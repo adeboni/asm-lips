@@ -5,12 +5,14 @@
 #endif
 #include <iostream>
 #define fl at<float>
-void draw_string(Mat img, const string text) {
+void draw_string(Mat img, const string text, const int height = 0) {
 	Size size = getTextSize(text,FONT_HERSHEY_COMPLEX,0.6f,1,NULL);
-	putText(img,text,Point(0,size.height),FONT_HERSHEY_COMPLEX,0.6f,Scalar::all(0),1,CV_AA);
-	putText(img,text,Point(1,size.height+1),FONT_HERSHEY_COMPLEX,0.6f,Scalar::all(255),1,CV_AA);
+	putText(img,text,Point(0,size.height + height),FONT_HERSHEY_COMPLEX,0.6f,Scalar::all(0),1,CV_AA);
+	putText(img,text,Point(1,size.height+1 + height),FONT_HERSHEY_COMPLEX,0.6f,Scalar::all(255),1,CV_AA);
 }
 //==============================================================================
+bool paused = false;
+
 int main(int argc,char** argv) {
 	if (argc < 2) { 
 		cout << "usage: ./visualise_face_tracker tracker [video_file]" << endl; 
@@ -40,18 +42,29 @@ int main(int argc,char** argv) {
 		return 0;
 	}
 	//detect until user quits
-	namedWindow("face tracker");
+	namedWindow("lip tracker");
 	while (cam.isOpened()) {
-		Mat im; cam >> im;
-		if (tracker.track(im,p)) tracker.draw(im);
-		draw_string(im,"d - redetection");
-		tracker.timer.display_fps(im, Point(1,im.rows-1));
-		imshow("face tracker", im);
+		if (!paused) {
+			Mat im; cam >> im;
+			if (tracker.track(im,p)) tracker.draw(im);
+			draw_string(im,"d - redetection");
+			draw_string(im,"p - pause", 20);
+			tracker.timer.display_fps(im, Point(1,im.rows-1));
+			imshow("lip tracker", im);
+		}
+		
 		int c = waitKey(10);
 		if (c == 'q') break;
-		else if (c == 'd') tracker.reset();
+		else if (c == 'd') {
+			tracker.reset();
+			paused = false;	
+		}
+		else if (c == 'p') {
+			paused = !paused;
+			if (!paused) tracker.reset();
+		}
 	}
-	destroyWindow("face tracker"); 
+	destroyWindow("lip tracker"); 
 	cam.release(); 
 	return 0;
 }
