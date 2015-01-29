@@ -1,0 +1,25 @@
+\begin{tikzpicture} 
+
+\begin{ganttchart}[vgrid, title height=0.8]{1}{26}
+  \gantttitle{Winter 2015}{26} \\
+  \gantttitle{Dec}{2}
+  \gantttitle{Jan}{10}
+  \gantttitle{Feb}{8}
+  \gantttitle{Mar}{6} \\
+  \gantttitlelist{26,2,9,16,23,30,6,13,20,27,6,13,20}{2} \\
+
+  \ganttgroup{Design Review}{1}{14} \\
+  \ganttbar{Prepare Design Review Presentation}{1}{6} \\
+  \ganttlinkedmilestone{Design Review}{6} \\
+  \ganttbar{Revise Design Report}{1}{14} \\
+  \ganttlinkedmilestone{Submit Revised Design Report}{14} \\
+
+  \ganttgroup{Operational System}{1}{24} \\
+  \ganttbar{CPU Implementation}{1}{12} \\
+  \ganttlinkedbar{CPU Implementation Testing}{6}{14} \\
+  \ganttbar{GPU Implementation}{10}{22} \\
+  \ganttlinkedbar{GPU Implementation Testing}{12}{24} \\
+  \ganttmilestone{Submit Initial Operating System}{24}
+\end{ganttchart}
+
+\end{tikzpicture}

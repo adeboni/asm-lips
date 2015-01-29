@@ -1,0 +1,25 @@
+\begin{tikzpicture} 
+
+\begin{ganttchart}[vgrid, title height=0.8]{1}{26}
+  \gantttitle{Fall 2014}{26} \\
+  \gantttitle{Sep}{2}
+  \gantttitle{Oct}{10}
+  \gantttitle{Nov}{8}
+  \gantttitle{Dec}{6} \\
+  \gantttitlelist{26,3,10,17,24,31,7,14,21,28,5,12,19}{2} \\
+
+  \ganttgroup{Design Report}{1}{22} \\
+  \ganttbar{Requirements Gathering}{1}{4} \\
+  \ganttlinkedbar{Requirements Analysis}{5}{6} \\
+  \ganttlinkedbar{Problem Statement}{2}{6} \\
+  \ganttlinkedbar{Diagrams}{11}{14} \\
+  \ganttlinkedbar{System Design}{12}{22} \\
+  \ganttlinkedmilestone{Submit Design Report}{22} \\
+
+  \ganttgroup{Trying Technologies}{1}{15} \\
+  \ganttbar{Research}{1}{14} \\
+  \ganttlinkedbar{Implementation}{9}{14} \\
+  \ganttlinkedbar{Testing}{10}{15} 
+\end{ganttchart}
+
+\end{tikzpicture} 

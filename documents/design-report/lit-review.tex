@@ -1,0 +1,44 @@
+\chapter{Literature Review}
+
+\section{Introduction}
+
+The goal of our senior design project is to create a robust GPU-accelerated library to track lip movement. This library will be used in a mobile application to help students learn languages by helping them improve the way that they move their lips while pronouncing various words. 
+
+Therefore, we researched topics in two main areas: Lip Contour Segmentation and GPU Image Analysis. With enough knowledge in these two areas, we should be able to successfully create the product we want to make.
+
+\section{Lip Tracking}
+
+	\subsection{Combining Edge Detection and Region Segmentation for Lip Contour Extraction}
+	
+	Saeed and Dugelay~\Cref{Saeed10} talk about how difficult it is to detect a lip contour using normal computer vision techniques due to the huge variety of environmental conditions and lip shapes. Their approach to solving this problem was to combine the results of edge detection and color segmentation of a lip image. This is a good introduction for us for our project. The results of their code, however, don't seem to be that great. There is a high rate of failure of accurate track lips. Nonetheless, the algorithm shown in this paper is fast, so we can use it as a preprocessing step, and then do more to make the results more robust.
+	
+	\subsection{A Robust Lip Tracking Algorithm using Localized Color Active Contours and Deformable Models}
+	
+	Liu and Cheung~\Cref{Liu11} bring up a completely different approach to lip tracking than the previous paper. In Saeed and Dugelay's paper, the processing algorithm has no prior knowledge of lip shapes. Liu and Cheung show how to train the algorithm with hand-made models of lips in order to give it a better idea of what to look for. This makes the algorithm more robust, especially when teeth or tongues are visible, which the previous one has trouble with. This seems like a strong approach for us to take for our project, however, the algorithm is very complicated, so it will take some time to fully understand it.
+	
+	\subsection{Lip Contour Segmentation and Tracking Compliant with Lip-Reading Application Constraints}
+	
+	Stillittano, Girondel, and Caplier~\Cref{Stillittano13} show a different algorithm that is trained with lip models beforehand. This one uses a simpler approach than what Liu and Cheung did. While the results are better than those from Saeed and Dugelay, they seem be worse than the model-based algorithm from Liu and Cheung. Stillittano's work confirms our interest in Liu and Cheung's algorithm, since that one seems to have the best results. However, the Stillittano's algorithm is certainly a back-up if things don't work out with the other one.
+	
+	\subsection{Visual Speech Recognition}
+	
+	Hassanat~\Cref{Hassanat14} compares many different approaches to lip tracking, including the two previously mentioned. He shows that there are two main trends in lip detection, image-based methods that have no prior knowledge, and model-based methods, which are trained with photos of what they are looking for. This allows us to easily compare the performance of many different tracking methods. The conclusion of Hassanat's work shows that model-based methods have much more accurate and correct results, but are much slower to run than the image-based methods. However, the image-based methods run so fast that we can use them as a preprocessing step for the model-based methods. This is what we are planning to do with our project.
+
+
+\section{GPU Image Analysis}
+
+	\subsection{Efficient, High-Quality Image Contour Detection}
+	
+	Catanzaro and associates~\Cref{Catanzaro09} write about several methods for improving the performance of image contour detection algorithms using a GPU. The methods discussed in this paper are generalized so that they can potentially be applied to a number of different image processing algorithms. Applying these techniques leads to a dramatic improvement in the time required to perform contour detection on an image. As a result, image analysis algorithms can potentially be used on much larger images than was previously feasible.
+	
+	\subsection{Feature tracking and matching in video using programmable graphics hardware}
+	
+	Sinha, Frahm, Pollefeys, and Genc~\Cref{Sinha11} look at how two different video analysis algorithms, KLT and SIFT, can be made more efficient through GPU based implementations. It discusses how the performance improvements seen in a GPU allow the algorithms to be used effectively in real time systems, which is what we will require in our project.
+	
+	\subsection{Efficient Parallel Implementation of Active Appearance Model Fitting Algorithm on GPU}
+	
+	Wang, Ma, Zhu, and Sun~\Cref{Wang14} examine an implementation for another video analysis algorithm called the Active Appearance Model or AAM. Through an alternative implementation that takes advantage of the parallelism of the GPU, the AAM can be more effectively be used in real time systems. Its CPU counterpart generally requires too much computation to be effective in real time systems. This demonstrates why we are focusing on having a GPU implementation for our system.
+	
+	\subsection{Accelerating Active Shape Model Using GPU for Facial Extraction in Video}
+	
+	Jian Li~\Cref{Li09} and associates discuss how a GPU implementation can significantly improve the performance of the Active Shape Modeling (or ASM) algorithm. The methods used in the implementation focus on using parallelism in the texture analysis of the images to reduce the total calculation time required. Once again, the biggest gain from such an implementation is that the algorithm becomes feasible to use in real time systems.

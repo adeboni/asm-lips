@@ -1,0 +1,14 @@
+\chapter{Architectual Diagram}
+
+We are using a data-flow architecture for our system, also known as a pipe-and-filter architecture. 
+We have an array of pixel values for an image which gets modified by each filter it passes through.
+The entire data flow for our system can be seen in \Cref{fig:architecture}.
+\newline
+
+\begin{figure}[!h]
+\noindent\resizebox{\textwidth}{!}{
+  \input{Diagrams/architecture}
+}
+\caption{System architecture}
+\label{fig:architecture}
+\end{figure}

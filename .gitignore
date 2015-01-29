@@ -1,0 +1,28 @@
+.yaml
+.bat
+mastering-opencv/data
+mastering-opencv/face-tracking/bin
+mastering-opencv/face-tracking/lib
+mastering-opencv/face-tracking/build
+preprocessing/*
+preprocessing/!.cpp
+
+# LaTeX files #
+###############
+.aux
+.bbl
+.blg
+.lof
+.log
+.synctex.gz
+.toc
+
+# OS generated files #
+######################
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
