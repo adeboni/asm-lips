@@ -1,11 +1,6 @@
 \begin{abstract}
 A major part of having correct pronunciation when learning a new language is moving your lips in the correct way.
 One solution to this is software which will track a student's lip movements and provide feedback.
-This paper describes how a C++ library will be created to accurately track lips in provided images.
-This library will attempt to use a CUDA-enabled GPU and will fall back to a CPU implementation if such a GPU is not found.
-As a result, the lip tracking library will run on Windows, Linux, and OS X, as well as Android devices. 
-
-The lip tracking algorithm is a hybrid between several approaches. 
-It will perform edge detection and color segmentation as a preprocessing step before using an Active Shape Model to find the final lip contour.
-This approach is highly efficient and parallelizable for a GPU.
+This paper describes how we are creating a C++ library to accurately track lips in provided images.
+Further, this library will attempt to use a CUDA-enabled GPU implementation to improve the algorithm's performance. It will fall back on a CPU implementation if such a GPU is not found. As a result, the lip tracking library will run on Windows, Linux, and OS X, as well as Android devices.
 \end{abstract}
