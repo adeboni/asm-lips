@@ -3,9 +3,11 @@
 #include "opencv_hotshots/ft/ft_data.hpp"
 #include <opencv2/core/core.hpp>
 #include <vector>
+#include "flags.hpp"
 
 #ifdef WITH_CUDA
 #include <opencv2/gpu/gpu.hpp>
+#include <opencv2/gpu/gpumat.hpp>
 #endif
 
 using namespace cv;
