@@ -1,4 +1,5 @@
 SET(ft_sources
+    flags.hpp
     ft.hpp
     ft_data.hpp            ft_data.cpp
     shape_model.hpp  shape_model.cpp

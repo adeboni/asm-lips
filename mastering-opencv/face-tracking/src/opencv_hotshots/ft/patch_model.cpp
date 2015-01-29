@@ -34,8 +34,8 @@ calc_response(const Mat &im,const bool sum2one)
 #ifndef WITH_CUDA
     matchTemplate(I,P,res,CV_TM_CCOEFF_NORMED);
 #else
-    gpu::GpuMat src;
-    gpu::matchTemplate(src.upload(I),P,res,CV_TM_CCOEFF_NORMED);
+    gpu::GpuMat I_src, P_src, res_src;
+    gpu::matchTemplate(I_src.upload(I),P_src,res_src,CV_TM_CCOEFF_NORMED);
 #endif
   if(sum2one){
     normalize(res,res,0,1,NORM_MINMAX); res /= sum(res)[0];
