@@ -1,0 +1,17 @@
+\begin{tikzpicture}
+
+\begin{umlsystem}[x=4]{Use Cases} 
+\umlusecase{~~~~~~~~~~Get Lip Contour~~~~~~~~~~} 
+\umlusecase[y=-2]{Get Number of Contour Points} 
+\umlusecase[y=-4]{~~~Get Acceptance Threshold~~~} 
+\umlusecase[y=-6]{~~~Set Acceptance Threshold~~~} 
+\end{umlsystem} 
+
+\umlactor[y=-3, x=-1.5]{user} 
+
+\umlassoc{user}{usecase-1} 
+\umlassoc{user}{usecase-2} 
+\umlassoc{user}{usecase-3} 
+\umlassoc{user}{usecase-4} 
+
+\end{tikzpicture}

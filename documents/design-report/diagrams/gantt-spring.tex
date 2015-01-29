@@ -1,0 +1,22 @@
+\begin{tikzpicture} 
+
+\begin{ganttchart}[vgrid, title height=0.8]{1}{24}
+  \gantttitle{Spring 2015}{24} \\
+  \gantttitle{Mar}{2}
+  \gantttitle{Apr}{8}
+  \gantttitle{May}{10}
+  \gantttitle{Jun}{4} \\
+  \gantttitlelist{27,3,10,17,24,1,8,15,22,29,5,12}{2} \\
+
+  \ganttgroup{Design Conference Preparation}{1}{12} \\
+  \ganttbar{Revise Presentation}{1}{10} \\
+  \ganttlinkedmilestone{Design Conference}{12} \\
+
+  \ganttgroup{Finish Senior Design}{1}{22} \\
+  \ganttbar{GPU Implementation}{1}{16} \\
+  \ganttlinkedbar{Write Documentation}{12}{18} \\
+  \ganttlinkedbar{Write User Manual}{16}{20} \\
+  \ganttmilestone{Submit Final System and Documentation}{22}
+\end{ganttchart}
+
+\end{tikzpicture} 

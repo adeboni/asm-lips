@@ -1,0 +1,43 @@
+\chapter{Design Rationale}
+
+In this chapter we list and explain the reasoning for the design choices we have made for the lip-tracking library.
+
+\section{Technologies}
+
+A description of the technologies we are using is found in \Cref{technologies}.
+We chose these technologies because they are very common and well supported, in addition to being available on every platform we are working with (Windows, Linux, OS X, Android).
+
+\section{Application Programming Interface}
+
+We wanted to make our API as simple as possible for the user, while still being flexible. As a result, we allow images to inputted in three different formats: Portable Grey Map (PGM), Portable Pixel Map (PPM), and Bitmap (BMP). These formats allow for both color (BMP and PPM) and greyscale (PGM) images, in formats that are very common. 
+
+The user can also change the acceptance threshold for lip detection. If there are too many false positives, then the threshold can be lowered to compensate, and vice versa.
+
+\section{Algorithm}
+
+There are many different algorithms that have been used in the past for feature tracking. 
+These can be divided into three categories, geometric-based approaches, appearance-based approaches, and model-based approaches.
+Ahmad Hassanat has provided a literature review comparing these approaches in his paper \textit{Visual Speech Recognition}~\cite{Hassanat14}.
+
+\subsection{Geometric-Based Approaches}
+
+These approaches involve edge detection and then trying to match ratios of the edge's height, width, area and perimeter with some predefined values.
+
+\subsection{Appearance-Based Approaches}
+
+These approaches involve color segmentation of the image and then trying to match a segment with a predefined set of colors. 
+This is the most common approach currently taken~\cite{Stillittano13}\cite{Yang09}, but does not always have good results.
+
+\subsection{Model-Based Approaches}
+
+These approaches involve creating a statistical model of a feature shape by inputting a set of hand-landmarked images into a neural network.
+This model can then be used to very accurately find a similar shape in an image. 
+There are three common model-based approaches, the Active Contour Model (ACM), Active Shape Model (ASM), and Active Appearance Model (AAM).
+These three models are closely related in that they all use the same fundamental algorithm. However, ASM is an improvement over ACM and AAM is an improvement over ASM. These improvements bring more accuracy to the algorithm, however, they also increase complexity and runtime.
+
+Additionally, both ASM~\cite{Li09} and AAM~\cite{Wang14} have been shown to be parallelizable with CUDA.
+	
+
+\subsection{Our Approach}
+
+We have chosen to take a hybrid approach that combines all three previous approaches. The geometric-based and appearance-based approaches alone do not produce results that are accurate enough for us. They run very quickly, however, and can produce a better input image for a model-based approach. The model-based approach we are using is the Active Shape Model. The model is a good balance between the Active Contour Model, which is too simple and not accurate enough, and the Active Appearance Model, which is complicated and relatively slow.

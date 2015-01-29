@@ -1,0 +1,13 @@
+\chapter{Conceptual Model}
+
+The interface to our lip-tracking library will consist of six functions. Three will be used to obtain a lip contour model as an array of points, which is passed into the function. They will also return a status code indicating success or failure. The array that is passed in must have already been allocated by the user, and the \texttt{getNumberOfContourPoints} function returns the size that the array should be. The other two functions will allow the user to get and set a threshold value used in the first three functions. This threshold value will determine the required confidence in the lip-tracking algorithm. The lower the threshold value, the less accurate the algorithm will be. If the value is too high, however, the algorithm may fail to obtain a lip contour at the desired confidence level, in which case the functions will return error codes.
+
+\section{API Functions}
+\begin{itemize}
+\item \texttt{int getLipContourPGM(unsigned char image[], unsigned int height, unsigned int width, unsigned int contour[]);}
+\item \texttt{int getLipContourPPM(unsigned char image[], unsigned int height, unsigned int width, unsigned int contour[]);}
+\item \texttt{int getLipContourBMP(unsigned char image[], unsigned int height, unsigned int width, unsigned int contour[]);}
+\item \texttt{int getNumberOfContourPoints();}
+\item \texttt{int setAcceptanceThreshold(unsigned int threshold);}
+\item \texttt{unsigned int getAcceptanceThreshold();}
+\end{itemize}
