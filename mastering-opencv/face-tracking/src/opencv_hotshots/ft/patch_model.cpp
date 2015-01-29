@@ -30,7 +30,13 @@ patch_model::
 calc_response(const Mat &im,const bool sum2one)
 {
   Mat I = this->convert_image(im);
-  Mat res; matchTemplate(I,P,res,CV_TM_CCOEFF_NORMED); 
+  Mat res;
+#ifndef WITH_CUDA
+    matchTemplate(I,P,res,CV_TM_CCOEFF_NORMED);
+#else
+    gpu::GpuMat src;
+    gpu::matchTemplate(src.upload(I),P,res,CV_TM_CCOEFF_NORMED);
+#endif
   if(sum2one){
     normalize(res,res,0,1,NORM_MINMAX); res /= sum(res)[0];
   }return res;
