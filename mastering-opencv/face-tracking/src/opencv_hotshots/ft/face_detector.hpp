@@ -1,28 +1,16 @@
-/*****************************************************************************
-*   Non-Rigid Face Tracking
-******************************************************************************
-*   by Jason Saragih, 5th Dec 2012
-*   http://jsaragih.org/
-******************************************************************************
-*   Ch6 of the book "Mastering OpenCV with Practical Computer Vision Projects"
-*   Copyright Packt Publishing 2012.
-*   http://www.packtpub.com/cool-projects-with-opencv/book
-*****************************************************************************/
-/*
-  face_detector: Shape initializer for face tracking
-  Jason Saragih (2012)
-*/
 #ifndef _FT_FACE_DETECTOR_HPP_
 #define _FT_FACE_DETECTOR_HPP_
 #include <opencv2/objdetect/objdetect.hpp>
+#include <opencv2/gpu/gpu.hpp>
 #include "opencv_hotshots/ft/ft_data.hpp"
-//==============================================================================
-class face_detector{                       //face detector for initialisation
+
+class face_detector {                       //face detector for initialisation
 public:
   string detector_fname;                   //file containing cascade classifier
   Vec3f detector_offset;                   //offset from center of detection
   Mat reference;                           //reference shape
-  CascadeClassifier detector;              //face detector
+  CascadeClassifier detector;          //face detector
+  //gpu::CascadeClassifier_GPU detector_gpu;
 
   vector<Point2f>                          //points for detected face in image
   detect(const Mat &im,                    //image containing face
@@ -59,5 +47,5 @@ protected:
   float                                    //scaling from @reference to @pts
   calc_scale(const Mat &pts);              //[x1;y1;...;xn;yn]
 };
-//==============================================================================
+
 #endif

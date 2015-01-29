@@ -1,26 +1,9 @@
-/*****************************************************************************
-*   Non-Rigid Face Tracking
-******************************************************************************
-*   by Jason Saragih, 5th Dec 2012
-*   http://jsaragih.org/
-******************************************************************************
-*   Ch6 of the book "Mastering OpenCV with Practical Computer Vision Projects"
-*   Copyright Packt Publishing 2012.
-*   http://www.packtpub.com/cool-projects-with-opencv/book
-*****************************************************************************/
-/*
-  shape_model: A combined local-global 2D point distribution model
-  Jason Saragih (2012)
-*/
 #include "opencv_hotshots/ft/shape_model.hpp"
 #include <opencv2/imgproc/imgproc.hpp>
 #include <iostream>
 #define fl at<float>
 //==============================================================================
-void 
-shape_model::
-calc_params(const vector<Point2f> &pts,const Mat weight,const float c_factor)
-{
+void shape_model::calc_params(const vector<Point2f> &pts, const Mat weight, const float c_factor) {
   int n = pts.size(); assert(V.rows == 2*n);
   Mat s = Mat(pts).reshape(1,2*n); //point set to vector format
   if(weight.empty())p = V.t()*s;   //simple projection
@@ -35,10 +18,7 @@ calc_params(const vector<Point2f> &pts,const Mat weight,const float c_factor)
   }this->clamp(c_factor);          //clamp resulting parameters
 }
 //==============================================================================
-Mat
-shape_model::
-center_shape(const Mat &pts)
-{
+Mat shape_model::center_shape(const Mat &pts) {
   int n = pts.rows/2; float mx = 0,my = 0;
   for(int i = 0; i < n; i++){
     mx += pts.fl(2*i); my += pts.fl(2*i+1);
@@ -49,29 +29,17 @@ center_shape(const Mat &pts)
   }return p;
 }
 //==============================================================================
-vector<Point2f> 
-shape_model::
-calc_shape()
-{
+vector<Point2f> shape_model::calc_shape() {
   Mat s = V*p; int n = s.rows/2; vector<Point2f> pts;
   for(int i = 0; i < n; i++)pts.push_back(Point2f(s.fl(2*i),s.fl(2*i+1)));
   return pts;
 }
 //==============================================================================
-void 
-shape_model::
-set_identity_params()
-{
+void shape_model::set_identity_params() {
   p = 0.0; p.fl(0) = 1.0; //1'st parameter is scale
 }
 //==============================================================================
-void
-shape_model::
-train(const vector<vector<Point2f> > &points,
-      const vector<Vec2i> &con,
-      const float frac,
-      const int kmax)
-{
+void shape_model::train(const vector<vector<Point2f> > &points, const vector<Vec2i> &con, const float frac, const int kmax) {
   //vectorize points
   Mat X = this->pts2mat(points);
   int N = X.cols,n = X.rows/2;
@@ -123,25 +91,18 @@ train(const vector<vector<Point2f> > &points,
   }
 }
 //==============================================================================
-Mat
-shape_model::
-pts2mat(const vector<vector<Point2f> > &points)
-{
+Mat shape_model::pts2mat(const vector<vector<Point2f> > &points) {
   int N = points.size(); assert(N > 0);
   int n = points[0].size();
   for(int i = 1; i < N; i++)assert(int(points[i].size()) == n); 
   Mat X(2*n,N,CV_32F);
   for(int i = 0; i < N; i++){
     Mat x = X.col(i),y = Mat(points[i]).reshape(1,2*n); y.copyTo(x);
-  }return X;
+  }
+  return X;
 }
 //==============================================================================
-Mat 
-shape_model::
-procrustes(const Mat &X,
-       const int itol,
-       const float ftol)
-{
+Mat shape_model::procrustes(const Mat &X, const int itol, const float ftol) {
   int N = X.cols,n = X.rows/2;
 
   //remove centre of mass
@@ -170,11 +131,7 @@ procrustes(const Mat &X,
   }return P;
 }
 //=============================================================================
-Mat
-shape_model::
-rot_scale_align(const Mat &src,
-        const Mat &dst)
-{
+Mat shape_model::rot_scale_align(const Mat &src, const Mat &dst) {
   //construct linear system
   int n = src.rows/2; float a=0,b=0,d=0;
   for(int i = 0; i < n; i++){
@@ -186,10 +143,7 @@ rot_scale_align(const Mat &src,
   return (Mat_<float>(2,2) << a,-b,b,a);
 }
 //==============================================================================
-Mat
-shape_model::
-calc_rigid_basis(const Mat &X)
-{
+Mat shape_model::calc_rigid_basis(const Mat &X) {
   //compute mean shape
   int N = X.cols,n = X.rows/2;
   Mat mean = X*Mat::ones(N,1,CV_32F)/N;
@@ -212,10 +166,7 @@ calc_rigid_basis(const Mat &X)
   }return R;
 }
 //==============================================================================
-void
-shape_model::
-clamp(const float c)
-{
+void shape_model::clamp(const float c) {
   double scale = p.fl(0);
   for(int i = 0; i < e.rows; i++){
     if(e.fl(i) < 0)continue;
@@ -227,18 +178,12 @@ clamp(const float c)
   }
 }
 //==============================================================================
-void
-shape_model::
-write(FileStorage &fs) const
-{
+void shape_model::write(FileStorage &fs) const {
   assert(fs.isOpened()); 
   fs << "{" << "V"  << V << "e"  << e << "C" << C << "}";
 }  
 //==============================================================================
-void
-shape_model::
-read(const FileNode& node)
-{
+void shape_model::read(const FileNode& node) {
   assert(node.type() == FileNode::MAP);
   node["V"] >> V; node["e"] >> e; node["C"] >> C;
   p = Mat::zeros(e.rows,1,CV_32F);

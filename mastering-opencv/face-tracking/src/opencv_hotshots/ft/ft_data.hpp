@@ -1,17 +1,3 @@
-/*****************************************************************************
-*   Non-Rigid Face Tracking
-******************************************************************************
-*   by Jason Saragih, 5th Dec 2012
-*   http://jsaragih.org/
-******************************************************************************
-*   Ch6 of the book "Mastering OpenCV with Practical Computer Vision Projects"
-*   Copyright Packt Publishing 2012.
-*   http://www.packtpub.com/cool-projects-with-opencv/book
-*****************************************************************************/
-/*
-  ft_data: face tracker data 
-  Jason Saragih (2012)
-*/
 #ifndef _FT_FT_DATA_HPP_
 #define _FT_FT_DATA_HPP_
 #include <opencv2/core/core.hpp>

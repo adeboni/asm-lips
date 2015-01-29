@@ -1,24 +1,10 @@
-/*****************************************************************************
-*   Non-Rigid Face Tracking
-******************************************************************************
-*   by Jason Saragih, 5th Dec 2012
-*   http://jsaragih.org/
-******************************************************************************
-*   Ch6 of the book "Mastering OpenCV with Practical Computer Vision Projects"
-*   Copyright Packt Publishing 2012.
-*   http://www.packtpub.com/cool-projects-with-opencv/book
-*****************************************************************************/
-/*
-  shape_model: A combined local-global 2D point distribution model
-  Jason Saragih (2012)
-*/
 #ifndef _FT_SHAPE_MODEL_HPP_
 #define _FT_SHAPE_MODEL_HPP_
 #include <opencv2/core/core.hpp>
 #include <vector>
 using namespace cv;
 using namespace std;
-//==============================================================================
+
 class shape_model{                         //2d linear shape model
 public:
   Mat p;                                   //parameter vector (kx1) CV_32F
@@ -72,5 +58,5 @@ protected:
   Mat                                      //rigid basis (2nx4) CV_32F
   calc_rigid_basis(const Mat &X);          //procrustes algned shapes/column
 };
-//==============================================================================
+
 #endif
