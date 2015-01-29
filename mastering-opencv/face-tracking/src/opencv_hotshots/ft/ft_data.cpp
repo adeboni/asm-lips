@@ -1,30 +1,12 @@
-/*****************************************************************************
-*   Non-Rigid Face Tracking
-******************************************************************************
-*   by Jason Saragih, 5th Dec 2012
-*   http://jsaragih.org/
-******************************************************************************
-*   Ch6 of the book "Mastering OpenCV with Practical Computer Vision Projects"
-*   Copyright Packt Publishing 2012.
-*   http://www.packtpub.com/cool-projects-with-opencv/book
-*****************************************************************************/
-/*
-  ft_data: face tracker data 
-  Jason Saragih (2012)
-*/
 #include "opencv_hotshots/ft/ft_data.hpp"
 #include <opencv2/highgui/highgui.hpp>
 #include <iostream>
 #include <string>
 #include "stdio.h"	// For 'sprintf()'
 
-//==============================================================================
-void
-ft_data::
-rm_incomplete_samples()
-{
-  int n = points[0].size(),N = points.size();
-  for(int i = 1; i < N; i++)n = max(n,int(points[i].size()));
+void ft_data::rm_incomplete_samples() {
+  int n = points[0].size(), N = points.size();
+  for(int i = 1; i < N; i++) n = max(n,int(points[i].size()));
   for(int i = 0; i < int(points.size()); i++){
     if(int(points[i].size()) != n){
       points.erase(points.begin()+i); imnames.erase(imnames.begin()+i); i--;
@@ -39,32 +21,22 @@ rm_incomplete_samples()
     }
   }
 }
-//==============================================================================
-void
-ft_data::
-rm_sample(const int idx)
-{
-  if((idx < 0) || (idx >= int(imnames.size())))return;
-  points.erase(points.begin()+idx); imnames.erase(imnames.begin()+idx);
+
+void ft_data::rm_sample(const int idx) {
+  if ((idx < 0) || (idx >= int(imnames.size()))) return;
+  points.erase(points.begin()+idx); 
+  imnames.erase(imnames.begin()+idx);
 }
-//==============================================================================
-Mat
-ft_data::
-get_image(const int idx,
-      const int flag)
-{
-  if((idx < 0) || (idx >= (int)imnames.size()))return Mat();
-  Mat img,im;
-  if(flag < 2)img = imread(imnames[idx],0); else img = imread(imnames[idx],1);
-  if(flag % 2 != 0)flip(img,im,1); else im = img;
+
+Mat ft_data::get_image(const int idx, const int flag) {
+  if ((idx < 0) || (idx >= (int)imnames.size())) return Mat();
+  Mat img, im;
+  if (flag < 2) img = imread(imnames[idx],0); else img = imread(imnames[idx],1);
+  if (flag % 2 != 0) flip(img,im,1); else im = img;
   return im;
 }
-//==============================================================================
-vector<Point2f>
-ft_data::
-get_points(const int idx,
-       const bool flipped)
-{
+
+vector<Point2f> ft_data::get_points(const int idx, const bool flipped) {
   if((idx < 0) || (idx >= (int)imnames.size()))return vector<Point2f>();
   vector<Point2f> p = points[idx];
   if(flipped){
@@ -75,23 +47,15 @@ get_points(const int idx,
     }return q;
   }else return p;
 }
-//==============================================================================
-void
-ft_data::
-draw_points(Mat &im,
-        const int idx,
-        const bool flipped,
-        const Scalar color,
-        const vector<int> &pts)
-{
-  if((idx < 0) || (idx >= (int)imnames.size()))return;
+
+void ft_data::draw_points(Mat &im, const int idx, const bool flipped, const Scalar color, const vector<int> &pts) {
+  if ((idx < 0) || (idx >= (int)imnames.size())) return;
   int n = points[idx].size();
-  if(pts.size() == 0){
-    for(int i = 0; i < n; i++){
-      if(!flipped)circle(im,points[idx][i],1,color,2,CV_AA);
-      else{
-    Point2f p(im.cols - 1 - points[idx][symmetry[i]].x,
-          points[idx][symmetry[i]].y);
+  if (pts.size() == 0) {
+    for (int i = 0; i < n; i++) {
+      if (!flipped) circle(im,points[idx][i],1,color,2,CV_AA);
+      else {
+    Point2f p(im.cols - 1 - points[idx][symmetry[i]].x, points[idx][symmetry[i]].y);
     circle(im,p,1,color,2,CV_AA);
 		
       }
@@ -102,22 +66,15 @@ draw_points(Mat &im,
       int i = pts[j]; if((i < 0) || (i >= n))continue;
       if(!flipped)circle(im,points[idx][i],1,color,2,CV_AA);
       else{
-    Point2f p(im.cols - 1 - points[idx][symmetry[i]].x,
-          points[idx][symmetry[i]].y);
+    Point2f p(im.cols - 1 - points[idx][symmetry[i]].x,points[idx][symmetry[i]].y);
     circle(im,p,1,color,2,CV_AA);
 		
       }
     }
   }
 }
-//==============================================================================
-void
-ft_data::
-draw_sym(Mat &im,
-     const int idx,
-     const bool flipped,
-     const vector<int> &pts)
-{
+
+void ft_data::draw_sym(Mat &im, const int idx, const bool flipped, const vector<int> &pts) {
   if((idx < 0) || (idx >= (int)imnames.size()))return;
   int n = points[idx].size();
   RNG rn; vector<Scalar> colors(n); 
@@ -139,15 +96,8 @@ draw_sym(Mat &im,
     }
   }
 }
-//==============================================================================
-void
-ft_data::
-draw_connect(Mat &im,
-         const int idx,
-         const bool flipped,
-         const Scalar color,
-         const vector<int> &con)
-{
+
+void ft_data::draw_connect(Mat &im, const int idx, const bool flipped, const Scalar color, const vector<int> &con) {
   if((idx < 0) || (idx >= (int)imnames.size()))return;
   int n = connections.size();
   if(con.size() == 0){    
@@ -178,11 +128,8 @@ draw_connect(Mat &im,
     }
   }
 }
-//============================================================================= 
-void 
-ft_data::
-write(FileStorage &fs) const
-{
+
+void ft_data::write(FileStorage &fs) const {
   assert(fs.isOpened()); 
   fs << "{";
   fs << "n_connections" << (int)connections.size();
@@ -213,11 +160,8 @@ write(FileStorage &fs) const
   }
   fs << "shapes" << X << "}";
 }
-//==============================================================================
-void
-ft_data::
-read(const FileNode& node)
-{
+
+void ft_data::read(const FileNode& node) {
   assert(node.type() == FileNode::MAP);
   int n; node["n_connections"] >> n; connections.resize(n);
   for(int i = 0; i < n; i++){
@@ -245,5 +189,4 @@ read(const FileNode& node)
     }
   }
 }
-//==============================================================================
 

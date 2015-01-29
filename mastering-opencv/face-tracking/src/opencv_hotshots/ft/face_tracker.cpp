@@ -1,17 +1,3 @@
-/*****************************************************************************
-*   Non-Rigid Face Tracking
-******************************************************************************
-*   by Jason Saragih, 5th Dec 2012
-*   http://jsaragih.org/
-******************************************************************************
-*   Ch6 of the book "Mastering OpenCV with Practical Computer Vision Projects"
-*   Copyright Packt Publishing 2012.
-*   http://www.packtpub.com/cool-projects-with-opencv/book
-*****************************************************************************/
-/*
-  face_tracker: face tracking classes
-  Jason Saragih (2012)
-*/
 #include "opencv_hotshots/ft/face_tracker.hpp"
 #include "opencv_hotshots/ft/ft.hpp"
 #include <iostream>
@@ -24,31 +10,28 @@
 //==============================================================================
 //==============================================================================
 //==============================================================================
-void 
-fps_timer::
-increment()
-{
-  if(fnum >= 29) {
-    t_end = cv::getTickCount();
+void fps_timer::increment() {
+  if (fnum >= 29) {
+    t_end = getTickCount();
     fps = 30.0/(float(t_end-t_start)/getTickFrequency()); 
     t_start = t_end; fnum = 0;
-  }else fnum += 1;
+  } else fnum += 1;
 }
 //==============================================================================
-void 
-fps_timer::
-reset(){
-t_start = cv::getTickCount(); fps = 0; fnum = 0;
+void fps_timer::reset() {
+	t_start = cv::getTickCount(); 
+	fps = 0; 
+	fnum = 0;
 }
 //==============================================================================
-void 
-fps_timer::
-display_fps(Mat &im,
-        Point p)
-{
-  char str[256]; Point pt; if(p.y < 0)pt = Point(10,im.rows-20); else pt = p;
-  sprintf(str,"%d frames/sec",(int)cvRound(fps)); string text = str;
-  putText(im,text,pt,FONT_HERSHEY_SIMPLEX,0.5,Scalar::all(255));
+void fps_timer::display_fps(Mat &im, Point p) {
+  char str[256]; 
+  Point pt; 
+  if(p.y < 0) pt = Point(10,im.rows-20); 
+  else pt = p;
+  sprintf(str,"%d frames/sec",(int)cvRound(fps)); 
+  string text = str;
+  putText(im, text, pt, FONT_HERSHEY_SIMPLEX, 0.5, Scalar::all(255));
 }
 //==============================================================================
 //==============================================================================
@@ -57,21 +40,22 @@ display_fps(Mat &im,
 //==============================================================================
 //==============================================================================
 //==============================================================================
-face_tracker_params::
-face_tracker_params()
-{
+face_tracker_params::face_tracker_params() {
   ssize.resize(3); 
-  ssize[0] = Size(21,21); ssize[1] = Size(11,11); ssize[2] = Size(5,5);
-  robust = false; itol = 20; ftol = 1e-3;
-  scaleFactor = 1.1; minNeighbours = 2; minSize = Size(30,30);
+  ssize[0] = Size(21,21); 
+  ssize[1] = Size(11,11); 
+  ssize[2] = Size(5,5);
+  robust = false; 
+  itol = 20; 
+  ftol = 1e-3;
+  scaleFactor = 1.1; 
+  minNeighbours = 2; 
+  minSize = Size(30,30);
 }
 //==============================================================================
-void 
-face_tracker_params::
-write(FileStorage &fs) const
-{
-  assert(fs.isOpened()); fs << "{";
-  fs << "nlevels" << int(ssize.size());
+void face_tracker_params::write(FileStorage &fs) const {
+  assert(fs.isOpened()); 
+  fs << "{" << "nlevels" << int(ssize.size());
   for(int i = 0; i < int(ssize.size()); i++){ char str[256]; const char* ss;
     sprintf(str,"w %d",i); ss = str; fs << ss << ssize[i].width;
     sprintf(str,"h %d",i); ss = str; fs << ss << ssize[i].height;
@@ -86,13 +70,14 @@ write(FileStorage &fs) const
      << "}";
 }
 //==============================================================================
-void 
-face_tracker_params::
-read(const FileNode& node)
-{
+void face_tracker_params::read(const FileNode& node) {
   assert(node.type() == FileNode::MAP);
-  int n; node["nlevels"] >> n; ssize.resize(n);
-  for(int i = 0; i < n; i++){ char str[256]; const char* ss;
+  int n; 
+  node["nlevels"] >> n; 
+  ssize.resize(n);
+  for(int i = 0; i < n; i++){ 
+	char str[256]; 
+	const char* ss;
     sprintf(str,"w %d",i); ss = str; node[ss] >> ssize[i].width;
     sprintf(str,"h %d",i); ss = str; node[ss] >> ssize[i].height;
   }
@@ -105,35 +90,26 @@ read(const FileNode& node)
   node["minHeight"] >> minSize.height;
 }
 //==============================================================================
-void 
-write(FileStorage& fs, 
-      const string&, 
-      const face_tracker_params& x)
-{
+void write(FileStorage& fs, const string&, const face_tracker_params& x) {
   x.write(fs);
 }
 //==============================================================================
-void 
-read(const FileNode& node, 
-     face_tracker_params& x,
-     const face_tracker_params& d)
-{
+void read(const FileNode& node, face_tracker_params& x, const face_tracker_params& d) {
   if(node.empty())x = d; else x.read(node);
 }
 //==============================================================================
-face_tracker_params 
-load_face_tracker_params(const char* fname)
-{
-  face_tracker_params x; FileStorage f(fname,FileStorage::READ);
-  f["face_tracker_params"] >> x; f.release(); return x;
+face_tracker_params load_face_tracker_params(const char* fname) {
+  face_tracker_params x; 
+  FileStorage f(fname,FileStorage::READ);
+  f["face_tracker_params"] >> x; 
+  f.release(); 
+  return x;
 }
 //==============================================================================
-void 
-save_face_tracker_params(const char* fname,
-             const face_tracker_params& x)
-{
+void save_face_tracker_params(const char* fname, const face_tracker_params& x) {
   FileStorage f(fname,FileStorage::WRITE);
-  f << "face_tracker_params" << x; f.release();
+  f << "face_tracker_params" << x; 
+  f.release();
 }
 //==============================================================================
 //==============================================================================
@@ -142,33 +118,30 @@ save_face_tracker_params(const char* fname,
 //==============================================================================
 //==============================================================================
 //==============================================================================
-int
-face_tracker::
-track(const Mat &im,const face_tracker_params &p)
-{
+int face_tracker::track(const Mat &im,const face_tracker_params &p) {
   //convert image to greyscale
-  Mat gray; if(im.channels()==1)gray = im; else cvtColor(im,gray,CV_RGB2GRAY);
+  Mat gray; 
+  if (im.channels() == 1) gray = im; 
+  else cvtColor(im,gray,CV_RGB2GRAY);
 
   //initialise
   if(!tracking)
     points = detector.detect(gray,p.scaleFactor,p.minNeighbours,p.minSize);
-  if((int)points.size() != smodel.npts())return 0;
+  if ((int)points.size() != smodel.npts()) return 0;
 
   //fit
   for(int level = 0; level < int(p.ssize.size()); level++)
     points = this->fit(gray,points,p.ssize[level],p.robust,p.itol,p.ftol);
 
   //set tracking flag and increment timer
-  tracking = true; timer.increment();  return 1;
+  tracking = true;
+  timer.increment();
+  return 1;
 }
 //==============================================================================
-void
-face_tracker::
-draw(Mat &im,
-     const Scalar pts_color,
-     const Scalar con_color)
-{
-  int n = points.size(); if(n == 0)return;
+void face_tracker::draw(Mat &im, const Scalar pts_color, const Scalar con_color) {
+  int n = points.size(); 
+  if (n == 0) return;
   for(int i = 0; i < smodel.C.rows; i++){
     int j = smodel.C.at<int>(i,0),k = smodel.C.at<int>(i,1);
     line(im,points[j],points[k],con_color,1);
@@ -176,15 +149,7 @@ draw(Mat &im,
   for(int i = 0; i < n; i++)circle(im,points[i],1,pts_color,2,CV_AA);
 }
 //==============================================================================
-vector<Point2f>
-face_tracker::
-fit(const Mat &image,
-    const vector<Point2f> &init,
-    const Size ssize,
-    const bool robust,
-    const int itol,
-    const float ftol)
-{
+vector<Point2f>face_tracker::fit(const Mat &image, const vector<Point2f> &init, const Size ssize, const bool robust, const int itol, const float ftol) {
   int n = smodel.npts(); 
   assert((int(init.size())==n) && (pmodel.n_patches()==n));
   smodel.calc_params(init); vector<Point2f> pts = smodel.calc_shape();
@@ -219,10 +184,7 @@ fit(const Mat &image,
   }return pts;
 }
 //==============================================================================
-void 
-face_tracker::
-write(FileStorage &fs) const
-{
+void face_tracker::write(FileStorage &fs) const {
   assert(fs.isOpened()); 
   fs << "{"
      << "detector" << detector
@@ -231,10 +193,7 @@ write(FileStorage &fs) const
      << "}";
 }
 //==============================================================================
-void 
-face_tracker::
-read(const FileNode& node)
-{
+void face_tracker::read(const FileNode& node) {
   assert(node.type() == FileNode::MAP);
   node["detector"] >> detector;
   node["smodel"]   >> smodel;

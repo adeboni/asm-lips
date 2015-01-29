@@ -1,17 +1,3 @@
-/*****************************************************************************
-*   Non-Rigid Face Tracking
-******************************************************************************
-*   by Jason Saragih, 5th Dec 2012
-*   http://jsaragih.org/
-******************************************************************************
-*   Ch6 of the book "Mastering OpenCV with Practical Computer Vision Projects"
-*   Copyright Packt Publishing 2012.
-*   http://www.packtpub.com/cool-projects-with-opencv/book
-*****************************************************************************/
-/*
-  patch_model: Correlation patch experts
-  Jason Saragih (2012)
-*/
 #ifndef _FT_PATCH_MODEL_HPP_
 #define _FT_PATCH_MODEL_HPP_
 #include "opencv_hotshots/ft/ft_data.hpp"
@@ -19,7 +5,7 @@
 #include <vector>
 using namespace cv;
 using namespace std;
-//==============================================================================
+
 class patch_model{                         //correlation-based patch expert
 public:
   Mat P;                                   //normalised patch
