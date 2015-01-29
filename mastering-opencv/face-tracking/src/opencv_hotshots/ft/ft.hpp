@@ -5,6 +5,7 @@
 #include "opencv_hotshots/ft/shape_model.hpp"
 #include "opencv_hotshots/ft/face_detector.hpp"
 #include "opencv_hotshots/ft/face_tracker.hpp"
+#include "opencv_hotshots/ft/flags.hpp"
 
 template <class T> T load_ft(const char* fname) {
 	T x; 
