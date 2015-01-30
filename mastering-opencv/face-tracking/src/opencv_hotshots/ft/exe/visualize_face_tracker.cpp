@@ -24,7 +24,9 @@ int main(int argc,char** argv) {
   p.ssize[1] = Size(11,11);
   p.ssize[2] = Size(5,5);
   
-  //gpu::printShortCudaDeviceInfo(cv::gpu::getDevice());
+#ifdef WITH_CUDA
+  gpu::printShortCudaDeviceInfo(cv::gpu::getDevice());
+#endif
 
   //open video stream
   VideoCapture cam; 
