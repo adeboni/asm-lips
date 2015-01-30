@@ -31,7 +31,7 @@ Mat patch_model::calc_response(const Mat &im, const bool sum2one) {
 #ifndef WITH_CUDA
     matchTemplate(I,P,res,CV_TM_CCOEFF_NORMED);
 #else
-    gpu::GpuMat I_src(I), P_src(P), res_src(res);
+    gpu::GpuMat I_src, P_src, res_src;
 	I_src.upload(I); P_src.upload(P); res_src.upload(res); 
     gpu::matchTemplate(I_src,P_src,res_src,CV_TM_CCOEFF_NORMED);
 	res_src.download(res);
