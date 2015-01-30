@@ -35,7 +35,8 @@ calc_response(const Mat &im,const bool sum2one)
     matchTemplate(I,P,res,CV_TM_CCOEFF_NORMED);
 #else
     gpu::GpuMat I_src(I), P_src(P), res_src(res);
-    gpu::matchTemplate(I_src,P_src,res_src,CV_TM_CCOEFF_NORMED);
+//    gpu::matchTemplate(I_src,P_src,res_src,CV_TM_CCOEFF_NORMED);
+    matchTemplate(I,P,res,CV_TM_CCOEFF_NORMED);
 #endif
   if(sum2one){
     normalize(res,res,0,1,NORM_MINMAX); res /= sum(res)[0];
