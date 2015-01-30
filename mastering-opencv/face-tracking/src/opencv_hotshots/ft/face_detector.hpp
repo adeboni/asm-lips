@@ -1,11 +1,6 @@
 #ifndef _FT_FACE_DETECTOR_HPP_
 #define _FT_FACE_DETECTOR_HPP_
 #include <opencv2/objdetect/objdetect.hpp>
-
-#ifdef WITH_CUDA
-#include <opencv2/gpu/gpu.hpp>
-#endif
-
 #include "opencv_hotshots/ft/ft_data.hpp"
 
 class face_detector {                       //face detector for initialisation
@@ -14,11 +9,7 @@ public:
   Vec3f detector_offset;                   //offset from center of detection
   Mat reference;                           //reference shape
   
-//#ifndef WITH_CUDA
   CascadeClassifier detector;          //face detector
-//#else
-//  gpu::CascadeClassifier_GPU detector;
-//#endif
 
   vector<Point2f>                          //points for detected face in image
   detect(const Mat &im,                    //image containing face
