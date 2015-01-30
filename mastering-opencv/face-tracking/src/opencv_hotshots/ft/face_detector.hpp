@@ -14,11 +14,11 @@ public:
   Vec3f detector_offset;                   //offset from center of detection
   Mat reference;                           //reference shape
   
-#ifndef WITH_CUDA
+//#ifndef WITH_CUDA
   CascadeClassifier detector;          //face detector
-#else
-  gpu::CascadeClassifier_GPU detector;
-#endif
+//#else
+//  gpu::CascadeClassifier_GPU detector;
+//#endif
 
   vector<Point2f>                          //points for detected face in image
   detect(const Mat &im,                    //image containing face
