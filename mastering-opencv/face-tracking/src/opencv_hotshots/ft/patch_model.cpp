@@ -4,25 +4,24 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <iostream>
 #include "stdio.h"      // For 'sprintf()'
-
 #define fl at<float>
 //==============================================================================
-Mat
-patch_model::
-convert_image(const Mat &im)
-{
+Mat patch_model::convert_image(const Mat &im) {
   Mat I; 
   if(im.channels() == 1){
-    if(im.type() != CV_32F)im.convertTo(I,CV_32F); 
+    if (im.type() != CV_32F) im.convertTo(I,CV_32F); 
     else I = im;
   }else{
     if(im.channels() == 3){
-      Mat img; cvtColor(im,img,CV_RGB2GRAY);
-      if(img.type() != CV_32F)img.convertTo(I,CV_32F); 
+      Mat img; 
+	  cvtColor(im,img,CV_RGB2GRAY);
+      if (img.type() != CV_32F) img.convertTo(I,CV_32F); 
       else I = img;
     }else{cout << "Unsupported image type!" << endl; abort();}
   }
-  I += 1.0; log(I,I); return I;
+  I += 1.0; 
+  log(I, I); 
+  return I;
 }
 //==============================================================================
 Mat patch_model::calc_response(const Mat &im, const bool sum2one) {
@@ -41,16 +40,7 @@ Mat patch_model::calc_response(const Mat &im, const bool sum2one) {
   }return res;
 }
 //==============================================================================
-void 
-patch_model::
-train(const vector<Mat> &images,
-      const Size psize,
-      const float var,
-      const float lambda,
-      const float mu_init,
-      const int nsamples,
-      const bool visi)
-{
+void patch_model::train(const vector<Mat> &images, const Size psize, const float var, const float lambda, const float mu_init, const int nsamples, const bool visi) {
   int N = images.size(),n = psize.width*psize.height;
 
   //compute desired response map
@@ -96,18 +86,14 @@ train(const vector<Mat> &images,
   }return;
 }
 //==============================================================================
-void
-patch_model::
-write(FileStorage &fs) const
-{
-  assert(fs.isOpened()); fs << "{" << "P"  << P << "}";
+void patch_model::write(FileStorage &fs) const {
+  assert(fs.isOpened()); 
+  fs << "{" << "P" << P << "}";
 }  
 //==============================================================================
-void
-patch_model::
-read(const FileNode& node)
-{
-  assert(node.type() == FileNode::MAP); node["P"] >> P; 
+void patch_model::read(const FileNode& node) {
+  assert(node.type() == FileNode::MAP); 
+  node["P"] >> P; 
 }
 //==============================================================================
 //==============================================================================
@@ -115,19 +101,7 @@ read(const FileNode& node)
 //==============================================================================
 //==============================================================================
 //==============================================================================
-void 
-patch_models::
-train(ft_data &data,
-      const vector<Point2f> &ref,
-      const Size psize,
-      const Size ssize,
-      const bool mirror,
-      const float var,
-      const float lambda,
-      const float mu_init,
-      const int nsamples,
-      const bool visi)
-{
+void patch_models::train(ft_data &data, const vector<Point2f> &ref, const Size psize, const Size ssize, const bool mirror, const float var, const float lambda, const float mu_init, const int nsamples, const bool visi) {
   //set reference shape
   int n = ref.size(); reference = Mat(ref).reshape(1,2*n);
   Size wsize = psize + ssize;
@@ -169,25 +143,19 @@ train(ft_data &data,
   }
 }
 //==============================================================================
-vector<Point2f> 
-patch_models::
-calc_peaks(const Mat &im,
-       const vector<Point2f> &points,
-       const Size ssize)
-{
+vector<Point2f> patch_models::calc_peaks(const Mat &im, const vector<Point2f> &points, const Size ssize) {
   int n = points.size(); assert(n == int(patches.size()));
   Mat pt = Mat(points).reshape(1,2*n);
   Mat S = this->calc_simil(pt);
   Mat Si = this->inv_simil(S);
   vector<Point2f> pts = this->apply_simil(Si,points);
   for(int i = 0; i < n; i++){
-    Size wsize = ssize + patches[i].patch_size(); Mat A(2,3,CV_32F);     
+    Size wsize = ssize + patches[i].patch_size(); 
+	Mat A(2,3,CV_32F);     
     A.fl(0,0) = S.fl(0,0); A.fl(0,1) = S.fl(0,1);
     A.fl(1,0) = S.fl(1,0); A.fl(1,1) = S.fl(1,1);
-    A.fl(0,2) = pt.fl(2*i  ) - 
-      (A.fl(0,0) * (wsize.width-1)/2 + A.fl(0,1)*(wsize.height-1)/2);
-    A.fl(1,2) = pt.fl(2*i+1) - 
-      (A.fl(1,0) * (wsize.width-1)/2 + A.fl(1,1)*(wsize.height-1)/2);
+    A.fl(0,2) = pt.fl(2*i  ) - (A.fl(0,0) * (wsize.width-1)/2 + A.fl(0,1)*(wsize.height-1)/2);
+    A.fl(1,2) = pt.fl(2*i+1) - (A.fl(1,0) * (wsize.width-1)/2 + A.fl(1,1)*(wsize.height-1)/2);
     Mat I; warpAffine(im,I,A,wsize,INTER_LINEAR+WARP_INVERSE_MAP);
     Mat R = patches[i].calc_response(I,false);
     Point maxLoc; minMaxLoc(R,0,0,0,&maxLoc);
@@ -196,11 +164,7 @@ calc_peaks(const Mat &im,
   }return this->apply_simil(S,pts);
 }
 //=============================================================================
-vector<Point2f> 
-patch_models::
-apply_simil(const Mat &S,
-        const vector<Point2f> &points)
-{
+vector<Point2f> patch_models::apply_simil(const Mat &S, const vector<Point2f> &points) {
   int n = points.size();
   vector<Point2f> p(n);
   for(int i = 0; i < n; i++){
@@ -209,10 +173,7 @@ apply_simil(const Mat &S,
   }return p;
 }
 //=============================================================================
-Mat 
-patch_models::
-inv_simil(const Mat &S)
-{
+Mat patch_models::inv_simil(const Mat &S) {
   Mat Si(2,3,CV_32F);
   float d = S.fl(0,0)*S.fl(1,1) - S.fl(1,0)*S.fl(0,1);
   Si.fl(0,0) = S.fl(1,1)/d; Si.fl(0,1) = -S.fl(0,1)/d;
@@ -221,10 +182,7 @@ inv_simil(const Mat &S)
   Mat t = -Ri*S.col(2),St = Si.col(2); t.copyTo(St); return Si; 
 }
 //=============================================================================
-Mat
-patch_models::
-calc_simil(const Mat &pts)
-{
+Mat patch_models::calc_simil(const Mat &pts) {
   //compute translation
   int n = pts.rows/2; float mx = 0,my = 0;
   for(int i = 0; i < n; i++){
@@ -248,10 +206,7 @@ calc_simil(const Mat &pts)
   return (Mat_<float>(2,3) << sc,-ss,mx,ss,sc,my);
 }
 //==============================================================================
-void 
-patch_models::
-write(FileStorage &fs) const
-{
+void patch_models::write(FileStorage &fs) const {
   assert(fs.isOpened()); 
   fs << "{" << "reference" << reference;
   fs << "n_patches" << (int)patches.size();
@@ -262,10 +217,7 @@ write(FileStorage &fs) const
   fs << "}";
 }
 //==============================================================================
-void 
-patch_models::
-read(const FileNode& node)
-{
+void patch_models::read(const FileNode& node) {
   assert(node.type() == FileNode::MAP); 
   node["reference"] >> reference;
   int n; node["n_patches"] >> n; patches.resize(n);
