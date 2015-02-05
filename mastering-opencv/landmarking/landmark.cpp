@@ -81,7 +81,7 @@ void draw()
         circle(newImg, Point(x,y), 3, Scalar(0, 0, 255), -1, 8);
     }
     
-    imshow("Landmarks", newImg);
+    imshow("Landmarks", newImg); 
 }
 
 void onMouse( int event, int x, int y, int, void* )
