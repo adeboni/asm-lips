@@ -39,27 +39,33 @@ int main(int argc, char **argv)
         
         int c = waitKey(10);
         if (c == 'q') break;
+        else if (c == 'k') return 0;
         else if (c == 'z') undo();
         else if (c == 'y') redo();
     }
     
-    string fileName;
+    string inFileName = argv[1];
+    string outFileName;
     if (argc >= 2)
-        fileName = argv[2];
+        outFileName = argv[2];
     else
     {
-        fileName = argv[1];
-        fileName = fileName.substr(0, fileName.length()-3) + "txt";
+        outFileName = inFileName;
+        outFileName = outFileName.substr(0, outFileName.length()-3) + "txt";
     }
     
     ofstream myfile;
-    myfile.open(fileName);
+    myfile.open(outFileName);
     
     // Outputting data.
+    int lastSlashIndex = inFileName.find_last_of("/");
+    string pureFileName = inFileName.substr(lastSlashIndex+1);
+    pureFileName = pureFileName.substr(0, pureFileName.length()-4);
+    myfile << "\"" << pureFileName << "\";\n";
+    myfile << "0;";
     for (int i = 0; i < ARRAY_SIZE-1; i++) {
-        myfile << points[i] << ",";
+        myfile << points[i] << ";";
     }
-    
     myfile << points[NUM_POINTS*2-1] << endl;
 }
 
