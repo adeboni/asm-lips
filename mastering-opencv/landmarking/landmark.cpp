@@ -10,7 +10,7 @@
 void copyPointsArray(int *src, int* dest);
 void undo();
 void draw();
-void onMouse( int event, int x, int y, int, void* );
+void onMouse(int event, int x, int y, int, void*);
 using namespace cv;
 using namespace std;
 
@@ -67,23 +67,23 @@ void undo()
 
 int getNearestPoint(int x, int y)
 {
-    int best;
-    int bestDist = INT_MAX;
-    
-    for (int i = 0; i < NUM_POINTS; i++) {
-        int nextX = points[2*i];
-        int nextY = points[2*i + 1];
-        
-        int dist = (x-nextX)*(x-nextX) + (y-nextY)*(y-nextY);
-        
-        if (dist < bestDist)
-        {
-            best = i;
-            bestDist = dist;
-        }
-    }
-    
-    return best;
+	int best;
+	int bestDist = INT_MAX;
+
+	for (int i = 0; i < NUM_POINTS; i++) {
+		int nextX = points[2 * i];
+		int nextY = points[2 * i + 1];
+
+		int dist = (x - nextX)*(x - nextX) + (y - nextY)*(y - nextY);
+
+		if (dist < bestDist)
+		{
+			best = i;
+			bestDist = dist;
+		}
+	}
+
+	return best;
 }
 
 void draw()
@@ -101,7 +101,7 @@ void draw()
     imshow("Landmarks", newImg);
 }
 
-void onMouse( int event, int x, int y, int, void* )
+void onMouse(int event, int x, int y, int, void*)
 {
     static int nearestPointIndex;
     static bool mouseDown = false;
