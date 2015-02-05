@@ -43,8 +43,14 @@ int main(int argc, char **argv)
         else if (c == 'y') redo();
     }
     
-    string fileName = argv[1];
-    fileName = fileName.substr(0, fileName.length()-3) + "txt";
+    string fileName;
+    if (argc >= 2)
+        fileName = argv[2];
+    else
+    {
+        fileName = argv[1];
+        fileName = fileName.substr(0, fileName.length()-3) + "txt";
+    }
     
     ofstream myfile;
     myfile.open(fileName);
