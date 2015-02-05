@@ -11,6 +11,7 @@
 
 void copyPointsArray(const int *src, int* dest);
 void undo();
+void redo();
 void draw();
 void onMouse(int event, int x, int y, int, void*);
 using namespace cv;
@@ -29,7 +30,6 @@ int main(int argc, char **argv)
     }
     
     img = imread(argv[1]);
-    copyPointsArray(points, prevPoints);
     
     namedWindow("Landmarks");
     setMouseCallback("Landmarks", onMouse, 0 );
@@ -40,6 +40,7 @@ int main(int argc, char **argv)
         int c = waitKey(10);
         if (c == 'q') break;
         else if (c == 'z') undo();
+        else if (c == 'y') redo();
     }
     
     string fileName = argv[1];
@@ -73,13 +74,13 @@ void undo()
         
         // Making copy of the current state.
         int currentStateTemp[NUM_POINTS*2];
-        copyPointsArray(points, &currentStateTemp);
+        copyPointsArray(points, currentStateTemp);
         
         // Copying last state into the points array.
         copyPointsArray(lastState, points);
         
         // Adding what the current state was into undone stack.
-        copyPointsArray(&currentStateTemp, lastState);
+        copyPointsArray(currentStateTemp, lastState);
         undoneChanges.push(lastState);
     }
 }
@@ -94,13 +95,13 @@ void redo()
         
         // Making copy of the current state.
         int currentStateTemp[NUM_POINTS*2];
-        copyPointsArray(points, &currentStateTemp);
+        copyPointsArray(points, currentStateTemp);
         
         // Copying last state into the points array.
         copyPointsArray(nextState, points);
         
         // Adding what the current state was into undone stack.
-        copyPointsArray(&currentStateTemp, nextState);
+        copyPointsArray(currentStateTemp, nextState);
         changesStack.push(nextState);
     }
 }
