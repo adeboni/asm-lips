@@ -17,25 +17,6 @@ static int points[] = { 201, 348, 201, 381, 202, 408, 209, 435, 224, 461, 241, 4
 
 int main(int argc, char **argv)
 {
-
-	img = cv::imread(argv[1]);
-
-	namedWindow("Landmarks");
-	setMouseCallback("Landmarks", onMouse, 0);
-
-	while (1) {
-		draw();
-
-		int c = waitKey(10);
-		if (c == 'q') break;
-	}
-
-	for (int i = 0; i < NUM_POINTS * 2 - 1; i++) {
-		std::cout << points[i] << ",";
-	}
-
-	std::cout << points[NUM_POINTS * 2 - 1] << std::endl;
-
     if (argc < 1){
         cerr << "Incorrect number of arguements." << endl;
         return 1;
@@ -65,7 +46,6 @@ int main(int argc, char **argv)
     }
     
     myfile << points[NUM_POINTS*2-1] << endl;
->>>>>>> 39b620770492441fdfee61fc80b313311141ec47
 }
 
 int getNearestPoint(int x, int y)
@@ -91,19 +71,6 @@ int getNearestPoint(int x, int y)
 
 void draw()
 {
-<<<<<<< HEAD
-	Mat newImg = img.clone();
-
-	for (int i = 0; i < NUM_POINTS; i++) {
-		int x = points[2 * i];
-		int y = points[2 * i + 1];
-
-		// Draws circle on image.
-		circle(newImg, Point(x, y), 3, Scalar(0, 0, 255), -1, 8);
-	}
-
-	imshow("Landmarks", newImg);
-=======
     Mat newImg = img.clone();
     
     for (int i = 0; i < NUM_POINTS; i++) {
@@ -115,7 +82,6 @@ void draw()
     }
     
     imshow("Landmarks", newImg); 
->>>>>>> b4e34c17344c58641844fec44608a2a85f7c8d22
 }
 
 void onMouse(int event, int x, int y, int, void*)
