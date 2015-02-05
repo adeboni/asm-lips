@@ -96,6 +96,8 @@ void draw()
         
         // Draws circle on image.
         circle(newImg, Point(x,y), 3, Scalar(0, 0, 255), -1, 8);
+		putText(newImg, to_string(i), Point(x-3, y), FONT_HERSHEY_COMPLEX_SMALL, 0.6, Scalar(0, 0, 0));
+		putText(newImg, to_string(i), Point(x-2, y), FONT_HERSHEY_COMPLEX_SMALL, 0.6, Scalar(255, 255, 255));
     }
     
     imshow("Landmarks", newImg);
