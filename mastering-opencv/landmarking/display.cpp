@@ -1,3 +1,12 @@
+/*
+ * display.cpp
+ *
+ * This program takes two arguements when run:
+ * The first is the image file to be displayed.
+ * The second is the file containing the point data for that image file.
+ *
+ */
+
 #include <iostream>
 #include <fstream>
 #include <string>
