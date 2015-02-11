@@ -21,41 +21,41 @@ const char* usage = "usage: ./visualise_face detector [video_file]";
 bool
 parse_help(int argc,char** argv)
 {
-  for(int i = 1; i < argc; i++){
-    string str = argv[i];
-    if(str.length() == 2){if(strcmp(str.c_str(),"-h") == 0)return true;}
-    if(str.length() == 6){if(strcmp(str.c_str(),"--help") == 0)return true;}
-  }return false;
+	for(int i = 1; i < argc; i++){
+		string str = argv[i];
+		if(str.length() == 2){if(strcmp(str.c_str(),"-h") == 0)return true;}
+		if(str.length() == 6){if(strcmp(str.c_str(),"--help") == 0)return true;}
+	}return false;
 }
 //==============================================================================
 int main(int argc,char** argv)
 {
-  //parse command line arguments
-  if(argc < 2){cout << usage << endl; return 0;}
-  if(parse_help(argc,argv)){cout << usage << endl; return 0;}
-  
-  //load detector model
-  face_detector detector = load_ft<face_detector>(argv[1]);
+	//parse command line arguments
+	if(argc < 2){cout << usage << endl; return 0;}
+	if(parse_help(argc,argv)){cout << usage << endl; return 0;}
+	
+	//load detector model
+	face_detector detector = load_ft<face_detector>(argv[1]);
 
-  //open video stream
-  VideoCapture cam; 
-  if(argc > 2)cam.open(argv[2]); else cam.open(0);
-  if(!cam.isOpened()){
-    cout << "Failed opening video file." << endl
-     << usage << endl; return 0;
-  }
-  //detect until user quits
-  namedWindow("face detector");
-  while(cam.get(CV_CAP_PROP_POS_AVI_RATIO) < 0.999999){
-    Mat im; cam >> im;     
-    vector<Point2f> p = detector.detect(im);
-    if(p.size() > 0){
-      for(int i = 0; i < int(p.size()); i++)
-    circle(im,p[i],1,CV_RGB(0,255,0),2,CV_AA);
-    }
-    imshow("face detector",im);
-    if(waitKey(10) == 'q')break;
-  }
-  destroyWindow("face detector"); cam.release(); return 0;
+	//open video stream
+	VideoCapture cam; 
+	if(argc > 2)cam.open(argv[2]); else cam.open(0);
+	if(!cam.isOpened()){
+		cout << "Failed opening video file." << endl
+		 << usage << endl; return 0;
+	}
+	//detect until user quits
+	namedWindow("face detector");
+	while(cam.get(CV_CAP_PROP_POS_AVI_RATIO) < 0.999999){
+		Mat im; cam >> im;     
+		vector<Point2f> p = detector.detect(im);
+		if(p.size() > 0){
+			for(int i = 0; i < int(p.size()); i++)
+		circle(im,p[i],1,CV_RGB(0,255,0),2,CV_AA);
+		}
+		imshow("face detector",im);
+		if(waitKey(10) == 'q')break;
+	}
+	destroyWindow("face detector"); cam.release(); return 0;
 }
 //==============================================================================
