@@ -169,30 +169,31 @@ Mat shape_model::calc_rigid_basis(const Mat &X) {
 	//construct basis for similarity transform
 	Mat R(2*n,4,CV_32F);
 	for(int i = 0; i < n; i++){
-	R.fl(2*i,0) =  mean.fl(2*i  ); R.fl(2*i+1,0) =  mean.fl(2*i+1);
-	R.fl(2*i,1) = -mean.fl(2*i+1); R.fl(2*i+1,1) =  mean.fl(2*i  );
-	R.fl(2*i,2) =  1.0;            R.fl(2*i+1,2) =  0.0;
-	R.fl(2*i,3) =  0.0;            R.fl(2*i+1,3) =  1.0;
+        R.fl(2*i,0) =  mean.fl(2*i  ); R.fl(2*i+1,0) =  mean.fl(2*i+1);
+        R.fl(2*i,1) = -mean.fl(2*i+1); R.fl(2*i+1,1) =  mean.fl(2*i  );
+        R.fl(2*i,2) =  1.0;            R.fl(2*i+1,2) =  0.0;
+        R.fl(2*i,3) =  0.0;            R.fl(2*i+1,3) =  1.0;
 	}
 	//Gram-Schmidt orthonormalization
 	for(int i = 0; i < 4; i++){
-	Mat r = R.col(i);
-	for(int j = 0; j < i; j++){
-	Mat b = R.col(j); r -= b*(b.t()*r);
+        Mat r = R.col(i);
+        for(int j = 0; j < i; j++){
+            Mat b = R.col(j); r -= b*(b.t()*r);
+        }
+        normalize(r,r);
 	}
-	normalize(r,r);
-	}return R;
+    return R;
 }
 //==============================================================================
 void shape_model::clamp(const float c) {
 	double scale = p.fl(0);
 	for(int i = 0; i < e.rows; i++){
-	if(e.fl(i) < 0)continue;
-	float v = c*sqrt(e.fl(i));
-	if(fabs(p.fl(i)/scale) > v){
-	if(p.fl(i) > 0)p.fl(i) =  v*scale;
-	else           p.fl(i) = -v*scale;
-	}
+        if(e.fl(i) < 0) continue;
+        float v = c*sqrt(e.fl(i));
+        if(fabs(p.fl(i)/scale) > v){
+            if(p.fl(i) > 0)p.fl(i) =  v*scale;
+            else           p.fl(i) = -v*scale;
+        }
 	}
 }
 //==============================================================================
