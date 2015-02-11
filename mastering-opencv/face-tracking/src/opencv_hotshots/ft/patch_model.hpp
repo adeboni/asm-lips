@@ -8,7 +8,7 @@
 #ifdef WITH_CUDA
 #include <opencv2/gpu/gpu.hpp>
 #include <opencv2/gpu/gpumat.hpp>
-#endif
+#endif /* WITH_CUDA 1*/
 
 using namespace cv;
 using namespace std;
@@ -85,4 +85,12 @@ protected:
           const vector<Point2f> &points); //shape to transform
 };
 //==============================================================================
-#endif
+///* CUDA Enhancement */
+//#ifndef WITH_CUDA
+//Mat                                      //response map (CV_32F)
+//calc_response(const patch_model &pm,     //the patch model that would have called this function.
+//              const Mat &im,             //image to compute response from
+//              const bool sum2one=false); //normalize response to sum to one?
+//#endif /* WITH_CUDA 2*/
+
+#endif /* _FT_PATCH_MODEL_HPP_ */
