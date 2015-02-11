@@ -4,22 +4,22 @@
 #define fl at<float>
 //==============================================================================
 int parse_frac(int argc, char** argv) {
-  for(int i = 1; i < argc; i++){
-    string str = argv[i];
-    if(str.length() != 2)continue;
-    if(strcmp(str.c_str(),"-f") == 0){
-      if(argc > i+1)return atof(argv[i+1]);
-    }
-  }return 0.8;
+	for(int i = 1; i < argc; i++){
+		string str = argv[i];
+		if(str.length() != 2)continue;
+		if(strcmp(str.c_str(),"-f") == 0){
+			if(argc > i+1)return atof(argv[i+1]);
+		}
+	}return 0.8;
 }
 //==============================================================================
 bool parse_mirror(int argc, char** argv) {
-  for(int i = 1; i < argc; i++){
-    string str = argv[i];
-    if(str.length() != 8)continue;
-    if(strcmp(str.c_str(),"--mirror") == 0)
+	for(int i = 1; i < argc; i++){
+		string str = argv[i];
+		if(str.length() != 8)continue;
+		if(strcmp(str.c_str(),"--mirror") == 0)
 		return true;
-  }return false;
+	}return false;
 }
 //==============================================================================
 int main(int argc, char** argv) {
