@@ -96,20 +96,14 @@ bool face_detector::enough_bounded_points(const Mat &pts, const Rect R, const fl
   if(float(m)/n >= frac)return true; else return false;
 }
 //==============================================================================
-Point2f
-face_detector::
-center_of_mass(const Mat &pts)
-{
+Point2f face_detector::center_of_mass(const Mat &pts) {
   float mx = 0,my = 0; int n = pts.rows/2;
   for(int i = 0; i < n; i++){
     mx += pts.fl(2*i); my += pts.fl(2*i+1);
   }return Point2f(mx/n,my/n);
 }
 //==============================================================================
-float 
-face_detector::
-calc_scale(const Mat &pts)
-{
+float face_detector::calc_scale(const Mat &pts) {
   Point2f c = this->center_of_mass(pts); int n = pts.rows/2;
   Mat p(2*n,1,CV_32F);
   for(int i = 0; i < n; i++){
@@ -118,10 +112,7 @@ calc_scale(const Mat &pts)
   }return reference.dot(p)/reference.dot(reference);
 }
 //==============================================================================
-void 
-face_detector::
-write(FileStorage &fs) const
-{
+void face_detector::write(FileStorage &fs) const {
   assert(fs.isOpened()); 
   fs << "{"
      << "fname"     << detector_fname
@@ -132,10 +123,7 @@ write(FileStorage &fs) const
      << "}";
 }
 //==============================================================================
-void 
-face_detector::
-read(const FileNode& node)
-{
+void face_detector::read(const FileNode& node) {
   assert(node.type() == FileNode::MAP);
   node["fname"]     >> detector_fname;
   node["x offset"]  >> detector_offset[0];

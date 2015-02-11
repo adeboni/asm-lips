@@ -14,7 +14,7 @@ Mat patch_model::convert_image(const Mat &im) {
   }else{
     if(im.channels() == 3){
       Mat img; 
-	  cvtColor(im,img,CV_RGB2GRAY);
+	  cvtColor(im, img, CV_RGB2GRAY);
       if (img.type() != CV_32F) img.convertTo(I,CV_32F); 
       else I = img;
     }else{cout << "Unsupported image type!" << endl; abort();}
@@ -27,14 +27,7 @@ Mat patch_model::convert_image(const Mat &im) {
 Mat patch_model::calc_response(const Mat &im, const bool sum2one) {
   Mat I = this->convert_image(im);
   Mat res;
-#ifndef WITH_CUDA
-    matchTemplate(I,P,res,CV_TM_CCOEFF_NORMED);
-#else
-    gpu::GpuMat I_src, P_src, res_src;
-	I_src.upload(I); P_src.upload(P); res_src.upload(res); 
-    gpu::matchTemplate(I_src,P_src,res_src,CV_TM_SQDIFF);
-	res_src.download(res);
-#endif
+  matchTemplate(I,P,res,CV_TM_CCOEFF_NORMED);
   if(sum2one){
     normalize(res,res,0,1,NORM_MINMAX); res /= sum(res)[0];
   }return res;
@@ -118,10 +111,8 @@ void patch_models::train(ft_data &data, const vector<Point2f> &ref, const Size p
       Mat S = this->calc_simil(pt),A(2,3,CV_32F); 
       A.fl(0,0) = S.fl(0,0); A.fl(0,1) = S.fl(0,1);
       A.fl(1,0) = S.fl(1,0); A.fl(1,1) = S.fl(1,1);
-      A.fl(0,2) = pt.fl(2*i  ) - 
-    (A.fl(0,0) * (wsize.width-1)/2 + A.fl(0,1)*(wsize.height-1)/2);
-      A.fl(1,2) = pt.fl(2*i+1) - 
-    (A.fl(1,0) * (wsize.width-1)/2 + A.fl(1,1)*(wsize.height-1)/2);
+      A.fl(0,2) = pt.fl(2*i  ) - (A.fl(0,0) * (wsize.width-1)/2 + A.fl(0,1)*(wsize.height-1)/2);
+      A.fl(1,2) = pt.fl(2*i+1) - (A.fl(1,0) * (wsize.width-1)/2 + A.fl(1,1)*(wsize.height-1)/2);
       Mat I; warpAffine(im,I,A,wsize,INTER_LINEAR+WARP_INVERSE_MAP);
       images.push_back(I);
       if(mirror){
@@ -144,7 +135,8 @@ void patch_models::train(ft_data &data, const vector<Point2f> &ref, const Size p
 }
 //==============================================================================
 vector<Point2f> patch_models::calc_peaks(const Mat &im, const vector<Point2f> &points, const Size ssize) {
-  int n = points.size(); assert(n == int(patches.size()));
+  int n = points.size(); 
+  assert(n == int(patches.size()));
   Mat pt = Mat(points).reshape(1,2*n);
   Mat S = this->calc_simil(pt);
   Mat Si = this->inv_simil(S);
@@ -157,11 +149,15 @@ vector<Point2f> patch_models::calc_peaks(const Mat &im, const vector<Point2f> &p
     A.fl(0,2) = pt.fl(2*i  ) - (A.fl(0,0) * (wsize.width-1)/2 + A.fl(0,1)*(wsize.height-1)/2);
     A.fl(1,2) = pt.fl(2*i+1) - (A.fl(1,0) * (wsize.width-1)/2 + A.fl(1,1)*(wsize.height-1)/2);
     Mat I; warpAffine(im,I,A,wsize,INTER_LINEAR+WARP_INVERSE_MAP);
+	
     Mat R = patches[i].calc_response(I,false);
+	
+
     Point maxLoc; minMaxLoc(R,0,0,0,&maxLoc);
     pts[i] = Point2f(pts[i].x + maxLoc.x - 0.5*ssize.width,
              pts[i].y + maxLoc.y - 0.5*ssize.height);
-  }return this->apply_simil(S,pts);
+  }
+  return this->apply_simil(S,pts);
 }
 //=============================================================================
 vector<Point2f> patch_models::apply_simil(const Mat &S, const vector<Point2f> &points) {
