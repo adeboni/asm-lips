@@ -47,7 +47,8 @@ vector<Point2f> shape_model::calc_shape() {
 	Mat s = V*p; 
 	int n = s.rows/2; 
 	vector<Point2f> pts;
-	for (int i = 0; i < n; i++) pts.push_back(Point2f(s.fl(2*i),s.fl(2*i+1)));
+	for (int i = 0; i < n; i++) 
+		pts.push_back(Point2f(s.fl(2*i),s.fl(2*i+1)));
 	return pts;
 }
 //==============================================================================

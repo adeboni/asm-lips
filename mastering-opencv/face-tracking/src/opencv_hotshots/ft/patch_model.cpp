@@ -104,30 +104,33 @@ void patch_models::train(ft_data &data, const vector<Point2f> &ref, const Size p
     //train each patch model in turn
     patches.resize(n);
     for(int i = 0; i < n; i++){
-        if(visi)cout << "training patch " << i << "..." << endl;
+        if (visi) cout << "training patch " << i << "..." << endl;
         vector<Mat> images(0);
-        for(int j = 0; j < data.n_images(); j++){
-            Mat im = data.get_image(j,0);
+        for (int j = 0; j < data.n_images(); j++) {
+            Mat im = data.get_image(j, 0);
             vector<Point2f> p = data.get_points(j,false);
-            Mat pt = Mat(p).reshape(1,2*n);
-            Mat S = this->calc_simil(pt),A(2,3,CV_32F);
-            A.fl(0,0) = S.fl(0,0); A.fl(0,1) = S.fl(0,1);
-            A.fl(1,0) = S.fl(1,0); A.fl(1,1) = S.fl(1,1);
+            Mat pt = Mat(p).reshape(1, 2*n);
+            Mat S = this->calc_simil(pt), A(2, 3, CV_32F);
+            A.fl(0,0) = S.fl(0,0); 
+			A.fl(0,1) = S.fl(0,1);
+            A.fl(1,0) = S.fl(1,0); 
+			A.fl(1,1) = S.fl(1,1);
             A.fl(0,2) = pt.fl(2*i  ) - (A.fl(0,0) * (wsize.width-1)/2 + A.fl(0,1)*(wsize.height-1)/2);
             A.fl(1,2) = pt.fl(2*i+1) - (A.fl(1,0) * (wsize.width-1)/2 + A.fl(1,1)*(wsize.height-1)/2);
-            Mat I;  warpAffine(im,I,A,wsize,INTER_LINEAR+WARP_INVERSE_MAP);
+            Mat I;
+			warpAffine(im,I,A,wsize,INTER_LINEAR+WARP_INVERSE_MAP);
             images.push_back(I);
-            if(mirror){
-                im = data.get_image(j,1);
-                p = data.get_points(j,true);
-                pt = Mat(p).reshape(1,2*n);
+            if (mirror) {
+                im = data.get_image(j, 1);
+                p = data.get_points(j, true);
+                pt = Mat(p).reshape(1, 2*n);
                 S = this->calc_simil(pt);
-                A.fl(0,0) = S.fl(0,0); A.fl(0,1) = S.fl(0,1);
-                A.fl(1,0) = S.fl(1,0); A.fl(1,1) = S.fl(1,1);
-                A.fl(0,2) = pt.fl(2*i  ) -
-                (A.fl(0,0) * (wsize.width-1)/2 + A.fl(0,1)*(wsize.height-1)/2);
-                A.fl(1,2) = pt.fl(2*i+1) -
-                (A.fl(1,0) * (wsize.width-1)/2 + A.fl(1,1)*(wsize.height-1)/2);
+                A.fl(0,0) = S.fl(0,0); 
+				A.fl(0,1) = S.fl(0,1);
+                A.fl(1,0) = S.fl(1,0); 
+				A.fl(1,1) = S.fl(1,1);
+                A.fl(0,2) = pt.fl(2*i  ) - (A.fl(0,0) * (wsize.width-1)/2 + A.fl(0,1)*(wsize.height-1)/2);
+                A.fl(1,2) = pt.fl(2*i+1) - (A.fl(1,0) * (wsize.width-1)/2 + A.fl(1,1)*(wsize.height-1)/2);
                 warpAffine(im,I,A,wsize,INTER_LINEAR+WARP_INVERSE_MAP);
                 images.push_back(I);
             }
@@ -164,7 +167,7 @@ vector<Point2f> patch_models::calc_peaks(const Mat &im, const vector<Point2f> &p
 vector<Point2f> patch_models::apply_simil(const Mat &S, const vector<Point2f> &points) {
     int n = points.size();
     vector<Point2f> p(n);
-    for(int i = 0; i < n; i++){
+    for(int i = 0; i < n; i++) {
         p[i].x = S.fl(0,0)*points[i].x + S.fl(0,1)*points[i].y + S.fl(0,2);
         p[i].y = S.fl(1,0)*points[i].x + S.fl(1,1)*points[i].y + S.fl(1,2);
     }
@@ -174,15 +177,21 @@ vector<Point2f> patch_models::apply_simil(const Mat &S, const vector<Point2f> &p
 Mat patch_models::inv_simil(const Mat &S) {
     Mat Si(2,3,CV_32F);
     float d = S.fl(0,0)*S.fl(1,1) - S.fl(1,0)*S.fl(0,1);
-    Si.fl(0,0) = S.fl(1,1)/d; Si.fl(0,1) = -S.fl(0,1)/d;
-    Si.fl(1,1) = S.fl(0,0)/d; Si.fl(1,0) = -S.fl(1,0)/d;
+    Si.fl(0,0) = S.fl(1,1)/d; 
+	Si.fl(0,1) = -S.fl(0,1)/d;
+    Si.fl(1,1) = S.fl(0,0)/d; 
+	Si.fl(1,0) = -S.fl(1,0)/d;
     Mat Ri = Si(Rect(0,0,2,2));
-    Mat t = -Ri*S.col(2),St = Si.col(2); t.copyTo(St); return Si;
+    Ri = -Ri*S.col(2); 
+	Mat St = Si.col(2); 
+	Ri.copyTo(St); 
+	return Si;
 }
 //=============================================================================
 Mat patch_models::calc_simil(const Mat &pts) {
     //compute translation
-    int n = pts.rows/2; float mx = 0,my = 0;
+    int n = pts.rows/2; 
+	float mx = 0,my = 0;
     for(int i = 0; i < n; i++){
         mx += pts.fl(2*i); my += pts.fl(2*i+1);
     }
@@ -192,15 +201,15 @@ Mat patch_models::calc_simil(const Mat &pts) {
     }
     //compute rotation and scale
     float a=0,b=0,c=0;
-    for(int i = 0; i < n; i++){
-        a += reference.fl(2*i) * reference.fl(2*i  ) +
-             reference.fl(2*i+1) * reference.fl(2*i+1);
+    for (int i = 0; i < n; i++) {
+        a += reference.fl(2*i) * reference.fl(2*i  ) + reference.fl(2*i+1) * reference.fl(2*i+1);
         b += reference.fl(2*i) * p.fl(2*i  ) + reference.fl(2*i+1) * p.fl(2*i+1);
         c += reference.fl(2*i) * p.fl(2*i+1) - reference.fl(2*i+1) * p.fl(2*i  );
     }
-    b /= a; c /= a;
-    float scale = sqrt(b*b+c*c),theta = atan2(c,b);
-    float sc = scale*cos(theta),ss = scale*sin(theta);
+    b /= a; 
+	c /= a;
+    float scale = sqrt(b*b+c*c), theta = atan2(c,b);
+    float sc = scale*cos(theta), ss = scale*sin(theta);
     return (Mat_<float>(2,3) << sc,-ss,mx,ss,sc,my);
 }
 //==============================================================================
