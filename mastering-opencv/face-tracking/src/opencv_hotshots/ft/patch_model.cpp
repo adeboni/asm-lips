@@ -191,20 +191,29 @@ Mat patch_models::inv_simil(const Mat &S) {
 Mat patch_models::calc_simil(const Mat &pts) {
     //compute translation
     int n = pts.rows/2; 
-	float mx = 0,my = 0;
+	float mx = 0, my = 0;
     for(int i = 0; i < n; i++){
-        mx += pts.fl(2*i); my += pts.fl(2*i+1);
+        mx += pts.fl(2*i); 
+		my += pts.fl(2*i+1);
     }
-    Mat p(2*n,1,CV_32F); mx /= n; my /= n;
+	mx /= n; 
+	my /= n;
+	vector<float> p(2*n);
+	//Mat p(2*n, 1, CV_32F); //change to vector?
     for(int i = 0; i < n; i++){
-        p.fl(2*i) = pts.fl(2*i) - mx; p.fl(2*i+1) = pts.fl(2*i+1) - my;
+        //p.fl(2*i) = pts.fl(2*i) - mx; 
+		//p.fl(2*i+1) = pts.fl(2*i+1) - my;
+		p[2*i] = pts.fl(2*i) - mx; 
+		p[2*i+1] = pts.fl(2*i+1) - my;
     }
     //compute rotation and scale
-    float a=0,b=0,c=0;
+    float a=0, b=0, c=0;
     for (int i = 0; i < n; i++) {
-        a += reference.fl(2*i) * reference.fl(2*i  ) + reference.fl(2*i+1) * reference.fl(2*i+1);
-        b += reference.fl(2*i) * p.fl(2*i  ) + reference.fl(2*i+1) * p.fl(2*i+1);
-        c += reference.fl(2*i) * p.fl(2*i+1) - reference.fl(2*i+1) * p.fl(2*i  );
+        a += reference.fl(2*i) * reference.fl(2*i) + reference.fl(2*i+1) * reference.fl(2*i+1);
+        //b += reference.fl(2*i) * p.fl(2*i) + reference.fl(2*i+1) * p.fl(2*i+1);
+        //c += reference.fl(2*i) * p.fl(2*i+1) - reference.fl(2*i+1) * p.fl(2*i);
+		b += reference.fl(2*i) * p[2*i] + reference.fl(2*i+1) * p[2*i+1];
+        c += reference.fl(2*i) * p[2*i+1] - reference.fl(2*i+1) * p[2*i];
     }
     b /= a; 
 	c /= a;

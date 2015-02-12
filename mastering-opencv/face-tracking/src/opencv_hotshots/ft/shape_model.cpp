@@ -32,7 +32,7 @@ Mat shape_model::center_shape(const Mat &pts) {
 	for (int i = 0; i < n; i++) {
 		mx += pts.fl(2*i); 
 		my += pts.fl(2*i+1);
-	}  
+	}
 	Mat p(2*n, 1, CV_32F); 
 	mx /= n; 
 	my /= n;
@@ -48,7 +48,7 @@ vector<Point2f> shape_model::calc_shape() {
 	int n = s.rows/2; 
 	vector<Point2f> pts;
 	for (int i = 0; i < n; i++) 
-		pts.push_back(Point2f(s.fl(2*i),s.fl(2*i+1)));
+		pts.push_back(Point2f(s.fl(2*i), s.fl(2*i+1)));
 	return pts;
 }
 //==============================================================================
