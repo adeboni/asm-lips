@@ -38,9 +38,12 @@ public:
     void
     read(const FileNode& node);                     //file storage node to read from
 
-protected:  
+protected:
     Mat                                             //single channel log-scale image
     convert_image(const Mat &im);                   //gray or rgb unsigned char image
+    
+    gpu::GpuMat
+    convert_image(const gpu::GpuMat &im);
 };
 //==============================================================================
 class patch_models{                                 //collection of patch experts

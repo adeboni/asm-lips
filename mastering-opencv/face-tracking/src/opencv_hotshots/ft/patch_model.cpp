@@ -27,27 +27,30 @@ Mat patch_model::convert_image(const Mat &im) {
     return I;
 }
 
-//gpu::GpuMat convert_image(const gpu::GpuMat &im)
-//{
-//    gpu::GpuMat I;
-//    if (im.channels() == 1) {
-//        if (im.type() != CV_32F) im.convertTo(I, CV_32F);
-//        else I = im;
-//    } else {
-//        if (im.channels() == 3) {
-//            Mat img;
-//            cvtColor(im, img, CV_RGB2GRAY);
-//            if (img.type() != CV_32F) img.convertTo(I, CV_32F);
-//            else I = img;
-//        } else {
-//            cout << "Unsupported image type!" << endl;
-//            abort();
-//        }
-//    }
-//    I += 1.0;
-//    log(I, I);
-//    return I;
-//}
+#ifdef WITH_CUDA
+gpu::GpuMat patch_model::convert_image(const gpu::GpuMat &im)
+{
+    gpu::GpuMat I;
+    if (im.channels() == 1) {
+        if (im.type() != CV_32F) im.convertTo(I, CV_32F);
+        else I = im;
+    } else {
+        if (im.channels() == 3) {
+            gpu::GpuMat img;
+            cvtColor(im, img, CV_RGB2GRAY);
+            if (img.type() != CV_32F) img.convertTo(I, CV_32F);
+            else I = img;
+        } else {
+            cout << "Unsupported image type!" << endl;
+            abort();
+        }
+    }
+    gpu::add(I, Scalar(1.0), I); // Used to be I += 1.0;
+    log(I, I);
+    return I;
+}
+#endif /* WITH_CUDA */
+
 //==============================================================================
 Mat patch_model::calc_response(const Mat &im) {
     Mat res;
