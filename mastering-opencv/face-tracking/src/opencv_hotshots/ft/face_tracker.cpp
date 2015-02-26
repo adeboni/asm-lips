@@ -4,12 +4,6 @@
 #include "stdio.h"      // For 'sprintf()'
 #define fl at<float>
 //==============================================================================
-//==============================================================================
-//==============================================================================
-//=============================== fps_timer ====================================
-//==============================================================================
-//==============================================================================
-//==============================================================================
 void fps_timer::increment() {
     if (fnum >= 29) {
         t_end = getTickCount();
@@ -33,12 +27,6 @@ void fps_timer::display_fps(Mat &im, Point p) {
     string text = str;
     putText(im, text, pt, FONT_HERSHEY_SIMPLEX, 0.5, Scalar::all(255));
 }
-//==============================================================================
-//==============================================================================
-//==============================================================================
-//========================== face_tracker_params ===============================
-//==============================================================================
-//==============================================================================
 //==============================================================================
 face_tracker_params::face_tracker_params() {
     ssize.resize(3);
@@ -112,12 +100,6 @@ void save_face_tracker_params(const char* fname, const face_tracker_params& x) {
     f.release();
 }
 //==============================================================================
-//==============================================================================
-//==============================================================================
-//============================== face_tracker ==================================
-//==============================================================================
-//==============================================================================
-//==============================================================================
 int face_tracker::track(const Mat &im,const face_tracker_params &p) {
     //convert image to greyscale
     Mat gray;
@@ -125,7 +107,7 @@ int face_tracker::track(const Mat &im,const face_tracker_params &p) {
     else cvtColor(im,gray,CV_RGB2GRAY);
 
     //initialise
-    if(!tracking)
+    if (!tracking)
         points = detector.detect(gray,p.scaleFactor,p.minNeighbours,p.minSize);
     if ((int)points.size() != smodel.npts()) return 0;
 
@@ -142,17 +124,16 @@ int face_tracker::track(const Mat &im,const face_tracker_params &p) {
 void face_tracker::draw(Mat &im, const Scalar pts_color, const Scalar con_color) {
     int n = points.size();
     if (n == 0) return;
-    for(int i = 0; i < smodel.C.rows; i++){
-        int j = smodel.C.at<int>(i,0),k = smodel.C.at<int>(i,1);
-        line(im,points[j],points[k],con_color,1);
-    }
-    for(int i = 0; i < n; i++)circle(im,points[i],1,pts_color,2,CV_AA);
+    for (int i = 0; i < smodel.C.rows; i++) 
+        line(im, points[smodel.C.at<int>(i,0)], points[smodel.C.at<int>(i,1)], (i >= 50 && i <= 69) ? con_color : CV_RGB(255,255,255), 1);
+    //for (int i = 0; i < n; i++) circle(im, points[i], 1, pts_color, 2, CV_AA);
 }
 //==============================================================================
 vector<Point2f>face_tracker::fit(const Mat &image, const vector<Point2f> &init, const Size ssize, const bool robust, const int itol, const float ftol) {
     int n = smodel.npts();
     assert((int(init.size())==n) && (pmodel.n_patches()==n));
-    smodel.calc_params(init); vector<Point2f> pts = smodel.calc_shape();
+    smodel.calc_params(init); 
+	vector<Point2f> pts = smodel.calc_shape();
 
     //find facial features in image around current estimates
     vector<Point2f> peaks = pmodel.calc_peaks(image,pts,ssize);

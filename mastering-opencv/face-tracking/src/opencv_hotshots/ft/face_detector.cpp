@@ -59,18 +59,18 @@ void face_detector::train(ft_data &data, const string fname, const Mat &ref, con
             p = data.get_points(i,true);
             pt = Mat(p).reshape(1,2*n);
             equalizeHist(im,eqIm);
-            detector.detectMultiScale(eqIm,faces,scaleFactor,minNeighbours,0
-                                      |CV_HAAR_FIND_BIGGEST_OBJECT
-                                      |CV_HAAR_SCALE_IMAGE,minSize);
-            if(faces.size() >= 1){
-                if(visi){
-                    Mat I; cvtColor(im,I,CV_GRAY2RGB);
-                    for(int i = 0; i < n; i++)circle(I,p[i],1,CV_RGB(0,255,0),2,CV_AA);
+            detector.detectMultiScale(eqIm,faces,scaleFactor,minNeighbours,CV_HAAR_FIND_BIGGEST_OBJECT|CV_HAAR_SCALE_IMAGE,minSize);
+            if(faces.size() >= 1) {
+                if (visi) {
+                    Mat I; 
+					cvtColor(im, I, CV_GRAY2RGB);
+                    for (int i = 0; i < n; i++) circle(I,p[i],1,CV_RGB(0,255,0),2,CV_AA);
                     rectangle(I,faces[0].tl(),faces[0].br(),CV_RGB(255,0,0),3);
-                    imshow("face detector training",I); waitKey(10);
+                    imshow("face detector training",I); 
+					waitKey(10);
                 }
                 //check if enough points are in detected rectangle
-                if(this->enough_bounded_points(pt,faces[0],frac)){
+                if(this->enough_bounded_points(pt,faces[0],frac)) {
                     Point2f center = this->center_of_mass(pt); float w = faces[0].width;
                     xoffset.push_back((center.x - (faces[0].x+0.5*faces[0].width ))/w);
                     yoffset.push_back((center.y - (faces[0].y+0.5*faces[0].height))/w);
@@ -89,22 +89,28 @@ void face_detector::train(ft_data &data, const string fname, const Mat &ref, con
 //==============================================================================
 bool face_detector::enough_bounded_points(const Mat &pts, const Rect R, const float frac) {
     int n = pts.rows/2,m = 0;
-    for(int i = 0; i < n; i++){
+    for (int i = 0; i < n; i++) {
         if((pts.fl(2*i  ) >= R.x) && (pts.fl(2*i  ) <= R.x + R.width) &&
-           (pts.fl(2*i+1) >= R.y) && (pts.fl(2*i+1) <= R.y + R.height))m++;
+           (pts.fl(2*i+1) >= R.y) && (pts.fl(2*i+1) <= R.y + R.height))
+		   m++;
     }
-    if(float(m)/n >= frac)return true; else return false;
+    if (float(m)/n >= frac) return true; 
+	else return false;
 }
 //==============================================================================
 Point2f face_detector::center_of_mass(const Mat &pts) {
-    float mx = 0,my = 0; int n = pts.rows/2;
-    for(int i = 0; i < n; i++){
-        mx += pts.fl(2*i); my += pts.fl(2*i+1);
-    }return Point2f(mx/n,my/n);
+    float mx = 0, my = 0; 
+	int n = pts.rows/2;
+    for (int i = 0; i < n; i++) {
+        mx += pts.fl(2*i); 
+		my += pts.fl(2*i+1);
+    }
+	return Point2f(mx/n,my/n);
 }
 //==============================================================================
 float face_detector::calc_scale(const Mat &pts) {
-    Point2f c = this->center_of_mass(pts); int n = pts.rows/2;
+    Point2f c = this->center_of_mass(pts); 
+	int n = pts.rows/2;
     Mat p(2*n,1,CV_32F);
     for(int i = 0; i < n; i++){
         p.fl(2*i  ) = pts.fl(2*i  ) - c.x;

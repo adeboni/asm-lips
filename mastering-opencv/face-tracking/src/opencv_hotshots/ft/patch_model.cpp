@@ -8,41 +8,42 @@
 //==============================================================================
 Mat patch_model::convert_image(const Mat &im) {
     Mat I;
-    if(im.channels() == 1){
-        if (im.type() != CV_32F) im.convertTo(I,CV_32F);
+    if (im.channels() == 1) {
+        if (im.type() != CV_32F) im.convertTo(I, CV_32F);
         else I = im;
-    }else{
-        if(im.channels() == 3){
+    } else {
+        if (im.channels() == 3) {
             Mat img;
             cvtColor(im, img, CV_RGB2GRAY);
-            if (img.type() != CV_32F) img.convertTo(I,CV_32F);
+            if (img.type() != CV_32F) img.convertTo(I, CV_32F);
             else I = img;
-        }else{cout << "Unsupported image type!" << endl; abort();}
+        } else {
+			cout << "Unsupported image type!" << endl; 
+			abort();
+		}
     }
     I += 1.0;
     log(I, I);
     return I;
 }
 //==============================================================================
-Mat patch_model::calc_response(const Mat &im, const bool sum2one) {
-    Mat I = this->convert_image(im);
+Mat patch_model::calc_response(const Mat &im) {
     Mat res;
-    matchTemplate(I,P,res,CV_TM_CCOEFF_NORMED);
-    if(sum2one){
-        normalize(res,res,0,1,NORM_MINMAX); res /= sum(res)[0];
-    }
+    matchTemplate(this->convert_image(im), P, res, CV_TM_CCOEFF_NORMED);
+    normalize(res, res, 0, 1, NORM_MINMAX); 
+	res /= sum(res)[0];
     return res;
 }
 //==============================================================================
 void patch_model::train(const vector<Mat> &images, const Size psize, const float var, const float lambda, const float mu_init, const int nsamples, const bool visi) {
-    int N = images.size(),n = psize.width*psize.height;
+    int N = images.size(), n = psize.width*psize.height;
 
     //compute desired response map
     Size wsize = images[0].size();
     if((wsize.width < psize.width) || (wsize.height < psize.height)){
         cerr << "Invalid image size < patch size!" << endl; throw std::exception();
     }
-    int dx = wsize.width-psize.width,dy = wsize.height-psize.height;
+    int dx = wsize.width-psize.width, dy = wsize.height-psize.height;
     Mat F(dy,dx,CV_32F);
     for(int y = 0; y < dy; y++){   float vy = (dy-1)/2 - y;
         for(int x = 0; x < dx; x++){ float vx = (dx-1)/2 - x;
@@ -91,14 +92,10 @@ void patch_model::read(const FileNode& node) {
     node["P"] >> P;
 }
 //==============================================================================
-//==============================================================================
-//==============================================================================
-//==============================================================================
-//==============================================================================
-//==============================================================================
 void patch_models::train(ft_data &data, const vector<Point2f> &ref, const Size psize, const Size ssize, const bool mirror, const float var, const float lambda, const float mu_init, const int nsamples, const bool visi) {
   //set reference shape
-    int n = ref.size(); reference = Mat(ref).reshape(1,2*n);
+    int n = ref.size(); 
+	reference = Mat(ref).reshape(1,2*n);
     Size wsize = psize + ssize;
 
     //train each patch model in turn
@@ -144,22 +141,24 @@ vector<Point2f> patch_models::calc_peaks(const Mat &im, const vector<Point2f> &p
     assert(n == int(patches.size()));
     Mat pt = Mat(points).reshape(1,2*n);
     Mat S = this->calc_simil(pt);
-    Mat Si = this->inv_simil(S);
-    vector<Point2f> pts = this->apply_simil(Si,points);
-    for(int i = 0; i < n; i++){
+    vector<Point2f> pts = this->apply_simil(this->inv_simil(S), points);
+    for (int i = 0; i < n; i++) {
         Size wsize = ssize + patches[i].patch_size();
-        Mat A(2,3,CV_32F);
-        A.fl(0,0) = S.fl(0,0); A.fl(0,1) = S.fl(0,1);
-        A.fl(1,0) = S.fl(1,0); A.fl(1,1) = S.fl(1,1);
-        A.fl(0,2) = pt.fl(2*i  ) - (A.fl(0,0) * (wsize.width-1)/2 + A.fl(0,1)*(wsize.height-1)/2);
-        A.fl(1,2) = pt.fl(2*i+1) - (A.fl(1,0) * (wsize.width-1)/2 + A.fl(1,1)*(wsize.height-1)/2);
-        Mat I; warpAffine(im,I,A,wsize,INTER_LINEAR+WARP_INVERSE_MAP);
+        Mat A(2, 3, CV_32F);
+        A.fl(0, 0) = S.fl(0, 0); 
+		A.fl(0, 1) = S.fl(0, 1);
+        A.fl(1, 0) = S.fl(1, 0); 
+		A.fl(1, 1) = S.fl(1, 1);
+        A.fl(0, 2) = pt.fl(2*i  ) - (A.fl(0,0) * (wsize.width-1)/2 + A.fl(0,1)*(wsize.height-1)/2);
+        A.fl(1, 2) = pt.fl(2*i+1) - (A.fl(1,0) * (wsize.width-1)/2 + A.fl(1,1)*(wsize.height-1)/2);
+        Mat I; 
+		warpAffine(im, I, A, wsize, INTER_LINEAR+WARP_INVERSE_MAP);
         
-        Mat R = patches[i].calc_response(I,false);
+        Mat R = patches[i].calc_response(I);
         
-        Point maxLoc; minMaxLoc(R,0,0,0,&maxLoc);
-        pts[i] = Point2f(pts[i].x + maxLoc.x - 0.5*ssize.width,
-                         pts[i].y + maxLoc.y - 0.5*ssize.height);
+        Point maxLoc; 
+		minMaxLoc(R, 0, 0, 0, &maxLoc);
+        pts[i] = Point2f(pts[i].x + maxLoc.x - 0.5*ssize.width, pts[i].y + maxLoc.y - 0.5*ssize.height);
     }
     return this->apply_simil(S,pts);
 }
@@ -192,17 +191,14 @@ Mat patch_models::calc_simil(const Mat &pts) {
     //compute translation
     int n = pts.rows/2; 
 	float mx = 0, my = 0;
-    for(int i = 0; i < n; i++){
+    for (int i = 0; i < n; i++) {
         mx += pts.fl(2*i); 
 		my += pts.fl(2*i+1);
     }
 	mx /= n; 
 	my /= n;
 	vector<float> p(2*n);
-	//Mat p(2*n, 1, CV_32F); //change to vector?
-    for(int i = 0; i < n; i++){
-        //p.fl(2*i) = pts.fl(2*i) - mx; 
-		//p.fl(2*i+1) = pts.fl(2*i+1) - my;
+    for (int i = 0; i < n; i++) {
 		p[2*i] = pts.fl(2*i) - mx; 
 		p[2*i+1] = pts.fl(2*i+1) - my;
     }
@@ -210,8 +206,6 @@ Mat patch_models::calc_simil(const Mat &pts) {
     float a=0, b=0, c=0;
     for (int i = 0; i < n; i++) {
         a += reference.fl(2*i) * reference.fl(2*i) + reference.fl(2*i+1) * reference.fl(2*i+1);
-        //b += reference.fl(2*i) * p.fl(2*i) + reference.fl(2*i+1) * p.fl(2*i+1);
-        //c += reference.fl(2*i) * p.fl(2*i+1) - reference.fl(2*i+1) * p.fl(2*i);
 		b += reference.fl(2*i) * p[2*i] + reference.fl(2*i+1) * p[2*i+1];
         c += reference.fl(2*i) * p[2*i+1] - reference.fl(2*i+1) * p[2*i];
     }

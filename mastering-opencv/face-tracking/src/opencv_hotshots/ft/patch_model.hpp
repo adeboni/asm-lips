@@ -21,8 +21,8 @@ public:
   patch_size(){return P.size();}
 
   Mat                                      //response map (CV_32F)
-  calc_response(const Mat &im,             //image to compute response from
-        const bool sum2one=false); //normalize response to sum to one?
+  calc_response(const Mat &im);             //image to compute response from
+
   void 
   train(const vector<Mat> &images,         //feature centered training images
     const Size psize,                  //desired patch size
