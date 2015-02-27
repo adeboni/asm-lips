@@ -4,6 +4,11 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <iostream>
 #include "stdio.h"      // For 'sprintf()'
+
+#ifdef WITH_CUDA
+#include "cuda_runtime.h"
+#endif
+
 #define fl at<float>
 //==============================================================================
 Mat patch_model::convert_image(const Mat &im) {
@@ -210,18 +215,27 @@ vector<Point2f> patch_models::apply_simil(const Mat &S, const vector<Point2f> &p
 
 #ifdef WITH_CUDA
 
-vector<Point2f> patch_models::apply_simil(const gpu::GpuMat &S, const vector<Point2f> &points) {
-    int n = points.size();
-    vector<Point2f> p(n);
-    for(int i = 0; i < n; i++) {
-//        p[i].x = S.fl(0,0)*points[i].x + S.fl(0,1)*points[i].y + S.fl(0,2);
-//        p[i].y = S.fl(1,0)*points[i].x + S.fl(1,1)*points[i].y + S.fl(1,2);
-        
-        p[i].x = *(S.ptr<float>(0) + 0) * points[i].x + *(S.ptr<float>(1) + 0) * points[i].y + *(S.ptr<float>(2) + 0);
-        p[i].y = *(S.ptr<float>(0) + 1) * points[i].x + *(S.ptr<float>(1) + 1) * points[i].y + *(S.ptr<float>(2) + 1);
-    }
-    return p;
-}
+//__global__ void apply_simil_kernel(unsigned char *S, float *points, int n, float *output)
+//{
+//    
+//}
+//
+//vector<Point2f> patch_models::apply_simil(const gpu::GpuMat &S, const vector<Point2f> &points) {
+//    float *funcInput, *funcOutput;
+//    int n = points.size();
+//    vector<Point2f> p(n);
+//    
+//    apply_simil_kernel<<<1,1>>>(S.ptr(), funcInput, n, funcOutput);
+//    
+//    for(int i = 0; i < n; i++) {
+////        p[i].x = S.fl(0,0)*points[i].x + S.fl(0,1)*points[i].y + S.fl(0,2);
+////        p[i].y = S.fl(1,0)*points[i].x + S.fl(1,1)*points[i].y + S.fl(1,2);
+//        
+//        p[i].x = *(S.ptr<float>(0) + 0) * points[i].x + *(S.ptr<float>(1) + 0) * points[i].y + *(S.ptr<float>(2) + 0);
+//        p[i].y = *(S.ptr<float>(0) + 1) * points[i].x + *(S.ptr<float>(1) + 1) * points[i].y + *(S.ptr<float>(2) + 1);
+//    }
+//    return p;
+//}
 
 #endif /* WITH_CUDA */
 
@@ -268,6 +282,39 @@ Mat patch_models::calc_simil(const Mat &pts) {
     float sc = scale*cos(theta), ss = scale*sin(theta);
     return (Mat_<float>(2,3) << sc,-ss,mx,ss,sc,my);
 }
+
+#ifdef WITH_CUDA
+
+//gpu::GpuMat patch_models::calc_simil(const gpu::GpuMat &pts) {
+//    //compute translation
+//    int n = pts.rows/2;
+//    float mx = 0, my = 0;
+//    for (int i = 0; i < n; i++) {
+//        mx += *pts.ptr<float>(2*i);         // mx += pts.fl(2*i);
+//        my += *pts.ptr<float>(2*i+1);       // my += pts.fl(2*i+1);
+//    }
+//    mx /= n;
+//    my /= n;
+//    vector<float> p(2*n);
+//    for (int i = 0; i < n; i++) {
+//        p[2*i] = *pts.ptr(2*i) - mx;        // p[2*i] = pts.fl(2*i) - mx;
+//        p[2*i+1] = *pts.ptr(2*i+1) - my;      // p[2*i+1] = pts.fl(2*i+1) - my;
+//    }
+//    //compute rotation and scale
+//    float a=0, b=0, c=0;
+//    for (int i = 0; i < n; i++) {
+//        a += reference.fl(2*i) * reference.fl(2*i) + reference.fl(2*i+1) * reference.fl(2*i+1);
+//        b += reference.fl(2*i) * p[2*i] + reference.fl(2*i+1) * p[2*i+1];
+//        c += reference.fl(2*i) * p[2*i+1] - reference.fl(2*i+1) * p[2*i];
+//    }
+//    b /= a;
+//    c /= a;
+//    float scale = sqrt(b*b+c*c), theta = atan2(c,b);
+//    float sc = scale*cos(theta), ss = scale*sin(theta);
+//    return (Mat_<float>(2,3) << sc,-ss,mx,ss,sc,my);
+//}
+
+#endif /* WITH_CUDA */
 //==============================================================================
 void patch_models::write(FileStorage &fs) const {
     assert(fs.isOpened());
