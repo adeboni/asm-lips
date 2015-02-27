@@ -59,6 +59,16 @@ Mat patch_model::calc_response(const Mat &im) {
 	res /= sum(res)[0];
     return res;
 }
+
+#ifdef WITH_CUDA
+gpu::GpuMat patch_model::calc_response(const gpu::GpuMat &im) {
+    gpu::GpuMat res;
+    gpu::matchTemplate(this->convert_image(im), P, res, CV_TM_SQDIFF); //might want to change to CV_TM_CCORR
+    gpu::normalize(res, res, 0, 1, NORM_MINMAX); 
+	gpu::divide(res, gpu::sum(res)[0], res);
+    return res;
+}
+#endif /* WITH_CUDA */
 //==============================================================================
 void patch_model::train(const vector<Mat> &images, const Size psize, const float var, const float lambda, const float mu_init, const int nsamples, const bool visi) {
     int N = images.size(), n = psize.width*psize.height;
