@@ -42,7 +42,7 @@ protected:
     Mat                                             //single channel log-scale image
     convert_image(const Mat &im);                   //gray or rgb unsigned char image
     
-    gpu::GpuMat
+    gpu::GpuMat                                     //GPU Version.
     convert_image(const gpu::GpuMat &im);
 };
 //==============================================================================
@@ -71,6 +71,11 @@ public:
                const vector<Point2f> &points,       //initial estimate of shape
                const Size ssize=Size(21,21));       //search window size
     
+    vector<Point2f>                                 //GPU Version.
+    calc_peaks(const gpu::GpuMat &im,
+               const vector<Point2f> &points,
+               const Size ssize=Size(21,21));
+    
     void
     write(FileStorage &fs) const;                   //file storage object to write to
 
@@ -83,10 +88,17 @@ protected:
 
     Mat                                             //similarity tranform referece->pts
     calc_simil(const Mat &pts);                     //destination shape
+    
+    gpu::GpuMat                                     //GPU Version.
+    calc_simil(const gpu::GpuMat &pts);
 
     vector<Point2f>                                 //similarity transformed shape
     apply_simil(const Mat &S,                       //similarity transform
                 const vector<Point2f> &points);     //shape to transform
+    
+    vector<Point2f>                                 //GPU Version.
+    apply_simil(const gpu::GpuMat &S,
+                const vector<Point2f> &points);
 };
 //==============================================================================
 ///* CUDA Enhancement */
