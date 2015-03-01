@@ -374,20 +374,20 @@ __global__ void calc_simil_kernel1(gpu::PtrStepSz<float> pts, float *mx, float *
 }
 
 
-__global__ void calc_simil_kernel2(gpu::PtrStepSz<float> pts, gpu::PtrStepSz<float> ref, float *p, float mx, float my, float *a, float *b, float *c) {
+__global__ void calc_simil_kernel2(gpu::PtrStepSz<float> pts, gpu::PtrStepSz<float> ref, float *p, float mx, float my, float *a, float *b, float *c, int n) {
     *a = 0;
     *b = 0;
     *c = 0;
     
     for (int i = 0; i < n; i++) {
-		*p[2*i] = pts(2*i, 1) - mx;
-		*p[2*i+1] = pts(2*i+1, 1) - my;
+		p[2*i] = pts(2*i, 1) - mx;
+		p[2*i+1] = pts(2*i+1, 1) - my;
 	}
 	
 	for (int i = 0; i < n; i++) {
         *a += ref(2*i, 1) * ref(2*i, 1) + ref(2*i+1, 1) * ref(2*i+1, 1);
-        *b += ref(2*i, 1) * *p[2*i] + ref(2*i+1, 1) * *p[2*i+1];
-        *c += ref(2*i, 1) * *p[2*i+1] - ref(2*i+1, 1) * *p[2*i];
+        *b += ref(2*i, 1) * p[2*i] + ref(2*i+1, 1) * p[2*i+1];
+        *c += ref(2*i, 1) * p[2*i+1] - ref(2*i+1, 1) * p[2*i];
     }
 	
     *b /= *a;
@@ -429,7 +429,7 @@ gpu::GpuMat patch_models::calc_simil(const gpu::GpuMat &pts) {
     cudaMalloc((void**)&dev_c, sizeof(float));
     
     cudaMemcpy(deviceFuncInput, funcInput, num_bytes, cudaMemcpyHostToDevice);
-    calc_simil_kernel2<<<1, 1>>>(pts, ref, deviceFuncInput, mx, my, &dev_a, &dev_b, &dev_c);
+    calc_simil_kernel2<<<1, 1>>>(pts, ref, deviceFuncInput, mx, my, &dev_a, &dev_b, &dev_c, n);
     
     cudaMemcpy(a, dev_a, sizeof(float), cudaMemcpyDeviceToHost);
     cudaMemcpy(b, dev_b, sizeof(float), cudaMemcpyDeviceToHost);
