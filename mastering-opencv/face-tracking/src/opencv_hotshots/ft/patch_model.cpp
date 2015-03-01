@@ -374,8 +374,6 @@ __global__ void calc_simil_kernel1(gpu::PtrStepSz<float> pts, float *mx, float *
     *mx = 0;
     *my = 0;
     
-    printf("Shiver me timbers.\n");
-    
     for (int i = 0; i < n; i++) {
         *mx += pts(2*i, 0);         // mx += pts.fl(2*i);
         *my += pts(2*i+1, 0);       // my += pts.fl(2*i+1);
@@ -392,8 +390,6 @@ __global__ void calc_simil_kernel2(gpu::PtrStepSz<float> pts, gpu::PtrStepSz<flo
 		p[2*i] = pts(2*i, 0) - mx;
 		p[2*i+1] = pts(2*i+1, 0) - my;
 	}
-    
-    printf("Yo ho, mateys!\n");
 	
 	for (int i = 0; i < n; i++) {
         *a += ref(2*i, 0) * ref(2*i, 0) + ref(2*i+1, 0) * ref(2*i+1, 0);
