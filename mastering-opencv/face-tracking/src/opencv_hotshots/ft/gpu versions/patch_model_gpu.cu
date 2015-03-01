@@ -12,15 +12,15 @@
 #define fl at<float>
 //==============================================================================
 #ifdef WITH_CUDA
-gpu::GpuMat patch_model_gpu::convert_image(const gpu::GpuMat &im)
+GpuMat patch_model_gpu::convert_image(const GpuMat &im)
 {
-    gpu::GpuMat I;
+    GpuMat I;
     if (im.channels() == 1) {
         if (im.type() != CV_32F) im.convertTo(I, CV_32F);
         else I = im;
     } else {
         if (im.channels() == 3) {
-            gpu::GpuMat img;
+            GpuMat img;
             gpu::cvtColor(im, img, CV_RGB2GRAY);
             if (img.type() != CV_32F) img.convertTo(I, CV_32F);
             else I = img;
@@ -37,8 +37,8 @@ gpu::GpuMat patch_model_gpu::convert_image(const gpu::GpuMat &im)
 
 //==============================================================================
 #ifdef WITH_CUDA
-gpu::GpuMat patch_model_gpu::calc_response(const gpu::GpuMat &im) {
-    gpu::GpuMat res;
+GpuMat patch_model_gpu::calc_response(const GpuMat &im) {
+    GpuMat res;
     gpu::matchTemplate(this->convert_image(im), P, res, CV_TM_SQDIFF); //might want to change to CV_TM_CCORR
     gpu::normalize(res, res, 0, 1, NORM_MINMAX); 
 	gpu::divide(res, gpu::sum(res)[0], res);
@@ -66,20 +66,20 @@ __global__ void calc_peaks_kernel(gpu::PtrStepSz<float> A, gpu::PtrStepSz<float>
 	A(2, 1) = pt(2 * i + 1, 1) - A(0, 1) * (w - 1) / 2 + A(1, 1) * (h - 1) / 2;
 }
 
-vector<Point2f> patch_models_gpu::calc_peaks(const gpu::GpuMat &im, const vector<Point2f> &points, const Size ssize) {
+vector<Point2f> patch_models_gpu::calc_peaks(const GpuMat &im, const vector<Point2f> &points, const Size ssize) {
     int n = points.size();
     assert(n == int(patches.size()));
-    gpu::GpuMat pt = gpu::GpuMat(Mat(points)).reshape(1, 2*n);
-    gpu::GpuMat S = this->calc_simil(pt);
+    GpuMat pt = GpuMat(Mat(points)).reshape(1, 2*n);
+    GpuMat S = this->calc_simil(pt);
     vector<Point2f> pts = this->apply_simil(this->inv_simil(S), points);
     for (int i = 0; i < n; i++) {
         Size wsize = ssize + patches[i].patch_size();
-        gpu::GpuMat A(2, 3, CV_32F);
+        GpuMat A(2, 3, CV_32F);
 		calc_peaks_kernel<<<1, 1>>>(A, S, pt, i, wsize.width, wsize.height);
-        gpu::GpuMat I;
+        GpuMat I;
         Mat Amat(A);
 		gpu::warpAffine(im, I, Amat, wsize, INTER_LINEAR+WARP_INVERSE_MAP);
-        gpu::GpuMat R = patches[i].calc_response(I);
+        GpuMat R = patches[i].calc_response(I);
         
         Point maxLoc; 
 		gpu::minMaxLoc(R, 0, 0, 0, &maxLoc);
@@ -127,7 +127,7 @@ __global__ void apply_simil_kernel(const gpu::PtrStepSz<float> S, float *points,
     *(output + i*2 + 1) = S(0,1) * points_x + S(1,1) * points_y + S(2,1);
 }
 
-vector<Point2f> patch_models_gpu::apply_simil(const gpu::GpuMat &S, const vector<Point2f> &points) {
+vector<Point2f> patch_models_gpu::apply_simil(const GpuMat &S, const vector<Point2f> &points) {
     int n = points.size();
     int num_bytes = n*2*sizeof(float);
     vector<Point2f> p(n);
@@ -175,15 +175,15 @@ __global__ void inv_simil_kernel(gpu::PtrStepSz<float> S, gpu::PtrStepSz<float> 
 	Si(0,1) = -S(0,1)/d;
 }
 
-gpu::GpuMat patch_models_gpu::inv_simil(const gpu::GpuMat &S) {
-    gpu::GpuMat Si(2,3,CV_32F);
+GpuMat patch_models_gpu::inv_simil(const GpuMat &S) {
+    GpuMat Si(2,3,CV_32F);
 	inv_simil_kernel<<<1,1>>>(S, Si);
-    gpu::GpuMat Ri = Si(Rect(0,0,2,2));
+    GpuMat Ri = Si(Rect(0,0,2,2));
     
     gpu::multiply(Ri, Scalar(-1), Ri);  // Originally Ri = -Ri*S.col(2);
     gpu::multiply(Ri, S.col(2), Ri);
     
-	gpu::GpuMat St = Si.col(2);
+	GpuMat St = Si.col(2);
 	Ri.copyTo(St); 
 	return Si;
 }
@@ -230,7 +230,7 @@ __global__ void calc_simil_kernel3(gpu::PtrStepSz<float> ret, float sc, float ss
 }
 
 
-gpu::GpuMat patch_models_gpu::calc_simil(const gpu::GpuMat &pts) {
+GpuMat patch_models_gpu::calc_simil(const GpuMat &pts) {
     //compute translation
     int n = pts.rows/2;
     float mx = 0, my = 0;
@@ -259,7 +259,7 @@ gpu::GpuMat patch_models_gpu::calc_simil(const gpu::GpuMat &pts) {
 
     float scale = sqrt(b*b+c*c), theta = atan2(c,b);
     float sc = scale*cos(theta), ss = scale*sin(theta);
-	gpu::GpuMat ret(2,3,CV_32F);
+	GpuMat ret(2,3,CV_32F);
 	calc_simil_kernel3<<<1, 1>>>(ret, sc, ss, mx, my);
     
 	return ret;
