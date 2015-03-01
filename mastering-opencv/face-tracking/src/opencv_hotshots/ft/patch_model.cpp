@@ -33,7 +33,7 @@ Mat patch_model::convert_image(const Mat &im) {
 }
 
 #ifdef WITH_CUDA
-GpuMat patch_model::convert_image(const GpuMat &im)
+gpu::GpuMat patch_model::convert_image(const gpu::GpuMat &im)
 {
     GpuMat I;
     if (im.channels() == 1) {
@@ -66,7 +66,7 @@ Mat patch_model::calc_response(const Mat &im) {
 }
 
 #ifdef WITH_CUDA
-GpuMat patch_model::calc_response(const GpuMat &im) {
+gpu::GpuMat patch_model::calc_response(const gpu::GpuMat &im) {
     GpuMat res;
     gpu::matchTemplate(this->convert_image(im), GpuMat(P), res, CV_TM_SQDIFF); //might want to change to CV_TM_CCORR
     gpu::normalize(res, res, 0, 1, NORM_MINMAX); 
@@ -274,7 +274,7 @@ __global__ void apply_simil_kernel(const gpu::PtrStepSz<float> S, float *points,
     *(output + i*2 + 1) = S(0,1) * points_x + S(1,1) * points_y + S(2,1);
 }
 
-vector<Point2f> patch_models::apply_simil(const GpuMat &S, const vector<Point2f> &points) {
+vector<Point2f> patch_models::apply_simil(const gpu::GpuMat &S, const vector<Point2f> &points) {
     int n = points.size();
     int num_bytes = n*2*sizeof(float);
     vector<Point2f> p(n);
@@ -322,7 +322,7 @@ __global__ void inv_simil_kernel(gpu::PtrStepSz<float> S, gpu::PtrStepSz<float> 
 	Si(0,1) = -S(0,1)/d;
 }
 
-GpuMat patch_models::inv_simil(const GpuMat &S) {
+gpu::GpuMat patch_models::inv_simil(const gpu::GpuMat &S) {
     GpuMat Si(2,3,CV_32F);
 	inv_simil_kernel<<<1,1>>>(S, Si);
     GpuMat Ri = Si(Rect(0,0,2,2));
@@ -406,7 +406,7 @@ __global__ void calc_simil_kernel3(gpu::PtrStepSz<float> ret, float sc, float ss
 }
 
 
-GpuMat patch_models::calc_simil(const GpuMat &pts) {
+gpu::GpuMat patch_models::calc_simil(const gpu::GpuMat &pts) {
 	GpuMat ref;
 	ref.upload(reference);
 	
