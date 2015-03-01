@@ -22,6 +22,8 @@ public:
 
     Mat                                             //response map (CV_32F)
     calc_response(const Mat &im);                   //image to compute response from
+	
+	gpu::GpuMat calc_response(const gpu::GpuMat &im); //GPU version
 
     void
     train(const vector<Mat> &images,                //feature centered training images
@@ -85,6 +87,9 @@ public:
 protected:
     Mat                                             //inverted similarity transform
     inv_simil(const Mat &S);                        //similarity transform
+	
+	gpu::GpuMat                                     //GPU version
+    inv_simil(const gpu::GpuMat &S);               
 
     Mat                                             //similarity tranform referece->pts
     calc_simil(const Mat &pts);                     //destination shape
@@ -101,12 +106,6 @@ protected:
                 const vector<Point2f> &points);
 };
 //==============================================================================
-///* CUDA Enhancement */
-//#ifndef WITH_CUDA
-//Mat                                      //response map (CV_32F)
-//calc_response(const patch_model &pm,     //the patch model that would have called this function.
-//              const Mat &im,             //image to compute response from
-//              const bool sum2one=false); //normalize response to sum to one?
-//#endif /* WITH_CUDA 2*/
+
 
 #endif /* _FT_PATCH_MODEL_HPP_ */
