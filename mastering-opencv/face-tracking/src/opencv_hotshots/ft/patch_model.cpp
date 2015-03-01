@@ -224,8 +224,7 @@ vector<Point2f> patch_models::calc_peaks(const gpu::GpuMat &im, const vector<Poi
         gpu::GpuMat A(2, 3, CV_32F);
 		calc_peaks_kernel<<<1, 1>>>(A, S, pt, i, wsize.width, wsize.height);
         gpu::GpuMat I;
-        Mat Amat;
-        Amat.download(A);
+        Mat Amat(A);
 		gpu::warpAffine(im, I, Amat, wsize, INTER_LINEAR+WARP_INVERSE_MAP);
         gpu::GpuMat R = patches[i].calc_response(I);
         
