@@ -431,9 +431,9 @@ gpu::GpuMat patch_models::calc_simil(const gpu::GpuMat &pts) {
     cudaMemcpy(deviceFuncInput, funcInput, num_bytes, cudaMemcpyHostToDevice);
     calc_simil_kernel2<<<1, 1>>>(pts, ref, deviceFuncInput, mx, my, &dev_a, &dev_b, &dev_c, n);
     
-    cudaMemcpy(a, dev_a, sizeof(float), cudaMemcpyDeviceToHost);
-    cudaMemcpy(b, dev_b, sizeof(float), cudaMemcpyDeviceToHost);
-    cudaMemcpy(c, dev_c, sizeof(float), cudaMemcpyDeviceToHost);
+    cudaMemcpy(&a, dev_a, sizeof(float), cudaMemcpyDeviceToHost);
+    cudaMemcpy(&b, dev_b, sizeof(float), cudaMemcpyDeviceToHost);
+    cudaMemcpy(&c, dev_c, sizeof(float), cudaMemcpyDeviceToHost);
 
     float scale = sqrt(b*b+c*c), theta = atan2(c,b);
     float sc = scale*cos(theta), ss = scale*sin(theta);
