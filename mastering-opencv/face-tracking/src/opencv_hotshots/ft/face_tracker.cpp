@@ -125,7 +125,7 @@ void face_tracker::draw(Mat &im, const Scalar pts_color, const Scalar con_color)
     int n = points.size();
     if (n == 0) return;
     for (int i = 0; i < smodel.C.rows; i++) 
-        line(im, points[smodel.C.at<int>(i,0)], points[smodel.C.at<int>(i,1)], (i >= 50 && i <= 69) ? con_color : CV_RGB(255,255,255), 1);
+        line(im, points[smodel.C.at<int>(i,0)], points[smodel.C.at<int>(i,1)], (i >= 50 && i <= 69) ? (Scalar)con_color : (Scalar)CV_RGB(255,255,255), 1);
     //for (int i = 0; i < n; i++) circle(im, points[i], 1, pts_color, 2, CV_AA);
 }
 //==============================================================================
