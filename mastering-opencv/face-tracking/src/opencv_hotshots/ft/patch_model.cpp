@@ -202,6 +202,38 @@ vector<Point2f> patch_models::calc_peaks(const Mat &im, const vector<Point2f> &p
     }
     return this->apply_simil(S,pts);
 }
+
+#ifdef WITH_CUDA
+__global__ void calc_peaks_kernel(gpu::PtrStepSz<float> A, gpu::PtrStepSz<float> S, gpu::PtrStepSz<float> pt, int i, int w, int h) {
+	A(0, 0) = S(0, 0);
+	A(0, 1) = S(0, 1);
+	A(1, 0) = S(1, 0);
+	A(1, 1) = S(1, 1);
+	A(2, 0) = pt(2 * i, 1) - A(0, 0) * (w - 1) / 2 + A(1, 0) * (h - 1) / 2;
+	A(2, 1) = pt(2 * i + 1, 1) - A(0, 1) * (w - 1) / 2 + A(1, 1) * (h - 1) / 2;
+}
+
+vector<Point2f> patch_models::calc_peaks(const gpu::GpuMat &im, const vector<Point2f> &points, const Size ssize) {
+    int n = points.size();
+    assert(n == int(patches.size()));
+    gpu::GpuMat pt = gpu::GpuMat(points).reshape(1, 2*n);
+    gpu::GpuMat S = this->calc_simil(pt);
+    vector<Point2f> pts = this->apply_simil(this->inv_simil(S), points);
+    for (int i = 0; i < n; i++) {
+        Size wsize = ssize + patches[i].patch_size();
+        gpu::GpuMat A(2, 3, CV_32F);
+		calc_peaks_kernel<<<1, 1>>>(A, S, pt, i, wsize.width, wsize.height);
+        gpu::GpuMat I; 
+		gpu::warpAffine(im, I, A, wsize, INTER_LINEAR+WARP_INVERSE_MAP);
+        gpu::GpuMat R = patches[i].calc_response(I);
+        
+        Point maxLoc; 
+		gpu::minMaxLoc(R, 0, 0, 0, &maxLoc);
+        pts[i] = Point2f(pts[i].x + maxLoc.x - 0.5*ssize.width, pts[i].y + maxLoc.y - 0.5*ssize.height);
+    }
+    return this->apply_simil(S, pts);
+}
+#endif /* WITH_CUDA */
 //=============================================================================
 vector<Point2f> patch_models::apply_simil(const Mat &S, const vector<Point2f> &points) {
     int n = points.size();
@@ -279,6 +311,26 @@ Mat patch_models::inv_simil(const Mat &S) {
 	Ri.copyTo(St); 
 	return Si;
 }
+
+#ifdef WITH_CUDA
+__global__ void inv_simil_kernel(gpu::PtrStepSz<float> S, gpu::PtrStepSz<float> Si) {
+	float d = S(0, 0)*S(1, 1) - S(0, 1)*S(1, 0);
+    Si(0,0) = S(1,1)/d; 
+	Si(1,0) = -S(1,0)/d;
+    Si(1,1) = S(0,0)/d; 
+	Si(0,1) = -S(0,1)/d;
+}
+
+gpu::GpuMat patch_models::inv_simil(const gpu::GpuMat &S) {
+    gpu::GpuMat Si(2,3,CV_32F);
+	inv_simil_kernel<<<1,1>>>(S, Si);
+    gpu::GpuMat Ri = Si(Rect(0,0,2,2));
+    Ri = -Ri*S.col(2); 
+	gpu::GpuMat St = Si.col(2); 
+	Ri.copyTo(St); 
+	return Si;
+}
+#endif /* WITH_CUDA */
 //=============================================================================
 Mat patch_models::calc_simil(const Mat &pts) {
     //compute translation

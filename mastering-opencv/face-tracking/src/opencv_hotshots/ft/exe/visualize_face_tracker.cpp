@@ -49,7 +49,7 @@ int main(int argc,char** argv) {
 		tracker.timer.display_fps(im, Point(1,im.rows-1));
 		imshow("face tracker", im);
 		int c = waitKey(10);
-		if (c == 'q')break;
+		if (c == 'q') break;
 		else if (c == 'd') tracker.reset();
 	}
 	destroyWindow("face tracker"); 
