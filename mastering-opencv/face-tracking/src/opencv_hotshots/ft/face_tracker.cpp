@@ -2,6 +2,12 @@
 #include "opencv_hotshots/ft/ft.hpp"
 #include <iostream>
 #include "stdio.h"      // For 'sprintf()'
+
+#ifdef WITH_CUDA
+#include <opencv2/gpu/gpu.hpp>
+#include <opencv2/gpu/gpumat.hpp>
+#endif /* WITH_CUDA */
+
 #define fl at<float>
 //==============================================================================
 void fps_timer::increment() {
@@ -136,7 +142,12 @@ vector<Point2f>face_tracker::fit(const Mat &image, const vector<Point2f> &init, 
 	vector<Point2f> pts = smodel.calc_shape();
 
     //find facial features in image around current estimates
+#ifndef WITH_CUDA
     vector<Point2f> peaks = pmodel.calc_peaks(image,pts,ssize);
+#else
+    gpu::GpuMat image_gpu(image);
+    vector<Point2f> peaks = pmodel.calc_peaks(image_gpu,pts,ssize);
+#endif
 
     //optimise
     if(!robust){
