@@ -224,7 +224,8 @@ vector<Point2f> patch_models::calc_peaks(const gpu::GpuMat &im, const vector<Poi
         gpu::GpuMat A(2, 3, CV_32F);
 		calc_peaks_kernel<<<1, 1>>>(A, S, pt, i, wsize.width, wsize.height);
         gpu::GpuMat I;
-        Mat Amat = A;
+        Mat Amat;
+        Amat.upload(A);
 		gpu::warpAffine(im, I, Amat, wsize, INTER_LINEAR+WARP_INVERSE_MAP);
         gpu::GpuMat R = patches[i].calc_response(I);
         
@@ -287,11 +288,11 @@ vector<Point2f> patch_models::apply_simil(const gpu::GpuMat &S, const vector<Poi
     cudaMalloc((void**)&deviceFuncInput, num_bytes);
     cudaMalloc((void**)&deviceFuncOutput, num_bytes);
     
-    cudMemcpy(deviceFuncInput, funcInput, num_bytes, cudaMemcpyHostToDevice);
+    cudaMemcpy(deviceFuncInput, funcInput, num_bytes, cudaMemcpyHostToDevice);
     
     apply_simil_kernel<<<n, 1>>>(S, funcInput, n, funcOutput);
     
-    cudMemcpy(funcOutput, deviceFuncOutput, num_bytes, cudaMemcpyDeviceToHost);
+    cudaMemcpy(funcOutput, deviceFuncOutput, num_bytes, cudaMemcpyDeviceToHost);
     
     return p;
 }
