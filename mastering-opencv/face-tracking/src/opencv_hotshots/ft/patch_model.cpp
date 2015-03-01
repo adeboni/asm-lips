@@ -374,6 +374,8 @@ __global__ void calc_simil_kernel1(gpu::PtrStepSz<float> pts, float *mx, float *
     *mx = 0;
     *my = 0;
     
+    printf("Shiver me timbers.\n");
+    
     for (int i = 0; i < n; i++) {
         *mx += pts(2*i, 0);         // mx += pts.fl(2*i);
         *my += pts(2*i+1, 0);       // my += pts.fl(2*i+1);
@@ -390,6 +392,8 @@ __global__ void calc_simil_kernel2(gpu::PtrStepSz<float> pts, gpu::PtrStepSz<flo
 		p[2*i] = pts(2*i, 0) - mx;
 		p[2*i+1] = pts(2*i+1, 0) - my;
 	}
+    
+    printf("Yo ho, mateys!\n");
 	
 	for (int i = 0; i < n; i++) {
         *a += ref(2*i, 0) * ref(2*i, 0) + ref(2*i+1, 0) * ref(2*i+1, 0);
@@ -425,7 +429,8 @@ gpu::GpuMat patch_models::calc_simil(const gpu::GpuMat &pts) {
     cudaMalloc((void**)&dev_my, sizeof(float));
     
     cerr << "Starting calc_simil_kernel1" << endl;
-	calc_simil_kernel1<<<1, 1>>>(pts, &mx, &my, n);
+	calc_simil_kernel1<<<1, 1>>>(pts, dev_mx, dev_my, n);
+    cerr << "Exiting calc_simil_kernel1" << endl;
     
     cudaMemcpy(&mx, dev_mx, sizeof(float), cudaMemcpyDeviceToHost);
     cudaMemcpy(&my, dev_my, sizeof(float), cudaMemcpyDeviceToHost);
@@ -437,10 +442,10 @@ gpu::GpuMat patch_models::calc_simil(const gpu::GpuMat &pts) {
 	int num_bytes = 2*n*sizeof(float);
     float *funcInput = (float *) &(p[0]);
     float *deviceFuncInput;
-    cudaMalloc((void**)&deviceFuncInput, num_bytes);
-   
 	float a=0, b=0, c=0;
     float *dev_a, *dev_b, *dev_c;
+    
+    cudaMalloc((void**)&deviceFuncInput, num_bytes);
     cudaMalloc((void**)&dev_a, sizeof(float));
     cudaMalloc((void**)&dev_b, sizeof(float));
     cudaMalloc((void**)&dev_c, sizeof(float));
@@ -448,6 +453,7 @@ gpu::GpuMat patch_models::calc_simil(const gpu::GpuMat &pts) {
     cudaMemcpy(deviceFuncInput, funcInput, num_bytes, cudaMemcpyHostToDevice);
     cerr << "Starting calc_simil_kernel2" << endl;
     calc_simil_kernel2<<<1, 1>>>(pts, ref, deviceFuncInput, mx, my, dev_a, dev_b, dev_c, n);
+    cerr << "Exiting calc_simil_kernel2" << endl;
     
     cudaMemcpy(&a, dev_a, sizeof(float), cudaMemcpyDeviceToHost);
     cudaMemcpy(&b, dev_b, sizeof(float), cudaMemcpyDeviceToHost);
@@ -458,6 +464,7 @@ gpu::GpuMat patch_models::calc_simil(const gpu::GpuMat &pts) {
 	GpuMat ret(2,3,CV_32F);
     cerr << "Starting calc_simil_kernel3" << endl;
 	calc_simil_kernel3<<<1, 1>>>(ret, sc, ss, mx, my);
+    cerr << "Exiting calc_simil_kernel3" << endl;
     
 	return ret;
 }
