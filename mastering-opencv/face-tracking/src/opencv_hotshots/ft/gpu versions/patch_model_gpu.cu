@@ -12,7 +12,7 @@
 #define fl at<float>
 //==============================================================================
 #ifdef WITH_CUDA
-GpuMat patch_model_gpu::convert_image(const GpuMat &im)
+gpu::GpuMat patch_model_gpu::convert_image(const gpu::GpuMat &im)
 {
     GpuMat I;
     if (im.channels() == 1) {
@@ -37,7 +37,7 @@ GpuMat patch_model_gpu::convert_image(const GpuMat &im)
 
 //==============================================================================
 #ifdef WITH_CUDA
-GpuMat patch_model_gpu::calc_response(const GpuMat &im) {
+gpu::GpuMat patch_model_gpu::calc_response(const gpu::GpuMat &im) {
     GpuMat res;
     gpu::matchTemplate(this->convert_image(im), P, res, CV_TM_SQDIFF); //might want to change to CV_TM_CCORR
     gpu::normalize(res, res, 0, 1, NORM_MINMAX); 
@@ -66,7 +66,7 @@ __global__ void calc_peaks_kernel(gpu::PtrStepSz<float> A, gpu::PtrStepSz<float>
 	A(2, 1) = pt(2 * i + 1, 1) - A(0, 1) * (w - 1) / 2 + A(1, 1) * (h - 1) / 2;
 }
 
-vector<Point2f> patch_models_gpu::calc_peaks(const GpuMat &im, const vector<Point2f> &points, const Size ssize) {
+vector<Point2f> patch_models_gpu::calc_peaks(const gpu::GpuMat &im, const vector<Point2f> &points, const Size ssize) {
     int n = points.size();
     assert(n == int(patches.size()));
     GpuMat pt = GpuMat(Mat(points)).reshape(1, 2*n);
@@ -127,7 +127,7 @@ __global__ void apply_simil_kernel(const gpu::PtrStepSz<float> S, float *points,
     *(output + i*2 + 1) = S(0,1) * points_x + S(1,1) * points_y + S(2,1);
 }
 
-vector<Point2f> patch_models_gpu::apply_simil(const GpuMat &S, const vector<Point2f> &points) {
+vector<Point2f> patch_models_gpu::apply_simil(const gpu::GpuMat &S, const vector<Point2f> &points) {
     int n = points.size();
     int num_bytes = n*2*sizeof(float);
     vector<Point2f> p(n);

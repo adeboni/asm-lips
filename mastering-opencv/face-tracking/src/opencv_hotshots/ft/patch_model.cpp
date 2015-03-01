@@ -371,9 +371,12 @@ Mat patch_models::calc_simil(const Mat &pts) {
 #ifdef WITH_CUDA
 
 __global__ void calc_simil_kernel1(gpu::PtrStepSz<float> pts, float *mx, float *my, int n) {
-	for (int i = 0; i < n; i++) {
-        *mx += pts(2*i, 1);         // mx += pts.fl(2*i);
-        *my += pts(2*i+1, 1);       // my += pts.fl(2*i+1);
+    *mx = 0;
+    *my = 0;
+    
+    for (int i = 0; i < n; i++) {
+        *mx += pts(2*i, 0);         // mx += pts.fl(2*i);
+        *my += pts(2*i+1, 0);       // my += pts.fl(2*i+1);
     }
 }
 
@@ -384,14 +387,14 @@ __global__ void calc_simil_kernel2(gpu::PtrStepSz<float> pts, gpu::PtrStepSz<flo
     *c = 0;
     
     for (int i = 0; i < n; i++) {
-		p[2*i] = pts(2*i, 1) - mx;
-		p[2*i+1] = pts(2*i+1, 1) - my;
+		p[2*i] = pts(2*i, 0) - mx;
+		p[2*i+1] = pts(2*i+1, 0) - my;
 	}
 	
 	for (int i = 0; i < n; i++) {
-        *a += ref(2*i, 1) * ref(2*i, 1) + ref(2*i+1, 1) * ref(2*i+1, 1);
-        *b += ref(2*i, 1) * p[2*i] + ref(2*i+1, 1) * p[2*i+1];
-        *c += ref(2*i, 1) * p[2*i+1] - ref(2*i+1, 1) * p[2*i];
+        *a += ref(2*i, 0) * ref(2*i, 0) + ref(2*i+1, 0) * ref(2*i+1, 0);
+        *b += ref(2*i, 0) * p[2*i] + ref(2*i+1, 0) * p[2*i+1];
+        *c += ref(2*i, 0) * p[2*i+1] - ref(2*i+1, 0) * p[2*i];
     }
 	
     *b /= *a;
@@ -416,8 +419,17 @@ gpu::GpuMat patch_models::calc_simil(const gpu::GpuMat &pts) {
     //compute translation
     int n = pts.rows/2;
     float mx = 0, my = 0;
+    float *dev_mx, *dev_my;
+    
+    cudaMalloc((void**)&dev_mx, sizeof(float));
+    cudaMalloc((void**)&dev_my, sizeof(float));
+    
     cerr << "Starting calc_simil_kernel1" << endl;
 	calc_simil_kernel1<<<1, 1>>>(pts, &mx, &my, n);
+    
+    cudaMemcpy(&mx, dev_mx, sizeof(float), cudaMemcpyDeviceToHost);
+    cudaMemcpy(&my, dev_my, sizeof(float), cudaMemcpyDeviceToHost);
+    
     mx /= n;
     my /= n;
 	
