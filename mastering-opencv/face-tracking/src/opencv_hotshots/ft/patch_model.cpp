@@ -216,7 +216,7 @@ __global__ void calc_peaks_kernel(gpu::PtrStepSz<float> A, gpu::PtrStepSz<float>
 vector<Point2f> patch_models::calc_peaks(const gpu::GpuMat &im, const vector<Point2f> &points, const Size ssize) {
     int n = points.size();
     assert(n == int(patches.size()));
-    gpu::GpuMat pt = gpu::GpuMat(Mat(points)).reshape(1, 2*n);
+    gpu::GpuMat pt = gpu::GpuMat(points).reshape(1, 2*n);
     gpu::GpuMat S = this->calc_simil(pt);
     vector<Point2f> pts = this->apply_simil(this->inv_simil(S), points);
     for (int i = 0; i < n; i++) {

@@ -39,7 +39,7 @@ gpu::GpuMat patch_model_gpu::convert_image(const gpu::GpuMat &im)
 #ifdef WITH_CUDA
 gpu::GpuMat patch_model_gpu::calc_response(const gpu::GpuMat &im) {
     gpu::GpuMat res;
-    gpu::matchTemplate(this->convert_image(im), gpu::GpuMat(P), res, CV_TM_SQDIFF); //might want to change to CV_TM_CCORR
+    gpu::matchTemplate(this->convert_image(im), P, res, CV_TM_SQDIFF); //might want to change to CV_TM_CCORR
     gpu::normalize(res, res, 0, 1, NORM_MINMAX); 
 	gpu::divide(res, gpu::sum(res)[0], res);
     return res;
@@ -231,9 +231,6 @@ __global__ void calc_simil_kernel3(gpu::PtrStepSz<float> ret, float sc, float ss
 
 
 gpu::GpuMat patch_models_gpu::calc_simil(const gpu::GpuMat &pts) {
-	gpu::GpuMat ref;
-	ref.upload(reference);
-	
     //compute translation
     int n = pts.rows/2;
     float mx = 0, my = 0;
@@ -254,7 +251,7 @@ gpu::GpuMat patch_models_gpu::calc_simil(const gpu::GpuMat &pts) {
     cudaMalloc((void**)&dev_c, sizeof(float));
     
     cudaMemcpy(deviceFuncInput, funcInput, num_bytes, cudaMemcpyHostToDevice);
-    calc_simil_kernel2<<<1, 1>>>(pts, ref, deviceFuncInput, mx, my, dev_a, dev_b, dev_c, n);
+    calc_simil_kernel2<<<1, 1>>>(pts, reference, deviceFuncInput, mx, my, dev_a, dev_b, dev_c, n);
     
     cudaMemcpy(&a, dev_a, sizeof(float), cudaMemcpyDeviceToHost);
     cudaMemcpy(&b, dev_b, sizeof(float), cudaMemcpyDeviceToHost);
