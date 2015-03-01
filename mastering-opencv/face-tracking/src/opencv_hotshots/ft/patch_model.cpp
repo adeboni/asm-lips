@@ -327,7 +327,7 @@ gpu::GpuMat patch_models::inv_simil(const gpu::GpuMat &S) {
     gpu::GpuMat Ri = Si(Rect(0,0,2,2));
     
     gpu::multiply(Ri, Scalar(-1), Ri);  // Originally Ri = -Ri*S.col(2);
-    gpu::multiply(Ri,, S.col(2), Ri);
+    gpu::multiply(Ri, S.col(2), Ri);
     
 	gpu::GpuMat St = Si.col(2);
 	Ri.copyTo(St); 
@@ -366,7 +366,7 @@ Mat patch_models::calc_simil(const Mat &pts) {
 
 #ifdef WITH_CUDA
 
-__global__ void calc_simil_kernel1(gpu::PtrStepSz<float> pts, float *mx, float *my) {
+__global__ void calc_simil_kernel1(gpu::PtrStepSz<float> pts, float *mx, float *my, int n) {
 	for (int i = 0; i < n; i++) {
         *mx += pts(2*i, 1);         // mx += pts.fl(2*i);
         *my += pts(2*i+1, 1);       // my += pts.fl(2*i+1);
@@ -412,7 +412,7 @@ gpu::GpuMat patch_models::calc_simil(const gpu::GpuMat &pts) {
     //compute translation
     int n = pts.rows/2;
     float mx = 0, my = 0;
-	calc_simil_kernel1<<<1, 1>>>(pts, &mx, &my);
+	calc_simil_kernel1<<<1, 1>>>(pts, &mx, &my, n);
     mx /= n;
     my /= n;
 	
