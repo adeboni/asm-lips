@@ -325,8 +325,11 @@ gpu::GpuMat patch_models::inv_simil(const gpu::GpuMat &S) {
     gpu::GpuMat Si(2,3,CV_32F);
 	inv_simil_kernel<<<1,1>>>(S, Si);
     gpu::GpuMat Ri = Si(Rect(0,0,2,2));
-    Ri = -Ri*S.col(2); 
-	gpu::GpuMat St = Si.col(2); 
+    
+    gpu::multiply(Ri, Scalar(-1), Ri);  // Originally Ri = -Ri*S.col(2);
+    gpu::multiply(Ri,, S.col(2), Ri);
+    
+	gpu::GpuMat St = Si.col(2);
 	Ri.copyTo(St); 
 	return Si;
 }
@@ -373,18 +376,18 @@ __global__ void calc_simil_kernel1(gpu::PtrStepSz<float> pts, float *mx, float *
 
 __global__ void calc_simil_kernel2(gpu::PtrStepSz<float> pts, gpu::PtrStepSz<float> ref, float *p, float mx, float my, float *a, float *b, float *c) {
 	for (int i = 0; i < n; i++) {
-		p[2*i] = pts(2*i, 1) - mx;
-		p[2*i+1] = pts(2*i+1, 1) - my;
+		*p[2*i] = pts(2*i, 1) - mx;
+		*p[2*i+1] = pts(2*i+1, 1) - my;
 	}
 	
 	for (int i = 0; i < n; i++) {
-        a += ref(2*i, 1) * ref(2*i, 1) + ref(2*i+1, 1) * ref(2*i+1, 1);
-        b += ref(2*i, 1) * p[2*i] + ref(2*i+1, 1) * p[2*i+1];
-        c += ref(2*i, 1) * p[2*i+1] - ref(2*i+1, 1) * p[2*i];
+        *a += ref(2*i, 1) * ref(2*i, 1) + ref(2*i+1, 1) * ref(2*i+1, 1);
+        *b += ref(2*i, 1) * *p[2*i] + ref(2*i+1, 1) * *p[2*i+1];
+        *c += ref(2*i, 1) * *p[2*i+1] - ref(2*i+1, 1) * *p[2*i];
     }
 	
-    b /= a;
-    c /= a;
+    *b /= *a;
+    *c /= *a;
 }
 
 
