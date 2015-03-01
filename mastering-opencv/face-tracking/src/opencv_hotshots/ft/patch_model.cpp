@@ -231,7 +231,7 @@ vector<Point2f> patch_models::calc_peaks(const gpu::GpuMat &im, const vector<Poi
 		gpu::minMaxLoc(R, 0, 0, 0, &maxLoc);
         pts[i] = Point2f(pts[i].x + maxLoc.x - 0.5*ssize.width, pts[i].y + maxLoc.y - 0.5*ssize.height);
     }
-    return this->apply_simil(S,pts);
+    return this->apply_simil(S, pts);
 }
 #endif /* WITH_CUDA */
 //=============================================================================
@@ -285,6 +285,26 @@ Mat patch_models::inv_simil(const Mat &S) {
 	Ri.copyTo(St); 
 	return Si;
 }
+
+#ifdef WITH_CUDA
+__global__ void inv_simil_kernel(gpu::PtrStepSz<float> S, gpu::PtrStepSz<float> Si) {
+	float d = S(0, 0)*S(1, 1) - S(0, 1)*S(1, 0);
+    Si(0,0) = S(1,1)/d; 
+	Si(1,0) = -S(1,0)/d;
+    Si(1,1) = S(0,0)/d; 
+	Si(0,1) = -S(0,1)/d;
+}
+
+gpu::GpuMat patch_models::inv_simil(const gpu::GpuMat &S) {
+    gpu::GpuMat Si(2,3,CV_32F);
+	inv_simil_kernel<<<1,1>>>(S, Si);
+    gpu::GpuMat Ri = Si(Rect(0,0,2,2));
+    Ri = -Ri*S.col(2); 
+	gpu::GpuMat St = Si.col(2); 
+	Ri.copyTo(St); 
+	return Si;
+}
+#endif /* WITH_CUDA */
 //=============================================================================
 Mat patch_models::calc_simil(const Mat &pts) {
     //compute translation
