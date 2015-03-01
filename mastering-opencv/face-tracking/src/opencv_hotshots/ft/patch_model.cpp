@@ -42,7 +42,7 @@ gpu::GpuMat patch_model::convert_image(const gpu::GpuMat &im)
     } else {
         if (im.channels() == 3) {
             gpu::GpuMat img;
-            cvtColor(im, img, CV_RGB2GRAY);
+            gpu::cvtColor(im, img, CV_RGB2GRAY);
             if (img.type() != CV_32F) img.convertTo(I, CV_32F);
             else I = img;
         } else {
@@ -286,11 +286,11 @@ vector<Point2f> patch_models::apply_simil(const gpu::GpuMat &S, const vector<Poi
     cudaMalloc((void**)&deviceFuncInput, num_bytes);
     cudaMalloc((void**)&deviceFuncOutput, num_bytes);
     
-    cudMemcpy(funcInput, deviceFuncInput, num_bytes, cudaMemcpyHostToDevice);
+    cudMemcpy(deviceFuncInput, funcInput, num_bytes, cudaMemcpyHostToDevice);
     
-    apply_simil_kernel<<<n,1>>>(S, funcInput, n, funcOutput);
+    apply_simil_kernel<<<n, 1>>>(S, funcInput, n, funcOutput);
     
-    cudMemcpy(deviceFuncOutput, funcOutput, num_bytes, cudaMemcpyDeviceToHost);
+    cudMemcpy(funcOutput, deviceFuncOutput, num_bytes, cudaMemcpyDeviceToHost);
     
     return p;
 }
@@ -363,34 +363,70 @@ Mat patch_models::calc_simil(const Mat &pts) {
 
 #ifdef WITH_CUDA
 
-//gpu::GpuMat patch_models::calc_simil(const gpu::GpuMat &pts) {
-//    //compute translation
-//    int n = pts.rows/2;
-//    float mx = 0, my = 0;
-//    for (int i = 0; i < n; i++) {
-//        mx += *pts.ptr<float>(2*i);         // mx += pts.fl(2*i);
-//        my += *pts.ptr<float>(2*i+1);       // my += pts.fl(2*i+1);
-//    }
-//    mx /= n;
-//    my /= n;
-//    vector<float> p(2*n);
-//    for (int i = 0; i < n; i++) {
-//        p[2*i] = *pts.ptr(2*i) - mx;        // p[2*i] = pts.fl(2*i) - mx;
-//        p[2*i+1] = *pts.ptr(2*i+1) - my;      // p[2*i+1] = pts.fl(2*i+1) - my;
-//    }
-//    //compute rotation and scale
-//    float a=0, b=0, c=0;
-//    for (int i = 0; i < n; i++) {
-//        a += reference.fl(2*i) * reference.fl(2*i) + reference.fl(2*i+1) * reference.fl(2*i+1);
-//        b += reference.fl(2*i) * p[2*i] + reference.fl(2*i+1) * p[2*i+1];
-//        c += reference.fl(2*i) * p[2*i+1] - reference.fl(2*i+1) * p[2*i];
-//    }
-//    b /= a;
-//    c /= a;
-//    float scale = sqrt(b*b+c*c), theta = atan2(c,b);
-//    float sc = scale*cos(theta), ss = scale*sin(theta);
-//    return (Mat_<float>(2,3) << sc,-ss,mx,ss,sc,my);
-//}
+__global__ void calc_simil_kernel1(gpu::PtrStepSz<float> pts, float *mx, float *my) {
+	for (int i = 0; i < n; i++) {
+        *mx += pts(2*i, 1);         // mx += pts.fl(2*i);
+        *my += pts(2*i+1, 1);       // my += pts.fl(2*i+1);
+    }
+}
+
+
+__global__ void calc_simil_kernel2(gpu::PtrStepSz<float> pts, gpu::PtrStepSz<float> ref, float *p, float mx, float my, float *a, float *b, float *c) {
+	for (int i = 0; i < n; i++) {
+		p[2*i] = pts(2*i, 1) - mx;
+		p[2*i+1] = pts(2*i+1, 1) - my;
+	}
+	
+	for (int i = 0; i < n; i++) {
+        a += ref(2*i, 1) * ref(2*i, 1) + ref(2*i+1, 1) * ref(2*i+1, 1);
+        b += ref(2*i, 1) * p[2*i] + ref(2*i+1, 1) * p[2*i+1];
+        c += ref(2*i, 1) * p[2*i+1] - ref(2*i+1, 1) * p[2*i];
+    }
+	
+    b /= a;
+    c /= a;
+}
+
+
+__global__ void calc_simil_kernel3(gpu::PtrStepSz<float> ret, float sc, float ss, float mx, float my) {
+	ret(0, 0) = sc;
+	ret(1, 0) = -ss;
+	ret(0, 1) = mx;
+	ret(1, 1) = ss;
+	ret(0, 2) = sc;
+	ret(1, 2) = my;
+}
+
+
+gpu::GpuMat patch_models::calc_simil(const gpu::GpuMat &pts) {
+	gpu::GpuMat ref;
+	ref.upload(reference);
+	
+    //compute translation
+    int n = pts.rows/2;
+    float mx = 0, my = 0;
+	calc_simil_kernel1<<<1, 1>>>(pts, &mx, &my);
+    mx /= n;
+    my /= n;
+	
+    vector<float> p(2*n);
+	int num_bytes = 2*n*sizeof(float);
+    float *funcInput = (float *) &(p[0].x);
+    float *deviceFuncInput, *deviceFuncOutput;
+    cudaMalloc((void**)&deviceFuncInput, num_bytes);
+    cudaMalloc((void**)&deviceFuncOutput, num_bytes);
+   
+	float a=0, b=0, c=0;
+    cudaMemcpy(deviceFuncInput, funcInput, deviceFuncInput, num_bytes, cudaMemcpyHostToDevice);
+    calc_simil_kernel2<<<1, 1>>>(pts, ref, deviceFuncInput, mx, my, &a, &b, &c);
+    cudaMemcpy(funcInput, deviceFuncInput, num_bytes, cudaMemcpyDeviceToHost);  
+
+    // float scale = sqrt(b*b+c*c), theta = atan2(c,b);
+    float sc = scale*cos(theta), ss = scale*sin(theta);
+	gpu::GpuMat ret(2,3,CV_32F);
+	calc_simil_kernel3<<<1, 1>>>(ret, sc, ss, mx, my);
+	return ret;
+}
 
 #endif /* WITH_CUDA */
 //==============================================================================
