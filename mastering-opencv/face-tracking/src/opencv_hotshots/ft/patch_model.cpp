@@ -421,7 +421,7 @@ gpu::GpuMat patch_models::calc_simil(const gpu::GpuMat &pts) {
     calc_simil_kernel2<<<1, 1>>>(pts, ref, deviceFuncInput, mx, my, &a, &b, &c);
     cudaMemcpy(funcInput, deviceFuncInput, num_bytes, cudaMemcpyDeviceToHost);  
 
-    // float scale = sqrt(b*b+c*c), theta = atan2(c,b);
+    float scale = sqrt(b*b+c*c), theta = atan2(c,b);
     float sc = scale*cos(theta), ss = scale*sin(theta);
 	gpu::GpuMat ret(2,3,CV_32F);
 	calc_simil_kernel3<<<1, 1>>>(ret, sc, ss, mx, my);
