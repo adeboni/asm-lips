@@ -8,7 +8,7 @@
 #ifdef WITH_CUDA
 #include <opencv2/gpu/gpu.hpp>
 #include <opencv2/gpu/gpumat.hpp>
-#endif /* WITH_CUDA 1*/
+#endif /* WITH_CUDA */
 
 using namespace cv;
 using namespace std;
