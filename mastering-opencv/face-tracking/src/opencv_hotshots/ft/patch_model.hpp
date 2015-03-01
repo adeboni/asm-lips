@@ -14,6 +14,7 @@ using namespace cv;
 using namespace std;
 
 class patch_model{                                  //correlation-based patch expert
+    typedef gpu::GpuMat GpuMat;
 public:
     Mat P;                                          //normalised patch
   
@@ -23,7 +24,7 @@ public:
     Mat                                             //response map (CV_32F)
     calc_response(const Mat &im);                   //image to compute response from
 	
-	gpu::GpuMat calc_response(const gpu::GpuMat &im); //GPU version
+	GpuMat calc_response(const GpuMat &im); //GPU version
 
     void
     train(const vector<Mat> &images,                //feature centered training images
@@ -44,11 +45,12 @@ protected:
     Mat                                             //single channel log-scale image
     convert_image(const Mat &im);                   //gray or rgb unsigned char image
     
-    gpu::GpuMat                                     //GPU Version.
-    convert_image(const gpu::GpuMat &im);
+    GpuMat                                     //GPU Version.
+    convert_image(const GpuMat &im);
 };
 //==============================================================================
 class patch_models{                                 //collection of patch experts
+    typedef gpu::GpuMat GpuMat;
 public:
     Mat reference;                                  //reference shape
     vector<patch_model> patches;                    //patch models
@@ -74,7 +76,7 @@ public:
                const Size ssize=Size(21,21));       //search window size
     
     vector<Point2f>                                 //GPU Version.
-    calc_peaks(const gpu::GpuMat &im,
+    calc_peaks(const GpuMat &im,
                const vector<Point2f> &points,
                const Size ssize=Size(21,21));
     
@@ -88,21 +90,21 @@ protected:
     Mat                                             //inverted similarity transform
     inv_simil(const Mat &S);                        //similarity transform
 	
-	gpu::GpuMat                                     //GPU version
-    inv_simil(const gpu::GpuMat &S);               
+	GpuMat                                     //GPU version
+    inv_simil(const GpuMat &S);               
 
     Mat                                             //similarity tranform referece->pts
     calc_simil(const Mat &pts);                     //destination shape
     
-    gpu::GpuMat                                     //GPU Version.
-    calc_simil(const gpu::GpuMat &pts);
+    GpuMat                                     //GPU Version.
+    calc_simil(const GpuMat &pts);
 
     vector<Point2f>                                 //similarity transformed shape
     apply_simil(const Mat &S,                       //similarity transform
                 const vector<Point2f> &points);     //shape to transform
     
     vector<Point2f>                                 //GPU Version.
-    apply_simil(const gpu::GpuMat &S,
+    apply_simil(const GpuMat &S,
                 const vector<Point2f> &points);
 };
 //==============================================================================
