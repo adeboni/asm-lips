@@ -222,6 +222,7 @@ vector<Point2f> patch_models::calc_peaks(const GpuMat &im, const vector<Point2f>
     for (int i = 0; i < n; i++) {
         Size wsize = ssize + patches[i].patch_size();
         GpuMat A(2, 3, CV_32F);
+        cerr << "Starting calc_peaks kernel" << endl;
 		calc_peaks_kernel<<<1, 1>>>(A, S, pt, i, wsize.width, wsize.height);
         GpuMat I;
         Mat Amat(A);
@@ -289,6 +290,7 @@ vector<Point2f> patch_models::apply_simil(const gpu::GpuMat &S, const vector<Poi
     
     cudaMemcpy(deviceFuncInput, funcInput, num_bytes, cudaMemcpyHostToDevice);
     
+    cerr << "Starting apply_simil_kernel" << endl;
     apply_simil_kernel<<<n, 1>>>(S, funcInput, n, funcOutput);
     
     cudaMemcpy(funcOutput, deviceFuncOutput, num_bytes, cudaMemcpyDeviceToHost);
@@ -324,6 +326,7 @@ __global__ void inv_simil_kernel(gpu::PtrStepSz<float> S, gpu::PtrStepSz<float> 
 
 gpu::GpuMat patch_models::inv_simil(const gpu::GpuMat &S) {
     GpuMat Si(2,3,CV_32F);
+    cerr << "Starting inv_simil_kernel" << endl;
 	inv_simil_kernel<<<1,1>>>(S, Si);
     GpuMat Ri = Si(Rect(0,0,2,2));
     
@@ -413,6 +416,7 @@ gpu::GpuMat patch_models::calc_simil(const gpu::GpuMat &pts) {
     //compute translation
     int n = pts.rows/2;
     float mx = 0, my = 0;
+    cerr << "Starting calc_simil_kernel1" << endl;
 	calc_simil_kernel1<<<1, 1>>>(pts, &mx, &my, n);
     mx /= n;
     my /= n;
@@ -430,6 +434,7 @@ gpu::GpuMat patch_models::calc_simil(const gpu::GpuMat &pts) {
     cudaMalloc((void**)&dev_c, sizeof(float));
     
     cudaMemcpy(deviceFuncInput, funcInput, num_bytes, cudaMemcpyHostToDevice);
+    cerr << "Starting calc_simil_kernel2" << endl;
     calc_simil_kernel2<<<1, 1>>>(pts, ref, deviceFuncInput, mx, my, dev_a, dev_b, dev_c, n);
     
     cudaMemcpy(&a, dev_a, sizeof(float), cudaMemcpyDeviceToHost);
@@ -439,6 +444,7 @@ gpu::GpuMat patch_models::calc_simil(const gpu::GpuMat &pts) {
     float scale = sqrt(b*b+c*c), theta = atan2(c,b);
     float sc = scale*cos(theta), ss = scale*sin(theta);
 	GpuMat ret(2,3,CV_32F);
+    cerr << "Starting calc_simil_kernel3" << endl;
 	calc_simil_kernel3<<<1, 1>>>(ret, sc, ss, mx, my);
     
 	return ret;
