@@ -68,7 +68,7 @@ Mat patch_model::calc_response(const Mat &im) {
 #ifdef WITH_CUDA
 gpu::GpuMat patch_model::calc_response(const gpu::GpuMat &im) {
     gpu::GpuMat res;
-    gpu::matchTemplate(this->convert_image(im), P, res, CV_TM_SQDIFF); //might want to change to CV_TM_CCORR
+    gpu::matchTemplate(this->convert_image(im), gpu::GpuMat(P), res, CV_TM_SQDIFF); //might want to change to CV_TM_CCORR
     gpu::normalize(res, res, 0, 1, NORM_MINMAX); 
 	gpu::divide(res, gpu::sum(res)[0], res);
     return res;
@@ -223,8 +223,9 @@ vector<Point2f> patch_models::calc_peaks(const gpu::GpuMat &im, const vector<Poi
         Size wsize = ssize + patches[i].patch_size();
         gpu::GpuMat A(2, 3, CV_32F);
 		calc_peaks_kernel<<<1, 1>>>(A, S, pt, i, wsize.width, wsize.height);
-        gpu::GpuMat I; 
-		gpu::warpAffine(im, I, A, wsize, INTER_LINEAR+WARP_INVERSE_MAP);
+        gpu::GpuMat I;
+        Mat Amat = A;
+		gpu::warpAffine(im, I, Amat, wsize, INTER_LINEAR+WARP_INVERSE_MAP);
         gpu::GpuMat R = patches[i].calc_response(I);
         
         Point maxLoc; 
