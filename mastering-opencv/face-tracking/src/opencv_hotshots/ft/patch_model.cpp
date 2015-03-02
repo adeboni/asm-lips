@@ -222,8 +222,9 @@ vector<Point2f> patch_models::calc_peaks(const GpuMat &im, const vector<Point2f>
     for (int i = 0; i < n; i++) {
         Size wsize = ssize + patches[i].patch_size();
         GpuMat A(2, 3, CV_32F);
-        cerr << "Starting calc_peaks kernel" << endl;
+        cerr << "Starting calc_peaks_kernel" << endl;
 		calc_peaks_kernel<<<1, 1>>>(A, S, pt, i, wsize.width, wsize.height);
+        cerr << "Exiting calc_peaks_kernel" << endl;
         GpuMat I;
         Mat Amat(A);
 		gpu::warpAffine(im, I, Amat, wsize, INTER_LINEAR+WARP_INVERSE_MAP);
@@ -292,6 +293,7 @@ vector<Point2f> patch_models::apply_simil(const gpu::GpuMat &S, const vector<Poi
     
     cerr << "Starting apply_simil_kernel" << endl;
     apply_simil_kernel<<<n, 1>>>(S, funcInput, n, funcOutput);
+    cerr << "Exiting apply_simil_kernel" << endl;
     
     cudaMemcpy(funcOutput, deviceFuncOutput, num_bytes, cudaMemcpyDeviceToHost);
     
@@ -328,6 +330,7 @@ gpu::GpuMat patch_models::inv_simil(const gpu::GpuMat &S) {
     GpuMat Si(2,3,CV_32F);
     cerr << "Starting inv_simil_kernel" << endl;
 	inv_simil_kernel<<<1,1>>>(S, Si);
+    cerr << "Exiting inv_simil_kernel" << endl;
     GpuMat Ri = Si(Rect(0,0,2,2));
     
     gpu::multiply(Ri, Scalar(-1), Ri);  // Originally Ri = -Ri*S.col(2);
