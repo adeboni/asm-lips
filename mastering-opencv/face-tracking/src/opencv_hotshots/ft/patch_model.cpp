@@ -333,7 +333,7 @@ gpu::GpuMat patch_models::inv_simil(const gpu::GpuMat &S) {
     cerr << "Exiting inv_simil_kernel" << endl;
     GpuMat Ri = Si(Rect(0,0,2,2));
     
-    gpu::multiply(Ri, Scalar(-1), Ri);  // Originally Ri = -Ri*S.col(2);
+    gpu::multiply(Ri, Scalar(-1.0), Ri);  // Originally Ri = -Ri*S.col(2);
     gpu::multiply(Ri, S.col(2), Ri);
     
 	GpuMat St = Si.col(2);
