@@ -328,8 +328,8 @@ __global__ void inv_simil_kernel1(gpu::PtrStepSz<float> S, gpu::PtrStepSz<float>
 
 // Used to do matrix multiplication.
 __global__ void inv_simil_kernel2(gpu::PtrStepSz<float> src1, gpu::PtrStepSz<float> src2, gpu::PtrStepSz<float> dest) {
-    Dest(0,0) = src1(0,0)*src2(0,0) + src1(0,1)*src2(1,0);
-    Dest(1,0) = src1(1,0)*src2(0,0) + src1(1,1)*src2(1,0);
+    dest(0,0) = src1(0,0)*src2(0,0) + src1(0,1)*src2(1,0);
+    dest(1,0) = src1(1,0)*src2(0,0) + src1(1,1)*src2(1,0);
 }
 
 __global__ void print_mat(gpu::PtrStepSz<float> Ri, int width, int height)
