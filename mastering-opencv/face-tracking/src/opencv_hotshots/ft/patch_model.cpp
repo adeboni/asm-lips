@@ -341,9 +341,10 @@ gpu::GpuMat patch_models::inv_simil(const gpu::GpuMat &S) {
     cerr << "Starting inv_simil_kernel" << endl;
 	inv_simil_kernel<<<1,1>>>(S, Si);
     cerr << "Exiting inv_simil_kernel" << endl;
-	cout << Si << endl;
     GpuMat Ri = Si(Rect(0,0,2,2));
     cerr << "Initially:" << endl;
+	cout << Ri << endl;
+	cout << S.size().height << " " << S.size().width << endl;
     print_mat<<<1,1>>>(Ri);
     
 	cout << "Starting first multiply" << endl;
