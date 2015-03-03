@@ -326,12 +326,23 @@ __global__ void inv_simil_kernel(gpu::PtrStepSz<float> S, gpu::PtrStepSz<float> 
 	Si(0,1) = -S(0,1)/d;
 }
 
+__global__ void print_mat(gpu::PtrStepSz<float> Ri)
+{
+    for (int i = 0; i < 2; i++) {
+        for (int j = 0; j < 2; j++)
+        {
+            printf("(%d, %d) = %f\n", i, j, Ri(j,i));
+        }
+    }
+}
+
 gpu::GpuMat patch_models::inv_simil(const gpu::GpuMat &S) {
     GpuMat Si(2,3,CV_32F);
     cerr << "Starting inv_simil_kernel" << endl;
 	inv_simil_kernel<<<1,1>>>(S, Si);
     cerr << "Exiting inv_simil_kernel" << endl;
     GpuMat Ri = Si(Rect(0,0,2,2));
+    print_mat<<<1,1>>>(Ri);
     
 	cout << "Starting first multiply" << endl;
     gpu::multiply(Ri, Scalar(-1.0), Ri);  // Originally Ri = -Ri*S.col(2);
