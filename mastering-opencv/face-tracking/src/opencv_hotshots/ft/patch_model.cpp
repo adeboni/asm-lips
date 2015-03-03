@@ -337,7 +337,7 @@ __global__ void print_mat(gpu::PtrStepSz<float> Ri, int width, int height)
     for (int i = 0; i < width; i++) {
         for (int j = 0; j < height; j++)
         {
-            printf("(%d, %d) = %f\n", i, j, Ri(j,i));
+            fprintf(stderr, "(%d, %d) = %f\n", i, j, Ri(j,i));
         }
     }
 }
