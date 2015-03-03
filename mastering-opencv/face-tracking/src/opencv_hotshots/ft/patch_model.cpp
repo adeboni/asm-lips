@@ -227,8 +227,7 @@ vector<Point2f> patch_models::calc_peaks(const GpuMat &im, const vector<Point2f>
 		calc_peaks_kernel<<<1, 1>>>(A, S, pt, i, wsize.width, wsize.height);
         cerr << "Exiting calc_peaks_kernel" << endl;
         GpuMat I;
-        Mat Amat(A);
-		gpu::warpAffine(im, I, Amat, wsize, INTER_LINEAR+WARP_INVERSE_MAP);
+		gpu::warpAffine(im, I, Mat(A), wsize, INTER_LINEAR+WARP_INVERSE_MAP);
         GpuMat R = patches[i].calc_response(I);
         
         Point maxLoc; 
