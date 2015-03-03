@@ -326,10 +326,10 @@ __global__ void inv_simil_kernel(gpu::PtrStepSz<float> S, gpu::PtrStepSz<float> 
 	Si(0,1) = -S(0,1)/d;
 }
 
-__global__ void print_mat(gpu::PtrStepSz<float> Ri)
+__global__ void print_mat(gpu::PtrStepSz<float> Ri, int width, int height)
 {
-    for (int i = 0; i < Ri.size().width; i++) {
-        for (int j = 0; j < Ri.size().height; j++)
+    for (int i = 0; i < width; i++) {
+        for (int j = 0; j < height; j++)
         {
             printf("(%d, %d) = %f\n", i, j, Ri(j,i));
         }
@@ -344,16 +344,16 @@ gpu::GpuMat patch_models::inv_simil(const gpu::GpuMat &S) {
     GpuMat Ri = Si(Rect(0,0,2,2));
     cerr << "Initially:" << endl;
 	cout << S.size().height << " " << S.size().width << endl;
-    print_mat<<<1,1>>>(Ri);
+    print_mat<<<1,1>>>(Ri, Ri.size().width, Ri.size().height);
     
 	cout << "Starting first multiply" << endl;
     gpu::multiply(Ri, Scalar(-1.0), Ri);  // Originally Ri = -Ri*S.col(2);
     cerr << "After first multiply:" << endl;
-    print_mat<<<1,1>>>(Ri);
+    print_mat<<<1,1>>>(Ri, Ri.size().width, Ri.size().height);
 	cout << "Exiting first multiply and starting second multiply" << endl;
     gpu::gemm(Ri, S.col(2), 1.0, gpu::GpuMat(), 0.0, Ri);
     cerr << "After second multiply:" << endl;
-    print_mat<<<1,1>>>(Ri);
+    print_mat<<<1,1>>>(Ri, Ri.size().width, Ri.size().height);
 	cout << "Exiting second multiply" << endl;
     
 	GpuMat St = Si.col(2);
