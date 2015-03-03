@@ -318,12 +318,18 @@ Mat patch_models::inv_simil(const Mat &S) {
 }
 
 #ifdef WITH_CUDA
-__global__ void inv_simil_kernel(gpu::PtrStepSz<float> S, gpu::PtrStepSz<float> Si) {
+__global__ void inv_simil_kernel1(gpu::PtrStepSz<float> S, gpu::PtrStepSz<float> Si) {
 	float d = S(0, 0)*S(1, 1) - S(0, 1)*S(1, 0);
     Si(0,0) = S(1,1)/d; 
 	Si(1,0) = -S(1,0)/d;
     Si(1,1) = S(0,0)/d; 
 	Si(0,1) = -S(0,1)/d;
+}
+
+// Used to do matrix multiplication.
+__global__ void inv_simil_kernel2(gpu::PtrStepSz<float> src1, gpu::PtrStepSz<float> src2, gpu::PtrStepSz<float> dest) {
+    Dest(0,0) = src1(0,0)*src2(0,0) + src1(0,1)*src2(1,0);
+    Dest(1,0) = src1(1,0)*src2(0,0) + src1(1,1)*src2(1,0);
 }
 
 __global__ void print_mat(gpu::PtrStepSz<float> Ri, int width, int height)
@@ -339,7 +345,7 @@ __global__ void print_mat(gpu::PtrStepSz<float> Ri, int width, int height)
 gpu::GpuMat patch_models::inv_simil(const gpu::GpuMat &S) {
     GpuMat Si(2,3,CV_32F);
     cerr << "Starting inv_simil_kernel" << endl;
-	inv_simil_kernel<<<1,1>>>(S, Si);
+	inv_simil_kernel1<<<1,1>>>(S, Si);
     cerr << "Exiting inv_simil_kernel" << endl;
     GpuMat Ri = Si(Rect(0,0,2,2));
     cerr << "Initially:" << endl;
@@ -349,15 +355,16 @@ gpu::GpuMat patch_models::inv_simil(const gpu::GpuMat &S) {
 	cout << "Starting first multiply" << endl;
     gpu::multiply(Ri, Scalar(-1.0), Ri);  // Originally Ri = -Ri*S.col(2);
     cerr << "After first multiply:" << endl;
-    print_mat<<<1,1>>>(Ri, Ri.size().width, Ri.size().height);
+    print_mat<<<2,1>>>(Ri, Ri.size().width, Ri.size().height);
 	cout << "Exiting first multiply and starting second multiply" << endl;
-    gpu::gemm(Ri, S.col(2), 1.0, gpu::GpuMat(), 0.0, Ri);
+    GpuMat T(2,1,CV_32F);
+    inv_simil_kernel2<<<1,1>>>(Ri, S.col(2), T);
     cerr << "After second multiply:" << endl;
-    print_mat<<<1,1>>>(Ri, Ri.size().width, Ri.size().height);
+    print_mat<<<1,1>>>(T, T.size().width, T.size().height);
 	cout << "Exiting second multiply" << endl;
     
 	GpuMat St = Si.col(2);
-	Ri.copyTo(St); 
+	T.copyTo(St);
 	return Si;
 }
 #endif /* WITH_CUDA */
