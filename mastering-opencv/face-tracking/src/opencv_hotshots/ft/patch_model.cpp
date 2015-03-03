@@ -339,7 +339,7 @@ __global__ void print_mat(gpu::PtrStepSz<float> Ri, int width, int height)
     for (int i = 0; i < width; i++) {
         for (int j = 0; j < height; j++)
         {
-            fprintf(stderr, "(%d, %d) = %f\n", i, j, Ri(j,i));
+            printf("(%d, %d) = %f\n", i, j, Ri(j,i));
         }
     }
 }
@@ -350,24 +350,24 @@ gpu::GpuMat patch_models::inv_simil(const gpu::GpuMat &S) {
 	inv_simil_kernel1<<<1,1>>>(S, Si);
     cerr << "Exiting inv_simil_kernel" << endl;
     GpuMat Ri = Si(Rect(0,0,2,2));
-    cerr << "Initially:" << endl;
-	cout << S.size().height << " " << S.size().width << endl;
-    print_mat<<<1,1>>>(Ri, Ri.size().width, Ri.size().height);
+    //cerr << "Initially:" << endl;
+	//cout << S.size().height << " " << S.size().width << endl;
+    //print_mat<<<1,1>>>(Ri, Ri.size().width, Ri.size().height);
     
-	cerr << "Starting first multiply" << endl;
+	//cerr << "Starting first multiply" << endl;
     gpu::multiply(Ri, Scalar(-1.0), Ri);  // Originally Ri = -Ri*S.col(2);
-    cerr << "After first multiply:" << endl;
-    print_mat<<<1,1>>>(Ri, Ri.size().width, Ri.size().height);
-	cerr << "Exiting first multiply and starting second multiply" << endl;
+    //cerr << "After first multiply:" << endl;
+    //print_mat<<<1,1>>>(Ri, Ri.size().width, Ri.size().height);
+	//cerr << "Exiting first multiply and starting second multiply" << endl;
     GpuMat T(2,1,CV_32F);
     inv_simil_kernel2<<<1,1>>>(Ri, S.col(2), T);
-    cerr << "After second multiply:" << endl;
-    print_mat<<<1,1>>>(T, T.size().width, T.size().height);
-	cerr << "Exiting second multiply" << endl;
+    //cerr << "After second multiply:" << endl;
+    //print_mat<<<1,1>>>(T, T.size().width, T.size().height);
+	//cerr << "Exiting second multiply" << endl;
     
 	GpuMat St = Si.col(2);
 	T.copyTo(St);
-    cerr << "About to return from inv_simil." << endl;
+    //cerr << "About to return from inv_simil." << endl;
 	return Si;
 }
 #endif /* WITH_CUDA */
