@@ -181,7 +181,7 @@ vector<Point2f> patch_models::calc_peaks(const Mat &im, const vector<Point2f> &p
     assert(n == int(patches.size()));
     Mat pt = Mat(points).reshape(1,2*n);
     Mat S = this->calc_simil(pt);
-    vector<Point2f> pts = this->apply_simil(this->inv_simil(S), points));
+    vector<Point2f> pts = this->apply_simil(this->inv_simil(S), points);
     for (int i = 0; i < n; i++) {
         Size wsize = ssize + patches[i].patch_size();
         Mat A(2, 3, CV_32F);
@@ -297,7 +297,6 @@ vector<Point2f> patch_models::apply_simil(const gpu::GpuMat &S, const vector<Poi
     
     cudaMemcpy(funcOutput, deviceFuncOutput, num_bytes, cudaMemcpyDeviceToHost);
     
-	for (int i = 0; i < n; i++) cerr << p[i] << " "; cerr << endl;
     return p;
 }
 
