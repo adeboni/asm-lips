@@ -145,8 +145,9 @@ vector<Point2f>face_tracker::fit(const Mat &image, const vector<Point2f> &init, 
 #ifndef WITH_CUDA
     vector<Point2f> peaks = pmodel.calc_peaks(image,pts,ssize);
 #else
-    gpu::GpuMat image_gpu(image);
-    vector<Point2f> peaks = pmodel.calc_peaks(image_gpu,pts,ssize);
+	vector<Point2f> peaks = pmodel.calc_peaks(image,pts,ssize);
+    //gpu::GpuMat image_gpu(image);
+    //vector<Point2f> peaks = pmodel.calc_peaks(image_gpu,pts,ssize);
 #endif
 
     //optimise
@@ -156,12 +157,15 @@ vector<Point2f>face_tracker::fit(const Mat &image, const vector<Point2f> &init, 
     }else{
         Mat weight(n,1,CV_32F),weight_sort(n,1,CV_32F);
         vector<Point2f> pts_old = pts;
-        for(int iter = 0; iter < itol; iter++){
+        for (int iter = 0; iter < itol; iter++) {
             //compute robust weight
-            for(int i = 0; i < n; i++)weight.fl(i) = norm(pts[i] - peaks[i]);
+            for (int i = 0; i < n; i++) weight.fl(i) = norm(pts[i] - peaks[i]);
             cv::sort(weight,weight_sort,CV_SORT_EVERY_COLUMN|CV_SORT_ASCENDING);
-            double var = 1.4826*weight_sort.fl(n/2); if(var < 0.1)var = 0.1;
-            pow(weight,2,weight); weight *= -0.5/(var*var); cv::exp(weight,weight);
+            double var = 1.4826*weight_sort.fl(n/2); 
+			if (var < 0.1) var = 0.1;
+            pow(weight,2,weight); 
+			weight *= -0.5/(var*var); 
+			cv::exp(weight,weight);
 
             //compute shape model parameters
             smodel.calc_params(peaks,weight);
