@@ -181,7 +181,7 @@ vector<Point2f> patch_models::calc_peaks(const Mat &im, const vector<Point2f> &p
     assert(n == int(patches.size()));
     Mat pt = Mat(points).reshape(1,2*n);
     Mat S = this->calc_simil(pt);
-    vector<Point2f> pts = Mat(this->apply_simil(GpuMat(this->inv_simil(S)), points));
+    vector<Point2f> pts = this->apply_simil(this->inv_simil(S), points));
     for (int i = 0; i < n; i++) {
         Size wsize = ssize + patches[i].patch_size();
         Mat A(2, 3, CV_32F);
@@ -194,7 +194,7 @@ vector<Point2f> patch_models::calc_peaks(const Mat &im, const vector<Point2f> &p
         Mat I; 
 		warpAffine(im, I, A, wsize, INTER_LINEAR+WARP_INVERSE_MAP);
         
-        Mat R = patches[i].calc_response(I);
+        Mat R = Mat(patches[i].calc_response(GpuMat(I)));
         
         Point maxLoc; 
 		minMaxLoc(R, 0, 0, 0, &maxLoc);

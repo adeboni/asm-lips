@@ -146,8 +146,7 @@ vector<Point2f>face_tracker::fit(const Mat &image, const vector<Point2f> &init, 
     vector<Point2f> peaks = pmodel.calc_peaks(image,pts,ssize);
 #else
 	vector<Point2f> peaks = pmodel.calc_peaks(image,pts,ssize);
-    //gpu::GpuMat image_gpu(image);
-    //vector<Point2f> peaks = pmodel.calc_peaks(image_gpu,pts,ssize);
+    //vector<Point2f> peaks = pmodel.calc_peaks(gpu::GpuMat(image),pts,ssize);
 #endif
 
     //optimise
