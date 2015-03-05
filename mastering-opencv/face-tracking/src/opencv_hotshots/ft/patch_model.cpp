@@ -181,7 +181,7 @@ vector<Point2f> patch_models::calc_peaks(const Mat &im, const vector<Point2f> &p
     assert(n == int(patches.size()));
     Mat pt = Mat(points).reshape(1,2*n);
     Mat S = Mat(this->calc_simil(GpuMat(pt)));
-    vector<Point2f> pts = this->apply_simil(this->inv_simil(S), points);
+    vector<Point2f> pts = Mat(this->apply_simil(GpuMat(this->inv_simil(S)), points));
     for (int i = 0; i < n; i++) {
         Size wsize = ssize + patches[i].patch_size();
         Mat A(2, 3, CV_32F);
@@ -250,30 +250,15 @@ vector<Point2f> patch_models::apply_simil(const Mat &S, const vector<Point2f> &p
 
 #ifdef WITH_CUDA
 
-__global__ void apply_simil_kernel(const gpu::PtrStepSz<float> S, float *points, int numPoints, float *output)
-{
-    /*for(int i = 0; i < numPoints; i++) {
-        float points_x = *(points + i*2);
-        float points_y = *(points + i*2 + 1);
-        
-        // Original CPU code for reference.
-//        p[i].x = S.fl(0,0)*points[i].x + S.fl(0,1)*points[i].y + S.fl(0,2);
-//        p[i].y = S.fl(1,0)*points[i].x + S.fl(1,1)*points[i].y + S.fl(1,2);
-        
-        *(output + i*2) = S(0,0) * points_x + S(1,0) * points_y + S(2,0);
-        *(output + i*2 + 1) = S(0,1) * points_x + S(1,1) * points_y + S(2,1);
-    }*/
-    
-    int i = blockIdx.x;
-    float points_x = *(points + i*2);
-    float points_y = *(points + i*2 + 1);
-    
+__global__ void apply_simil_kernel(const gpu::PtrStepSz<float> S, float *points, int numPoints, float *output) {
+
     /* Original CPU code for reference. */
     //        p[i].x = S.fl(0,0)*points[i].x + S.fl(0,1)*points[i].y + S.fl(0,2);
     //        p[i].y = S.fl(1,0)*points[i].x + S.fl(1,1)*points[i].y + S.fl(1,2);
     
-    *(output + i*2) = S(0,0) * points_x + S(1,0) * points_y + S(2,0);
-    *(output + i*2 + 1) = S(0,1) * points_x + S(1,1) * points_y + S(2,1);
+	int i = blockIdx.x;
+    output[i*2] = S(0,0) * points[i*2] + S(1,0) * points[i*2 + 1] + S(2,0);
+    output[i*2 + 1] = S(0,1) * points[i*2] + S(1,1) * points[i*2 + 1] + S(2,1);
 }
 
 vector<Point2f> patch_models::apply_simil(const gpu::GpuMat &S, const vector<Point2f> &points) {
@@ -285,7 +270,6 @@ vector<Point2f> patch_models::apply_simil(const gpu::GpuMat &S, const vector<Poi
     float *funcOutput = (float *) &(p[0].x);
     float *deviceFuncInput, *deviceFuncOutput;
     
-    //cudaMalloc((void**)&device_array, num_bytes);
     cudaMalloc((void**)&deviceFuncInput, num_bytes);
     cudaMalloc((void**)&deviceFuncOutput, num_bytes);
     
