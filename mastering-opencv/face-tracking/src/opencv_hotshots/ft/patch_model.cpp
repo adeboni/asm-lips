@@ -220,14 +220,14 @@ vector<Point2f> patch_models::calc_peaks(const GpuMat &im, const vector<Point2f>
     GpuMat S = this->calc_simil(pt);
     vector<Point2f> pts = this->apply_simil(this->inv_simil(S), points);
     for (int i = 0; i < n; i++) {
+		cerr << "In loop, i = " << i << endl;
         Size wsize = ssize + patches[i].patch_size();
         GpuMat A(2, 3, CV_32F);
         cerr << "Starting calc_peaks_kernel" << endl;
 		calc_peaks_kernel<<<1, 1>>>(A, S, pt, i, wsize.width, wsize.height);
         cerr << "Exiting calc_peaks_kernel" << endl;
         GpuMat I;
-        Mat Amat(A);
-		gpu::warpAffine(im, I, Amat, wsize, INTER_LINEAR+WARP_INVERSE_MAP);
+		gpu::warpAffine(im, I, Mat(A), wsize, INTER_LINEAR+WARP_INVERSE_MAP);
         GpuMat R = patches[i].calc_response(I);
         
         Point maxLoc; 
@@ -337,7 +337,7 @@ __global__ void print_mat(gpu::PtrStepSz<float> Ri, int width, int height)
     for (int i = 0; i < width; i++) {
         for (int j = 0; j < height; j++)
         {
-            fprintf(stderr, "(%d, %d) = %f\n", i, j, Ri(j,i));
+            printf("(%d, %d) = %f\n", i, j, Ri(j,i));
         }
     }
 }
@@ -348,15 +348,24 @@ gpu::GpuMat patch_models::inv_simil(const gpu::GpuMat &S) {
 	inv_simil_kernel1<<<1,1>>>(S, Si);
     cerr << "Exiting inv_simil_kernel" << endl;
     GpuMat Ri = Si(Rect(0,0,2,2));
-	cerr << "Starting first multiply" << endl;
+    //cerr << "Initially:" << endl;
+	//cout << S.size().height << " " << S.size().width << endl;
+    //print_mat<<<1,1>>>(Ri, Ri.size().width, Ri.size().height);
+    
+	//cerr << "Starting first multiply" << endl;
     gpu::multiply(Ri, Scalar(-1.0), Ri);  // Originally Ri = -Ri*S.col(2);
-	cerr << "Exiting first multiply and starting second multiply" << endl;
+    //cerr << "After first multiply:" << endl;
+    //print_mat<<<1,1>>>(Ri, Ri.size().width, Ri.size().height);
+	//cerr << "Exiting first multiply and starting second multiply" << endl;
     GpuMat T(2,1,CV_32F);
     inv_simil_kernel2<<<1,1>>>(Ri, S.col(2), T);
-	cerr << "Exiting second multiply" << endl;
+    //cerr << "After second multiply:" << endl;
+    //print_mat<<<1,1>>>(T, T.size().width, T.size().height);
+	//cerr << "Exiting second multiply" << endl;
     
 	GpuMat St = Si.col(2);
 	T.copyTo(St);
+    //cerr << "About to return from inv_simil." << endl;
 	return Si;
 }
 #endif /* WITH_CUDA */
@@ -446,9 +455,9 @@ gpu::GpuMat patch_models::calc_simil(const gpu::GpuMat &pts) {
     cudaMalloc((void**)&dev_mx, sizeof(float));
     cudaMalloc((void**)&dev_my, sizeof(float));
     
-    cerr << "Starting calc_simil_kernel1" << endl;
+    //cerr << "Starting calc_simil_kernel1" << endl;
 	calc_simil_kernel1<<<1, 1>>>(pts, dev_mx, dev_my, n);
-    cerr << "Exiting calc_simil_kernel1" << endl;
+    //cerr << "Exiting calc_simil_kernel1" << endl;
     
     cudaMemcpy(&mx, dev_mx, sizeof(float), cudaMemcpyDeviceToHost);
     cudaMemcpy(&my, dev_my, sizeof(float), cudaMemcpyDeviceToHost);
@@ -469,9 +478,9 @@ gpu::GpuMat patch_models::calc_simil(const gpu::GpuMat &pts) {
     cudaMalloc((void**)&dev_c, sizeof(float));
     
     cudaMemcpy(deviceFuncInput, funcInput, num_bytes, cudaMemcpyHostToDevice);
-    cerr << "Starting calc_simil_kernel2" << endl;
+    //cerr << "Starting calc_simil_kernel2" << endl;
     calc_simil_kernel2<<<1, 1>>>(pts, ref, deviceFuncInput, mx, my, dev_a, dev_b, dev_c, n);
-    cerr << "Exiting calc_simil_kernel2" << endl;
+    //cerr << "Exiting calc_simil_kernel2" << endl;
     
     cudaMemcpy(&a, dev_a, sizeof(float), cudaMemcpyDeviceToHost);
     cudaMemcpy(&b, dev_b, sizeof(float), cudaMemcpyDeviceToHost);
@@ -480,9 +489,9 @@ gpu::GpuMat patch_models::calc_simil(const gpu::GpuMat &pts) {
     float scale = sqrt(b*b+c*c), theta = atan2(c,b);
     float sc = scale*cos(theta), ss = scale*sin(theta);
 	GpuMat ret(2,3,CV_32F);
-    cerr << "Starting calc_simil_kernel3" << endl;
+    //cerr << "Starting calc_simil_kernel3" << endl;
 	calc_simil_kernel3<<<1, 1>>>(ret, sc, ss, mx, my);
-    cerr << "Exiting calc_simil_kernel3" << endl;
+    //cerr << "Exiting calc_simil_kernel3" << endl;
     
 	return ret;
 }
