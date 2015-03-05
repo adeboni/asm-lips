@@ -181,7 +181,7 @@ vector<Point2f> patch_models::calc_peaks(const Mat &im, const vector<Point2f> &p
     assert(n == int(patches.size()));
     Mat pt = Mat(points).reshape(1,2*n);
     Mat S = Mat(this->calc_simil(GpuMat(pt)));
-    vector<Point2f> pts = this->apply_simil(Mat(this->inv_simil(GpuMat(S))), points);
+    vector<Point2f> pts = Mat(this->apply_simil(GpuMat(this->inv_simil(S)), points));
     for (int i = 0; i < n; i++) {
         Size wsize = ssize + patches[i].patch_size();
         Mat A(2, 3, CV_32F);
