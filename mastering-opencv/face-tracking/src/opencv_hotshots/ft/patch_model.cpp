@@ -257,6 +257,7 @@ __global__ void apply_simil_kernel(const gpu::PtrStepSz<float> S, float *points,
     //        p[i].y = S.fl(1,0)*points[i].x + S.fl(1,1)*points[i].y + S.fl(1,2);
     
 	int i = blockIdx.x;
+	printf("%d\n", i);
     output[i*2] = S(0,0) * points[i*2] + S(1,0) * points[i*2 + 1] + S(2,0);
     output[i*2 + 1] = S(0,1) * points[i*2] + S(1,1) * points[i*2 + 1] + S(2,1);
 }
