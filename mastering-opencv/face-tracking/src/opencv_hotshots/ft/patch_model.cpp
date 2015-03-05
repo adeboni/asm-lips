@@ -434,12 +434,19 @@ __global__ void calc_simil_kernel2(gpu::PtrStepSz<float> pts, gpu::PtrStepSz<flo
 
 
 __global__ void calc_simil_kernel3(gpu::PtrStepSz<float> ret, float sc, float ss, float mx, float my) {
-	ret(0, 0) = sc;
-	ret(1, 0) = -ss;
-	ret(0, 1) = mx;
-	ret(1, 1) = ss;
-	ret(0, 2) = sc;
-	ret(1, 2) = my;
+//	ret(0, 0) = sc;
+//	ret(1, 0) = -ss;
+//	ret(0, 1) = mx;
+//	ret(1, 1) = ss;
+//	ret(0, 2) = sc;
+//	ret(1, 2) = my;
+    
+    ret(0, 0) = sc;
+    ret(0, 1) = -ss;
+    ret(0, 2) = mx;
+    ret(1, 0) = ss;
+    ret(1, 1) = sc;
+    ret(1, 2) = my;
 }
 
 
