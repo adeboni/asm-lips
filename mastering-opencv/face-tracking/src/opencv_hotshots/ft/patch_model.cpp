@@ -283,7 +283,7 @@ vector<Point2f> patch_models::apply_simil(const gpu::GpuMat &S, const vector<Poi
     
     cout << "--- Printing Points ---" << endl;
     for (int i = 0; i < points.size(); i++) {
-        cout << "Point " << i << ": ";
+        cout << "Point " << i << " by vector: ";
         printPoint(points[i]);
         cout << endl;
     }
