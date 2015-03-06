@@ -272,8 +272,8 @@ vector<Point2f> patch_models::apply_simil(const gpu::GpuMat &S, const vector<Poi
     int num_bytes = n*2*sizeof(float);
     vector<Point2f> p(n);
     
-    float *input = (float *) &(points[0].x);
-    float *output = (float *) &(p[0].x);
+    float *input = &(points[0].x);
+    float *output = &(p[0].x);
     float *dev_input, *dev_output;
     
     cudaMalloc((void**)&dev_input, num_bytes);
