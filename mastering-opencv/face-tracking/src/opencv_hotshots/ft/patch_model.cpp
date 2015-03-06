@@ -273,7 +273,7 @@ vector<Point2f> patch_models::apply_simil(const gpu::GpuMat &S, const vector<Poi
     vector<Point2f> p(n);
     
     const float *input = &(points[0].x);
-    float output[2*n];
+    float *output = &(p[0].x);
     float *dev_input, *dev_output;
     
     cudaMalloc((void**)&dev_input, num_bytes);
@@ -286,7 +286,6 @@ vector<Point2f> patch_models::apply_simil(const gpu::GpuMat &S, const vector<Poi
     cerr << "Exiting apply_simil_kernel" << endl;
     
     cudaMemcpy(output, dev_output, num_bytes, cudaMemcpyDeviceToHost);
-	memcpy(&(p[0].x), output, 2*n*sizeof(float));
     
     return p;
 }
