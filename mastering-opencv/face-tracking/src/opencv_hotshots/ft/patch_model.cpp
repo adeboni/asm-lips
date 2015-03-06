@@ -260,7 +260,7 @@ __global__ void apply_simil_kernel(const gpu::PtrStepSz<float> S, const float *p
     //        p[i].y = S.fl(1,0)*points[i].x + S.fl(1,1)*points[i].y + S.fl(1,2);
     
 	int i = threadIdx.x;
-    printf("Thread %d --> %d\n", i, (int)points);
+    printf("Thread %d -- Point Indices: (%d,%d) -- points addresses: (%d,%d)\n", i, 2*i, 2*i+1, (int)(points+(2*i)), (int)(points+(2*i+1)));
 	/*if (i < n) {
         printf(" --> Point: (%f, %f)\n", points[i*2], points[i*2 + 1]);
 		output[i*2] = S(0,0) * points[i*2] + S(1,0) * points[i*2 + 1] + S(2,0);
