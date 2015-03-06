@@ -182,9 +182,9 @@ vector<Point2f> patch_models::calc_peaks(const Mat &im, const vector<Point2f> &p
     assert(n == int(patches.size()));
     Mat pt = Mat(points).reshape(1,2*n);
     Mat S = this->calc_simil(pt);
-    //vector<Point2f> pts = Mat(this->apply_simil(GpuMat(this->inv_simil(S)), points));
+    vector<Point2f> pts = Mat(this->apply_simil(GpuMat(this->inv_simil(S)), points));
 	//vector<Point2f> pts = this->apply_simil(this->inv_simil(S), points);
-	vector<Point2f> pts = this->apply_simil(Mat(this->inv_simil(GpuMat(S))), points);
+	//vector<Point2f> pts = this->apply_simil(Mat(this->inv_simil(GpuMat(S))), points);
     for (int i = 0; i < n; i++) {
         Size wsize = ssize + patches[i].patch_size();
         Mat A(2, 3, CV_32F);
@@ -259,7 +259,7 @@ __global__ void apply_simil_kernel(const gpu::PtrStepSz<float> S, float *points,
     //        p[i].x = S.fl(0,0)*points[i].x + S.fl(0,1)*points[i].y + S.fl(0,2);
     //        p[i].y = S.fl(1,0)*points[i].x + S.fl(1,1)*points[i].y + S.fl(1,2);
     
-	int i = blockIdx.x;
+	int i = threadIdx.x;
 	if (i < n*2) {
 		output[i*2] = S(0,0) * points[i*2] + S(1,0) * points[i*2 + 1] + S(2,0);
 		output[i*2 + 1] = S(0,1) * points[i*2] + S(1,1) * points[i*2 + 1] + S(2,1);
@@ -281,7 +281,7 @@ vector<Point2f> patch_models::apply_simil(const gpu::GpuMat &S, const vector<Poi
     cudaMemcpy(dev_input, input, num_bytes, cudaMemcpyHostToDevice);
     
     cerr << "Starting apply_simil_kernel" << endl;
-    apply_simil_kernel<<<n, 1>>>(S, input, output, n);
+    apply_simil_kernel<<<1, n>>>(S, input, output, n);
     cerr << "Exiting apply_simil_kernel" << endl;
     
     cudaMemcpy(output, dev_output, num_bytes, cudaMemcpyDeviceToHost);
