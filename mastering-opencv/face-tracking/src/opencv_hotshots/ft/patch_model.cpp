@@ -264,8 +264,6 @@ __global__ void apply_simil_kernel(const gpu::PtrStepSz<float> S, float *points,
 		output[i*2] = S(0,0) * points[i*2] + S(1,0) * points[i*2 + 1] + S(2,0);
 		output[i*2 + 1] = S(0,1) * points[i*2] + S(1,1) * points[i*2 + 1] + S(2,1);
 	}
-	//output[i*2] = *(S.ptr<float>(0) + 0) * points[i*2] + *(S.ptr<float>(1) + 0) * points[i*2 + 1] + *(S.ptr<float>(2) + 0);
-    //output[i*2 + 1] = *(S.ptr<float>(0) + 1) * points[i*2] + *(S.ptr<float>(1) + 1) * points[i*2 + 1] + *(S.ptr<float>(2) + 1);
 }
 
 vector<Point2f> patch_models::apply_simil(const gpu::GpuMat &S, const vector<Point2f> &points) {
