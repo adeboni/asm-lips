@@ -309,17 +309,17 @@ Mat patch_models::inv_simil(const Mat &S) {
 
 #ifdef WITH_CUDA
 __global__ void inv_simil_kernel1(gpu::PtrStepSz<float> S, gpu::PtrStepSz<float> Si) {
-	float d = S(0, 0)*S(1, 1) - S(0, 1)*S(1, 0);
-   Si(0,0) = S(1,1)/d;
-	Si(1,0) = -S(1,0)/d;
-   Si(1,1) = S(0,0)/d;
-	Si(0,1) = -S(0,1)/d;
+//	float d = S(0, 0)*S(1, 1) - S(0, 1)*S(1, 0);
+//    Si(0,0) = S(1,1)/d;
+//	Si(1,0) = -S(1,0)/d;
+//    Si(1,1) = S(0,0)/d;
+//	Si(0,1) = -S(0,1)/d;
     
-    // float d = *(S.ptr<float>(0)+0) * *(S.ptr<float>(1)+1) - *(S.ptr<float>(0)+1) * *(S.ptr<float>(1)+0);
-    // *(Si.ptr<float>(0)+0) = *(S.ptr<float>(1)+1) / d;
-    // *(Si.ptr<float>(1)+0) = -*(S.ptr<float>(1)+0) / d;
-    // *(Si.ptr<float>(1)+1) = *(S.ptr<float>(0)+0) / d;
-    // *(Si.ptr<float>(0)+1) = -*(S.ptr<float>(0)+1) / d;
+    float d = *(S.ptr(0)+0) * *(S.ptr(1)+1) - *(S.ptr(0)+1) * *(S.ptr(1)+0);
+    *(Si.ptr(0)+0) = *(S.ptr(1)+1) / d;
+    *(Si.ptr(1)+0) = -*(S.ptr(1)+0) / d;
+    *(Si.ptr(1)+1) = *(S.ptr(0)+0) / d;
+    *(Si.ptr(0)+1) = -*(S.ptr(0)+1) / d;
     
 //    float d = S(0, 0)*S(1, 1) - S(1,0)*S(0,1);
 //    Si(0,0) = S(1,1)/d;
@@ -330,11 +330,11 @@ __global__ void inv_simil_kernel1(gpu::PtrStepSz<float> S, gpu::PtrStepSz<float>
 
 // Used to do matrix multiplication.
 __global__ void inv_simil_kernel2(gpu::PtrStepSz<float> src1, gpu::PtrStepSz<float> src2, gpu::PtrStepSz<float> dest) {
-   dest(0,0) = src1(0,0)*src2(0,0) + src1(0,1)*src2(1,0);
-   dest(1,0) = src1(1,0)*src2(0,0) + src1(1,1)*src2(1,0);
+//    dest(0,0) = src1(0,0)*src2(0,0) + src1(0,1)*src2(1,0);
+//    dest(1,0) = src1(1,0)*src2(0,0) + src1(1,1)*src2(1,0);
     
-    // *(dest.ptr<float>(0)+0) = *(src1.ptr<float>(0)+0) * *(src2.ptr<float>(0)+0) + *(src1.ptr<float>(0)+1) * *(src2.ptr<float>(1)+0);
-    // *(dest.ptr<float>(1)+0) = *(src1.ptr<float>(1)+0) * *(src2.ptr<float>(0)+0) + *(src1.ptr<float>(1)+1) * *(src2.ptr<float>(1)+0);
+    *(dest.ptr(0)+0) = *(src1.ptr(0)+0) * *(src2.ptr(0)+0) + *(src1.ptr(0)+1) * *(src2.ptr(1)+0);
+    *(dest.ptr(1)+0) = *(src1.ptr(1)+0) * *(src2.ptr(0)+0) + *(src1.ptr(1)+1) * *(src2.ptr(1)+0);
     
 //    dest(0,0) = src1(0,0)*src2(0,0) + src1(1,0)*src2(0,1);
 //    dest(0,1) = src1(0,1)*src2(0,0) + src1(1,1)*src2(0,1);
