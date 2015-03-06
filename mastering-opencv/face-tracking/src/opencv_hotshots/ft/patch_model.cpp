@@ -250,15 +250,19 @@ vector<Point2f> patch_models::apply_simil(const Mat &S, const vector<Point2f> &p
 
 #ifdef WITH_CUDA
 
-__global__ void apply_simil_kernel(const gpu::PtrStepSz<float> S, float *points, int numPoints, float *output) {
+__global__ void apply_simil_kernel(const gpu::PtrStepSz<float> S, float *points, float *output) {
 
     /* Original CPU code for reference. */
     //        p[i].x = S.fl(0,0)*points[i].x + S.fl(0,1)*points[i].y + S.fl(0,2);
     //        p[i].y = S.fl(1,0)*points[i].x + S.fl(1,1)*points[i].y + S.fl(1,2);
     
 	int i = blockIdx.x;
-    output[i*2] = S(0,0) * points[i*2] + S(1,0) * points[i*2 + 1] + S(2,0);
-    output[i*2 + 1] = S(0,1) * points[i*2] + S(1,1) * points[i*2 + 1] + S(2,1);
+	if (i < n*2) {
+		output[i*2] = S(0,0) * points[i*2] + S(1,0) * points[i*2 + 1] + S(2,0);
+		output[i*2 + 1] = S(0,1) * points[i*2] + S(1,1) * points[i*2 + 1] + S(2,1);
+	}
+	//output[i*2] = *(S<float>(0) + 0) * points[i*2] + *(S<float>(1) + 0) * points[i*2 + 1] + *(S<float>(2) + 0);
+    //output[i*2 + 1] = *(S<float>(0) + 1) * points[i*2] + *(S<float>(1) + 1) * points[i*2 + 1] + *(S<float>(2) + 1);
 }
 
 vector<Point2f> patch_models::apply_simil(const gpu::GpuMat &S, const vector<Point2f> &points) {
@@ -266,20 +270,20 @@ vector<Point2f> patch_models::apply_simil(const gpu::GpuMat &S, const vector<Poi
     int num_bytes = n*2*sizeof(float);
     vector<Point2f> p(n);
     
-    float *funcInput = (float *) &(points[0].x);
-    float *funcOutput = (float *) &(p[0].x);
-    float *deviceFuncInput, *deviceFuncOutput;
+    float *input = (float *) &(points[0].x);
+    float *output = (float *) &(p[0].x);
+    float *dev_input, *dev_output;
     
-    cudaMalloc((void**)&deviceFuncInput, num_bytes);
-    cudaMalloc((void**)&deviceFuncOutput, num_bytes);
+    cudaMalloc((void**)&dev_input, num_bytes);
+    cudaMalloc((void**)&dev_output, num_bytes);
     
-    cudaMemcpy(deviceFuncInput, funcInput, num_bytes, cudaMemcpyHostToDevice);
+    cudaMemcpy(dev_input, input, num_bytes, cudaMemcpyHostToDevice);
     
     cerr << "Starting apply_simil_kernel" << endl;
-    apply_simil_kernel<<<n, 1>>>(S, funcInput, n, funcOutput);
+    apply_simil_kernel<<<n, 1>>>(S, input, output, n);
     cerr << "Exiting apply_simil_kernel" << endl;
     
-    cudaMemcpy(funcOutput, deviceFuncOutput, num_bytes, cudaMemcpyDeviceToHost);
+    cudaMemcpy(output, dev_output, num_bytes, cudaMemcpyDeviceToHost);
     
     return p;
 }
