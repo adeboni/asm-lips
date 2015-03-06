@@ -332,6 +332,7 @@ __global__ void print_mat(gpu::PtrStepSz<float> Ri, int width, int height)
             printf("(%d, %d) = %f\n", i, j, Ri(j,i));
         }
     }
+    printf("\n");
 }
 
 gpu::GpuMat patch_models::inv_simil(const gpu::GpuMat &S) {
@@ -349,8 +350,10 @@ gpu::GpuMat patch_models::inv_simil(const gpu::GpuMat &S) {
 	//cerr << "Starting first multiply" << endl;
     gpu::multiply(Ri, Scalar(-1.0), Ri);  // Originally Ri = -Ri*S.col(2);
     //cerr << "After first multiply:" << endl;
-    if (shouldPrint)
+    if (shouldPrint){
         print_mat<<<1,1>>>(Ri, Ri.size().width, Ri.size().height);
+        print_mat<<<1,1>>>(S.col(2), S.col(2).size().width, S.col(2).size().height);
+    }
 	//cerr << "Exiting first multiply and starting second multiply" << endl;
     GpuMat T(2,1,CV_32F);
     inv_simil_kernel2<<<1,1>>>(Ri, S.col(2), T);
