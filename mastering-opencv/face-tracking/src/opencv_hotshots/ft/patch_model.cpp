@@ -294,6 +294,11 @@ vector<Point2f> patch_models::apply_simil(const gpu::GpuMat &S, const vector<Poi
     
     cudaMemcpy(dev_input, input, num_bytes, cudaMemcpyHostToDevice);
     
+	
+	for (int i = 0; i < n*2; i++) 
+		cout << (&(points[0].x))[i] << " ";
+	cout << endl;
+	
     cerr << "Starting apply_simil_kernel" << endl;
     apply_simil_kernel<<<1, n>>>(S, input, output, n);
     cerr << "Exiting apply_simil_kernel" << endl;
