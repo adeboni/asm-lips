@@ -281,7 +281,7 @@ vector<Point2f> patch_models::apply_simil(const gpu::GpuMat &S, const vector<Poi
     
     cudaMemcpy(dev_input, input, num_bytes, cudaMemcpyHostToDevice);
     
-	
+	cout << n*2 << " vs " << points.size() * 2 << endl; 
 	for (int i = 0; i < n*2; i++) 
 		cout << (&(points[0].x))[i] << " ";
 	cout << endl;
