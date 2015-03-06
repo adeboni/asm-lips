@@ -253,7 +253,7 @@ vector<Point2f> patch_models::apply_simil(const Mat &S, const vector<Point2f> &p
 
 #ifdef WITH_CUDA
 
-__global__ void apply_simil_kernel(const gpu::PtrStepSz<float> S, const float *points, float *output, int n) {
+__global__ void apply_simil_kernel(const gpu::PtrStepSz<float> S,  float *points, float *output, int n) {
 
     /* Original CPU code for reference. */
     //        p[i].x = S.fl(0,0)*points[i].x + S.fl(0,1)*points[i].y + S.fl(0,2);
@@ -279,6 +279,11 @@ vector<Point2f> patch_models::apply_simil(const gpu::GpuMat &S, const vector<Poi
     vector<Point2f> p(n);
     
     const float *input = &(points[0].x);
+	
+	float input2[n*2];
+	for (int i = 0; i < n*2; i++)
+		input2[i] = (&(points[0].x))[i];
+	
     float *output = &(p[0].x);
     float *dev_input, *dev_output;
     
@@ -293,10 +298,10 @@ vector<Point2f> patch_models::apply_simil(const gpu::GpuMat &S, const vector<Poi
     cudaMalloc((void**)&dev_input, num_bytes);
     cudaMalloc((void**)&dev_output, num_bytes);
     
-    cudaMemcpy(dev_input, input, num_bytes, cudaMemcpyHostToDevice);
+    cudaMemcpy(dev_input, input2, num_bytes, cudaMemcpyHostToDevice);
 	
     cerr << "Starting apply_simil_kernel" << endl;
-    apply_simil_kernel<<<1, n>>>(S, input, output, n);
+    apply_simil_kernel<<<1, n>>>(S, input2, output, n);
     cerr << "Exiting apply_simil_kernel" << endl;
     
     cudaMemcpy(output, dev_output, num_bytes, cudaMemcpyDeviceToHost);
