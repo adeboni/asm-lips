@@ -268,6 +268,7 @@ __global__ void apply_simil_kernel(const gpu::PtrStepSz<float> S, float *points,
 
 vector<Point2f> patch_models::apply_simil(const gpu::GpuMat &S, const vector<Point2f> &points) {
     int n = points.size();
+	cerr << n << " points" << endl;
     int num_bytes = n*2*sizeof(float);
     vector<Point2f> p(n);
     
