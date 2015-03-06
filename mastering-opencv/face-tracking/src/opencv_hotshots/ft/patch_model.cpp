@@ -261,7 +261,7 @@ __global__ void apply_simil_kernel(const gpu::PtrStepSz<float> S, const float *p
     
 	int i = threadIdx.x;
 	printf("%d\n", i);
-	if (i < n*2) {
+	if (i < n) {
 		output[i*2] = S(0,0) * points[i*2] + S(1,0) * points[i*2 + 1] + S(2,0);
 		output[i*2 + 1] = S(0,1) * points[i*2] + S(1,1) * points[i*2 + 1] + S(2,1);
 	}
