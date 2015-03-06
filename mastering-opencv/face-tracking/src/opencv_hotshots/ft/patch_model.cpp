@@ -260,7 +260,7 @@ __global__ void apply_simil_kernel(const gpu::PtrStepSz<float> S, const float *p
     //        p[i].y = S.fl(1,0)*points[i].x + S.fl(1,1)*points[i].y + S.fl(1,2);
     
 	int i = threadIdx.x;
-	printf("%d\n", i);
+	printf("Thread %d --> Point: (%d, %d)\n", i, points[i*2], points[i*2 + 1]);
 	if (i < n) {
 		output[i*2] = S(0,0) * points[i*2] + S(1,0) * points[i*2 + 1] + S(2,0);
 		output[i*2 + 1] = S(0,1) * points[i*2] + S(1,1) * points[i*2 + 1] + S(2,1);
@@ -293,17 +293,15 @@ vector<Point2f> patch_models::apply_simil(const gpu::GpuMat &S, const vector<Poi
     cudaMalloc((void**)&dev_output, num_bytes);
     
     cudaMemcpy(dev_input, input, num_bytes, cudaMemcpyHostToDevice);
-    
-	cout << n*2 << " vs " << points.size() * 2 << endl; 
-	for (int i = 0; i < n*2; i++) 
-		cout << (&(points[0].x))[i] << " ";
-	cout << endl;
 	
     cerr << "Starting apply_simil_kernel" << endl;
     apply_simil_kernel<<<1, n>>>(S, input, output, n);
     cerr << "Exiting apply_simil_kernel" << endl;
     
     cudaMemcpy(output, dev_output, num_bytes, cudaMemcpyDeviceToHost);
+    
+    cudaFree(dev_input);
+    cudaFree(dev_output);
     
     return p;
 }
