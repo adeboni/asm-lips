@@ -260,6 +260,7 @@ __global__ void apply_simil_kernel(const gpu::PtrStepSz<float> S, float *points,
     //        p[i].y = S.fl(1,0)*points[i].x + S.fl(1,1)*points[i].y + S.fl(1,2);
     
 	int i = threadIdx.x;
+	printf("%d\n", i);
 	if (i < n*2) {
 		output[i*2] = S(0,0) * points[i*2] + S(1,0) * points[i*2 + 1] + S(2,0);
 		output[i*2 + 1] = S(0,1) * points[i*2] + S(1,1) * points[i*2 + 1] + S(2,1);
@@ -268,7 +269,6 @@ __global__ void apply_simil_kernel(const gpu::PtrStepSz<float> S, float *points,
 
 vector<Point2f> patch_models::apply_simil(const gpu::GpuMat &S, const vector<Point2f> &points) {
     int n = points.size();
-	cerr << n << " points" << endl;
     int num_bytes = n*2*sizeof(float);
     vector<Point2f> p(n);
     
