@@ -267,7 +267,7 @@ __global__ void apply_simil_kernel(const gpu::PtrStepSz<float> S, const float *p
 	}
 }
 
-void printPoint(const &Point2f pnt)
+void printPoint(const Point2f &pnt)
 {
     cerr << "(" << pnt.x << ", " << pnt.y << ")";
 }
