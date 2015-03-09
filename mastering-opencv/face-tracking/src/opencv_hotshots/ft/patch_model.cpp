@@ -284,7 +284,8 @@ void printPoint(const Point2f &pnt)
     cout << "(" << pnt.x << ", " << pnt.y << ")";
 }
 
-vector<Point2f> patch_models::apply_simil(const gpu::GpuMat &S, vector<Point2f> &points) {
+vector<Point2f> patch_models::apply_simil(const gpu::GpuMat &S, const vector<Point2f> &pts) {
+	vector<Point2f> points = pts;
     int n = points.size();
     int num_bytes = n*2*sizeof(float);
 	cout << "num_bytes: " << num_bytes << endl;
