@@ -7,6 +7,17 @@
 
 #ifdef WITH_CUDA
 #include "cuda_runtime.h"
+
+#define gpuErrchk(ans) { gpuAssert((ans), __FILE__, __LINE__); }
+inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=true)
+{
+   if (code != cudaSuccess) 
+   {
+      fprintf(stderr,"GPUassert: %s %s %d\n", cudaGetErrorString(code), file, line);
+      if (abort) exit(code);
+   }
+}
+
 #endif
 
 #define fl at<float>
@@ -296,21 +307,19 @@ vector<Point2f> patch_models::apply_simil(const gpu::GpuMat &S, const vector<Poi
     }
     cout << "--- Done Printing Points ---" << endl;
     
-    cudaMalloc((void**)&dev_input, num_bytes);
-    cudaMalloc((void**)&dev_output, num_bytes);
+    gpuErrchk(cudaMalloc((void**)&dev_input, num_bytes));
+    gpuErrchk(cudaMalloc((void**)&dev_output, num_bytes));
     
-    cudaMemcpy(dev_input, input, num_bytes, cudaMemcpyHostToDevice);
+    gpuErrchk(cudaMemcpy(dev_input, input, num_bytes, cudaMemcpyHostToDevice));
 	
     cerr << "Starting apply_simil_kernel" << endl;
     apply_simil_kernel<<<1, n>>>(S, input, output, n);
+	gpuErrchk(cudaPeekAtLastError());
+    gpuErrchk(cudaMemcpy(output, dev_output, num_bytes, cudaMemcpyDeviceToHost));
     cerr << "Exiting apply_simil_kernel" << endl;
-	
-	cudaDeviceSynchronize();
     
-    cudaMemcpy(output, dev_output, num_bytes, cudaMemcpyDeviceToHost);
-    
-    cudaFree(dev_input);
-    cudaFree(dev_output);
+    gpuErrchk(cudaFree(dev_input));
+    gpuErrchk(cudaFree(dev_output));
     
     return p;
 }
