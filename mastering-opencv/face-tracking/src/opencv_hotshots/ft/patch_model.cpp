@@ -278,6 +278,7 @@ void printPoint(const Point2f &pnt)
 vector<Point2f> patch_models::apply_simil(const gpu::GpuMat &S, const vector<Point2f> &points) {
     int n = points.size();
     int num_bytes = n*2*sizeof(float);
+	cout << "num_bytes: " << num_bytes << endl;
     vector<Point2f> p(n);
     
     //const float *input = &(points[0].x);
@@ -303,6 +304,8 @@ vector<Point2f> patch_models::apply_simil(const gpu::GpuMat &S, const vector<Poi
     cerr << "Starting apply_simil_kernel" << endl;
     apply_simil_kernel<<<1, n>>>(S, input, output, n);
     cerr << "Exiting apply_simil_kernel" << endl;
+	
+	cudaDeviceSynchronize();
     
     cudaMemcpy(output, dev_output, num_bytes, cudaMemcpyDeviceToHost);
     
