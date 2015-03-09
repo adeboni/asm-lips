@@ -262,7 +262,7 @@ vector<Point2f> patch_models::apply_simil(const Mat &S, const vector<Point2f> &p
 
 #ifdef WITH_CUDA
 
-__global__ void apply_simil_kernel(float2 *points, float2 *output, const gpu::PtrStepSz<float> S, int n) {
+__global__ void apply_simil_kernel(float *points, float *output, const gpu::PtrStepSz<float> S, int n) {
 
     /* Original CPU code for reference. */
     //        p[i].x = S.fl(0,0)*points[i].x + S.fl(0,1)*points[i].y + S.fl(0,2);
@@ -271,7 +271,7 @@ __global__ void apply_simil_kernel(float2 *points, float2 *output, const gpu::Pt
 	int i = threadIdx.x;
     printf("Thread %d -- Point Indices: (%d,%d) -- points addresses: (%p,%p)\n", i, 2*i, 2*i+1, (void*)(points+(2*i)), (void*)(points+(2*i+1)));
 	if (i == 0) {
-        printf(" --> Point %d: (%f, %f)\n", i, points[i].x, points[i].y);
+        printf(" --> Point %d: (%f, %f)\n", i, points[i*2], points[i*2 + 1]);
 		printf("S(0,0): %f,  S(1,0): %f,  S(2,0): %f\n", S(0,0), S(1,0), S(2,0));
 		printf("S(0,1): %f,  S(1,1): %f,  S(2,1): %f\n", S(0,1), S(1,1), S(2,1));
 		//output[i*2] = S(0,0) * points[i*2] + S(1,0) * points[i*2 + 1] + S(2,0);
@@ -281,33 +281,31 @@ __global__ void apply_simil_kernel(float2 *points, float2 *output, const gpu::Pt
 
 void printPoint(const Point2f &pnt)
 {
-    cerr << "(" << pnt.x << ", " << pnt.y << ")";
+    cout << "(" << pnt.x << ", " << pnt.y << ")";
 }
 
 vector<Point2f> patch_models::apply_simil(const gpu::GpuMat &S, const vector<Point2f> &points) {
     int n = points.size();
-    int num_bytes = n*sizeof(float2);
+    int num_bytes = n*2*sizeof(float);
 	cout << "num_bytes: " << num_bytes << endl;
     vector<Point2f> p(n);
     
     //const float *input = &(points[0].x);
-	float2 input[n];
-	for (int i = 0; i < n; i++) {
-		input[i].x = points[i].x;
-		input[i].y = points[i].y;
-	}
-    float2 output[n];
-    float2 *dev_input, *dev_output;
+	float input[n*2];
+	for (int i = 0; i < n*2; i++)
+		input[i] = (&(points[0].x))[i];
+    float *output = &(p[0].x);
+    float *dev_input, *dev_output;
     
     cout << "--- Printing Points ---" << endl;
     for (int i = 0; i < points.size(); i++) {
         cout << "Point " << i << " by vector: ";
         printPoint(points[i]);
-		cout << " (" << input[i].x << ", " << input[i].y << ")" << endl;
+		cout << " | by array: (" << input[i*2] << ", " << input[i*2+1] << ")" << endl;
     }
     cout << "--- Done Printing Points ---" << endl;
     
-    gpuErrchk(cudaMalloc((void**)&dev_input, num_bytes));
+    gpuErrchk(cudaMallocHost((void**)&dev_input, num_bytes));
     gpuErrchk(cudaMalloc((void**)&dev_output, num_bytes));
     
     gpuErrchk(cudaMemcpy(dev_input, input, num_bytes, cudaMemcpyHostToDevice));
@@ -318,13 +316,8 @@ vector<Point2f> patch_models::apply_simil(const gpu::GpuMat &S, const vector<Poi
     gpuErrchk(cudaMemcpy(output, dev_output, num_bytes, cudaMemcpyDeviceToHost));
     cerr << "Exiting apply_simil_kernel" << endl;
     
-    gpuErrchk(cudaFree(dev_input));
+    gpuErrchk(cudaFreeHost(dev_input));
     gpuErrchk(cudaFree(dev_output));
-	
-	for (int i = 0; i < n; i++) {
-		p[i].x = output[i].x;
-		p[i].y = output[i].y;
-	}
     
     return p;
 }
