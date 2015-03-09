@@ -262,7 +262,7 @@ vector<Point2f> patch_models::apply_simil(const Mat &S, const vector<Point2f> &p
 
 #ifdef WITH_CUDA
 
-__global__ void apply_simil_kernel(const gpu::PtrStepSz<float> S, int n, float *points, float *output) {
+__global__ void apply_simil_kernel(const gpu::PtrStepSz<float> S, int n, const float *points, float *output) {
 
     /* Original CPU code for reference. */
     //        p[i].x = S.fl(0,0)*points[i].x + S.fl(0,1)*points[i].y + S.fl(0,2);
