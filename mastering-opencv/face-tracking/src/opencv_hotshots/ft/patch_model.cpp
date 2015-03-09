@@ -296,14 +296,14 @@ vector<Point2f> patch_models::apply_simil(const gpu::GpuMat &S, const vector<Poi
 		input[i].x = points[i].x;
 		input[i].y = points[i].y;
 	}
-    float2 *output = &(p[0].x);
+    float2 output[n];
     float2 *dev_input, *dev_output;
     
     cout << "--- Printing Points ---" << endl;
     for (int i = 0; i < points.size(); i++) {
         cout << "Point " << i << " by vector: ";
         printPoint(points[i]);
-		cout << " (" << input[i*2] << ", " << input[i*2+1] << ")" << endl;
+		cout << " (" << input[i].x << ", " << input[i].y << ")" << endl;
     }
     cout << "--- Done Printing Points ---" << endl;
     
@@ -320,6 +320,11 @@ vector<Point2f> patch_models::apply_simil(const gpu::GpuMat &S, const vector<Poi
     
     gpuErrchk(cudaFree(dev_input));
     gpuErrchk(cudaFree(dev_output));
+	
+	for (int i = 0; i < n; i++) {
+		p[i].x = output[i].x;
+		p[i].y = output[i].y;
+	}
     
     return p;
 }
