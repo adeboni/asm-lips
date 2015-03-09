@@ -253,7 +253,7 @@ vector<Point2f> patch_models::apply_simil(const Mat &S, const vector<Point2f> &p
 
 #ifdef WITH_CUDA
 
-__global__ void apply_simil_kernel(const gpu::PtrStepSz<float> S,  const float *points, float *output, int n) {
+__global__ void apply_simil_kernel(const gpu::PtrStepSz<float> S, float *points, float *output, int n) {
 
     /* Original CPU code for reference. */
     //        p[i].x = S.fl(0,0)*points[i].x + S.fl(0,1)*points[i].y + S.fl(0,2);
@@ -280,7 +280,10 @@ vector<Point2f> patch_models::apply_simil(const gpu::GpuMat &S, const vector<Poi
     int num_bytes = n*2*sizeof(float);
     vector<Point2f> p(n);
     
-    const float *input = &(points[0].x);
+    //const float *input = &(points[0].x);
+	float input[n*2];
+	for (int i = 0; i < n*2; i++)
+		input[i] = (&(points[0].x))[i];
     float *output = &(p[0].x);
     float *dev_input, *dev_output;
     
@@ -288,7 +291,7 @@ vector<Point2f> patch_models::apply_simil(const gpu::GpuMat &S, const vector<Poi
     for (int i = 0; i < points.size(); i++) {
         cout << "Point " << i << " by vector: ";
         printPoint(points[i]);
-        cout << endl;
+		cout << " (" << input[i*2] << ", " << input[i*2+1] << ")" << endl;
     }
     cout << "--- Done Printing Points ---" << endl;
     
