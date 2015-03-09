@@ -293,8 +293,8 @@ vector<Point2f> patch_models::apply_simil(const gpu::GpuMat &S, const vector<Poi
     //const float *input = &(points[0].x);
 	float input[n*2];
 	for (int i = 0; i < n*2; i++)
-		input[i] = (&(points[0].x))[i];
-    float *output = &(p[0].x);
+		input[i] = (&(points[0]))[i];
+    float *output = &(p[0]);
     float *dev_input, *dev_output;
     
     cout << "--- Printing Points ---" << endl;
