@@ -9,13 +9,11 @@
 #include "cuda_runtime.h"
 
 #define gpuErrchk(ans) { gpuAssert((ans), __FILE__, __LINE__); }
-inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=true)
-{
-   if (code != cudaSuccess) 
-   {
-      fprintf(stderr,"GPUassert: %s %s %d\n", cudaGetErrorString(code), file, line);
-      if (abort) exit(code);
-   }
+inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=true) {
+	if (code != cudaSuccess) {
+		fprintf(stderr,"GPUassert: %s %s %d\n", cudaGetErrorString(code), file, line);
+		if (abort) exit(code);
+	}
 }
 
 #endif
@@ -264,7 +262,7 @@ vector<Point2f> patch_models::apply_simil(const Mat &S, const vector<Point2f> &p
 
 #ifdef WITH_CUDA
 
-__global__ void apply_simil_kernel(float *points, float *output, const gpu::PtrStepSz<float> S, int n) {
+__global__ void apply_simil_kernel(float2 *points, float2 *output, const gpu::PtrStepSz<float> S, int n) {
 
     /* Original CPU code for reference. */
     //        p[i].x = S.fl(0,0)*points[i].x + S.fl(0,1)*points[i].y + S.fl(0,2);
@@ -273,7 +271,7 @@ __global__ void apply_simil_kernel(float *points, float *output, const gpu::PtrS
 	int i = threadIdx.x;
     printf("Thread %d -- Point Indices: (%d,%d) -- points addresses: (%p,%p)\n", i, 2*i, 2*i+1, (void*)(points+(2*i)), (void*)(points+(2*i+1)));
 	if (i == 0) {
-        printf(" --> Point %d: (%f, %f)\n", i, points[i*2], points[i*2 + 1]);
+        printf(" --> Point %d: (%f, %f)\n", i, points[i].x, points[i].y);
 		printf("S(0,0): %f,  S(1,0): %f,  S(2,0): %f\n", S(0,0), S(1,0), S(2,0));
 		printf("S(0,1): %f,  S(1,1): %f,  S(2,1): %f\n", S(0,1), S(1,1), S(2,1));
 		//output[i*2] = S(0,0) * points[i*2] + S(1,0) * points[i*2 + 1] + S(2,0);
@@ -288,14 +286,16 @@ void printPoint(const Point2f &pnt)
 
 vector<Point2f> patch_models::apply_simil(const gpu::GpuMat &S, const vector<Point2f> &points) {
     int n = points.size();
-    int num_bytes = n*2*sizeof(float);
+    int num_bytes = n*sizeof(float2);
 	cout << "num_bytes: " << num_bytes << endl;
     vector<Point2f> p(n);
     
     //const float *input = &(points[0].x);
-	float input[n*2];
-	for (int i = 0; i < n*2; i++)
-		input[i] = (&(points[0].x))[i];
+	float2 input[n];
+	for (int i = 0; i < n; i++) {
+		input[i].x = points[i].x;
+		input[i].y = points[i].y;
+	}
     float *output = &(p[0].x);
     float *dev_input, *dev_output;
     
