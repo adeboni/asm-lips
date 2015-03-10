@@ -327,7 +327,7 @@ vector<Point2f> patch_models::apply_simil(const gpu::GpuMat &S, const vector<Poi
     return p;
 }
 
-/*vector<Point2f> patch_models::apply_simil2(const gpu::GpuMat &S, const vector<Point2f> &points) {
+vector<Point2f> patch_models::apply_simil2(const gpu::GpuMat &S, const vector<Point2f> &points) {
     Mat matS(S);
     int n = points.size();
     vector<Point2f> p(n);
@@ -336,7 +336,7 @@ vector<Point2f> patch_models::apply_simil(const gpu::GpuMat &S, const vector<Poi
         p[i].y = matS.fl(1,0)*points[i].x + matS.fl(1,1)*points[i].y + matS.fl(1,2);
     }
     return p;
-}*/
+}
 
 #endif /* WITH_CUDA */
 
