@@ -271,11 +271,13 @@ __global__ void apply_simil_kernel(const gpu::PtrStepSz<float> S, int n, float *
 	int i = threadIdx.x;
     printf("Thread %d -- Point Indices: (%d,%d) -- points addresses: (%p,%p)\n", i, 2*i, 2*i+1, (void*)(points+(2*i)), (void*)(points+(2*i+1)));
 	if (i == 0) {
-        printf(" --> Point %d: (%f, %f)\n", i, points[i*2], points[i*2 + 1]);
-		printf("S(0,0): %f,  S(1,0): %f,  S(2,0): %f\n", S(0,0), S(1,0), S(2,0));
-		printf("S(0,1): %f,  S(1,1): %f,  S(2,1): %f\n", S(0,1), S(1,1), S(2,1));
-		output[i*2] = S(0,0) * points[i*2] + S(1,0) * points[i*2 + 1] + S(2,0);
-		output[i*2 + 1] = S(0,1) * points[i*2] + S(1,1) * points[i*2 + 1] + S(2,1);
+//        printf(" --> Point %d: (%f, %f)\n", i, points[i*2], points[i*2 + 1]);
+//		printf("S(0,0): %f,  S(1,0): %f,  S(2,0): %f\n", S(0,0), S(1,0), S(2,0));
+//		printf("S(0,1): %f,  S(1,1): %f,  S(2,1): %f\n", S(0,1), S(1,1), S(2,1));
+//		output[i*2] = S(0,0) * points[i*2] + S(1,0) * points[i*2 + 1] + S(2,0);
+//		output[i*2 + 1] = S(0,1) * points[i*2] + S(1,1) * points[i*2 + 1] + S(2,1);
+        output[i*2] = S(0,0) * points[i*2] + S(0,1) * points[i*2 + 1] + S(0,2);
+        output[i*2 + 1] = S(1,0) * points[i*2] + S(1,1) * points[i*2 + 1] + S(1,2);
 	}
 }
 
