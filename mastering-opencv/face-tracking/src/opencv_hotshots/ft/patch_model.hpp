@@ -105,7 +105,7 @@ protected:
     
     vector<Point2f>                                 //GPU Version.
     apply_simil(const GpuMat &S,
-                const vector<Point2f> &points);
+                const vector<Point2f> &pts);
 };
 //==============================================================================
 
