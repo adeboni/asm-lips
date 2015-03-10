@@ -316,7 +316,7 @@ vector<Point2f> patch_models::apply_simil(const gpu::GpuMat &S, const vector<Poi
     cout << "Output address post-copy: " << (void *)dev_output << endl;
 	
     cerr << "Starting apply_simil_kernel" << endl;
-    apply_simil_kernel<<<1, n>>>(S, n, input, output);
+    apply_simil_kernel<<<1, n>>>(S, n, dev_input, dev_output);
 	gpuErrchk(cudaPeekAtLastError());
     gpuErrchk(cudaMemcpy(output, dev_output, num_bytes, cudaMemcpyDeviceToHost));
     cerr << "Exiting apply_simil_kernel" << endl;
