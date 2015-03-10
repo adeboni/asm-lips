@@ -384,11 +384,11 @@ __global__ void print_mat(gpu::PtrStepSz<float> Ri, int width, int height)
 gpu::GpuMat patch_models::inv_simil(const gpu::GpuMat &S) {
     Mat matS(S);
     Mat matSi(2,3,CV_32F);
-    float d = S.fl(0,0)*S.fl(1,1) - S.fl(1,0)*S.fl(0,1);
-    Si.fl(0,0) = S.fl(1,1)/d;
-    Si.fl(0,1) = -S.fl(0,1)/d;
-    Si.fl(1,1) = S.fl(0,0)/d;
-    Si.fl(1,0) = -S.fl(1,0)/d;
+    float d = matS.fl(0,0)*matS.fl(1,1) - matS.fl(1,0)*matS.fl(0,1);
+    matSi.fl(0,0) = matS.fl(1,1)/d;
+    matSi.fl(0,1) = -matS.fl(0,1)/d;
+    matSi.fl(1,1) = matS.fl(0,0)/d;
+    matSi.fl(1,0) = -matS.fl(1,0)/d;
     print_mat<<<1,1>>>(GpuMat(matSi), matSi.size().width, matSi.size().height);
     
     GpuMat Si(2,3,CV_32F);
