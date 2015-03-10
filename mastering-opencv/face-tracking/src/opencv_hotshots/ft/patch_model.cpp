@@ -307,10 +307,13 @@ vector<Point2f> patch_models::apply_simil(const gpu::GpuMat &S, const vector<Poi
     gpuErrchk(cudaMalloc((void**)&dev_input, num_bytes));
     gpuErrchk(cudaMalloc((void**)&dev_output, num_bytes));
     
-    cout << "Input address: " << (void *)dev_input << endl;
-    cout << "Output address: " << (void *)dev_output << endl;
+    cout << "Input address pre-copy: " << (void *)dev_input << endl;
+    cout << "Output address pre-copy: " << (void *)dev_output << endl;
     
     gpuErrchk(cudaMemcpy(dev_input, input, num_bytes, cudaMemcpyHostToDevice));
+    
+    cout << "Input address post-copy: " << (void *)dev_input << endl;
+    cout << "Output address post-copy: " << (void *)dev_output << endl;
 	
     cerr << "Starting apply_simil_kernel" << endl;
     apply_simil_kernel<<<1, n>>>(S, n, input, output);
@@ -323,6 +326,17 @@ vector<Point2f> patch_models::apply_simil(const gpu::GpuMat &S, const vector<Poi
     
     return p;
 }
+
+/*vector<Point2f> patch_models::apply_simil2(const gpu::GpuMat &S, const vector<Point2f> &points) {
+    Mat matS(S);
+    int n = points.size();
+    vector<Point2f> p(n);
+    for(int i = 0; i < n; i++) {
+        p[i].x = matS.fl(0,0)*points[i].x + matS.fl(0,1)*points[i].y + matS.fl(0,2);
+        p[i].y = matS.fl(1,0)*points[i].x + matS.fl(1,1)*points[i].y + matS.fl(1,2);
+    }
+    return p;
+}*/
 
 #endif /* WITH_CUDA */
 
