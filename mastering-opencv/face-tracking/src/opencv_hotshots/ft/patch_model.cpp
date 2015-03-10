@@ -389,12 +389,15 @@ gpu::GpuMat patch_models::inv_simil(const gpu::GpuMat &S) {
     matSi.fl(0,1) = -matS.fl(0,1)/d;
     matSi.fl(1,1) = matS.fl(0,0)/d;
     matSi.fl(1,0) = -matS.fl(1,0)/d;
+    Mat matRi = matSi(Rect(0,0,2,2));
+    matRi = -matRi*matS.col(2);
+    Mat matSt = matSi.col(2);
+    matRi.copyTo(matSt);
     print_mat<<<1,1>>>(GpuMat(matSi), matSi.size().width, matSi.size().height);
     
     GpuMat Si(2,3,CV_32F);
 //    cerr << "Starting inv_simil_kernel" << endl;
 	inv_simil_kernel1<<<1,1>>>(S, Si);
-    print_mat<<<1,1>>>(Si, Si.size().width, Si.size().height);
 //    cerr << "Exiting inv_simil_kernel" << endl;
     GpuMat Ri = Si(Rect(0,0,2,2));
     //cerr << "Initially:" << endl;
@@ -413,6 +416,7 @@ gpu::GpuMat patch_models::inv_simil(const gpu::GpuMat &S) {
 	GpuMat St = Si.col(2);
 	T.copyTo(St);
     //cerr << "About to return from inv_simil." << endl;
+    print_mat<<<1,1>>>(Si, Si.size().width, Si.size().height);
 	return Si;
 }
 #endif /* WITH_CUDA */
