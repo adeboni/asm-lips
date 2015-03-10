@@ -363,8 +363,8 @@ __global__ void inv_simil_kernel1(gpu::PtrStepSz<float> S, gpu::PtrStepSz<float>
 
 // Used to do matrix multiplication.
 __global__ void inv_simil_kernel2(gpu::PtrStepSz<float> src1, gpu::PtrStepSz<float> src2, gpu::PtrStepSz<float> dest) {
-    dest(0,0) = src1(0,0)*src2(0,0) + src1(0,1)*src2(1,0);
-    dest(1,0) = src1(1,0)*src2(0,0) + src1(1,1)*src2(1,0);
+    dest(0,0) = src1(0,0)*src2(0,0) - src1(0,1)*src2(1,0);
+    dest(1,0) = src1(1,0)*src2(0,0) - src1(1,1)*src2(1,0);
     
 //    dest(0,0) = src1(0,0)*src2(0,0) + src1(1,0)*src2(0,1);
 //    dest(0,1) = src1(0,1)*src2(0,0) + src1(1,1)*src2(0,1);
@@ -405,7 +405,7 @@ gpu::GpuMat patch_models::inv_simil(const gpu::GpuMat &S) {
     //print_mat<<<1,1>>>(Ri, Ri.size().width, Ri.size().height);
     
 	//cerr << "Starting first multiply" << endl;
-//    gpu::multiply(Ri, Scalar(-1.0), Ri);  // Originally Ri = -Ri*S.col(2);
+    gpu::multiply(Ri, Scalar(-1.0), Ri);  // Originally Ri = -Ri*S.col(2);
     //cerr << "After first multiply:" << endl;
 	//cerr << "Exiting first multiply and starting second multiply" << endl;
     GpuMat T(2,1,CV_32F);
