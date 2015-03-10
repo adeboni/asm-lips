@@ -382,9 +382,19 @@ __global__ void print_mat(gpu::PtrStepSz<float> Ri, int width, int height)
 }
 
 gpu::GpuMat patch_models::inv_simil(const gpu::GpuMat &S) {
+    Mat matS(S);
+    Mat matSi(2,3,CV_32F);
+    float d = S.fl(0,0)*S.fl(1,1) - S.fl(1,0)*S.fl(0,1);
+    Si.fl(0,0) = S.fl(1,1)/d;
+    Si.fl(0,1) = -S.fl(0,1)/d;
+    Si.fl(1,1) = S.fl(0,0)/d;
+    Si.fl(1,0) = -S.fl(1,0)/d;
+    print_mat<<<1,1>>>(GpuMat(matSi), matSi.size().width, matSi.size().height);
+    
     GpuMat Si(2,3,CV_32F);
 //    cerr << "Starting inv_simil_kernel" << endl;
 	inv_simil_kernel1<<<1,1>>>(S, Si);
+    print_mat<<<1,1>>>(Si, Si.size().width, Si.size().height);
 //    cerr << "Exiting inv_simil_kernel" << endl;
     GpuMat Ri = Si(Rect(0,0,2,2));
     //cerr << "Initially:" << endl;
@@ -392,9 +402,7 @@ gpu::GpuMat patch_models::inv_simil(const gpu::GpuMat &S) {
     //print_mat<<<1,1>>>(Ri, Ri.size().width, Ri.size().height);
     
 	//cerr << "Starting first multiply" << endl;
-    print_mat<<<1,1>>>(Ri, Ri.size().width, Ri.size().height);
     gpu::multiply(Ri, Scalar(-1.0), Ri);  // Originally Ri = -Ri*S.col(2);
-    print_mat<<<1,1>>>(Ri, Ri.size().width, Ri.size().height);
     //cerr << "After first multiply:" << endl;
 	//cerr << "Exiting first multiply and starting second multiply" << endl;
     GpuMat T(2,1,CV_32F);
