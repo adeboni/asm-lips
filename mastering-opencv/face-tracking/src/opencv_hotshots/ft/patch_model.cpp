@@ -307,8 +307,8 @@ vector<Point2f> patch_models::apply_simil(const gpu::GpuMat &S, const vector<Poi
     gpuErrchk(cudaMalloc((void**)&dev_input, num_bytes));
     gpuErrchk(cudaMalloc((void**)&dev_output, num_bytes));
     
-    cout << "Input address: " << (int)dev_input << endl;
-    cout << "Output address: " << (int)dev_output << endl;
+    cout << "Input address: " << (void *)dev_input << endl;
+    cout << "Output address: " << (void *)dev_output << endl;
     
     gpuErrchk(cudaMemcpy(dev_input, input, num_bytes, cudaMemcpyHostToDevice));
 	
