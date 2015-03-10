@@ -154,7 +154,7 @@ vector<Point2f>face_tracker::fit(const Mat &image, const vector<Point2f> &init, 
         smodel.calc_params(peaks); //compute shape model parameters
         pts = smodel.calc_shape(); //update shape
     }else{
-        Mat weight(n,1,CV_32F),weight_sort(n,1,CV_32F);
+        Mat weight(n,1,CV_32F), weight_sort(n,1,CV_32F);
         vector<Point2f> pts_old = pts;
         for (int iter = 0; iter < itol; iter++) {
             //compute robust weight
@@ -173,8 +173,11 @@ vector<Point2f>face_tracker::fit(const Mat &image, const vector<Point2f> &init, 
             pts = smodel.calc_shape();
       
             //check for convergence
-            float v = 0; for(int i = 0; i < n; i++)v += norm(pts[i]-pts_old[i]);
-            if(v < ftol)break; else pts_old = pts;
+            float v = 0; 
+			for(int i = 0; i < n; i++)
+				v += norm(pts[i]-pts_old[i]);
+            if (v < ftol) break; 
+			else pts_old = pts;
         }
     }return pts;
 }

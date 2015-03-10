@@ -219,13 +219,13 @@ vector<Point2f> patch_models::calc_peaks(const Mat &im, const vector<Point2f> &p
 }
 
 #ifdef WITH_CUDA
-__global__ void calc_peaks_kernel(gpu::PtrStepSz<float> A, gpu::PtrStepSz<float> S, gpu::PtrStepSz<float> pt, int i, int w, int h) {
+__global__ void calc_peaks_kernel(gpu::PtrStepSz<float> A, gpu::PtrStepSz<float> S, gpu::PtrStepSz<float> pt, int i, float w, float h) {
 	A(0, 0) = S(0, 0);
 	A(0, 1) = S(0, 1);
 	A(1, 0) = S(1, 0);
 	A(1, 1) = S(1, 1);
-	A(2, 0) = pt(2 * i, 1) - A(0, 0) * (w - 1) / 2 + A(1, 0) * (h - 1) / 2;
-	A(2, 1) = pt(2 * i + 1, 1) - A(0, 1) * (w - 1) / 2 + A(1, 1) * (h - 1) / 2;
+	A(2, 0) = pt(2 * i, 1) - A(0, 0) * w + A(1, 0) * h;
+	A(2, 1) = pt(2 * i + 1, 1) - A(0, 1) * w + A(1, 1) * h;
 }
 
 vector<Point2f> patch_models::calc_peaks(const GpuMat &im, const vector<Point2f> &points, const Size ssize) {
@@ -234,18 +234,18 @@ vector<Point2f> patch_models::calc_peaks(const GpuMat &im, const vector<Point2f>
     GpuMat pt = GpuMat(Mat(points).reshape(1, 2*n));
     GpuMat S = this->calc_simil(pt);
     vector<Point2f> pts = this->apply_simil(this->inv_simil(S), points);
+	GpuMat I, R;
+	Point maxLoc; 
+	GpuMat A(2, 3, CV_32F);
     for (int i = 0; i < n; i++) {
-		cerr << "In loop, i = " << i << endl;
         Size wsize = ssize + patches[i].patch_size();
-        GpuMat A(2, 3, CV_32F);
-        cerr << "Starting calc_peaks_kernel" << endl;
-		calc_peaks_kernel<<<1, 1>>>(A, S, pt, i, wsize.width, wsize.height);
-        cerr << "Exiting calc_peaks_kernel" << endl;
-        GpuMat I;
-		gpu::warpAffine(im, I, Mat(A), wsize, INTER_LINEAR+WARP_INVERSE_MAP);
-        GpuMat R = patches[i].calc_response(I);
         
-        Point maxLoc; 
+        cerr << "Starting calc_peaks_kernel" << endl;
+		calc_peaks_kernel<<<1, 1>>>(A, S, pt, i, (wsize.width - 1)/2.0, (wsize.height - 1)/2.0);
+        cerr << "Exiting calc_peaks_kernel" << endl;
+        
+		gpu::warpAffine(im, I, Mat(A), wsize, INTER_LINEAR+WARP_INVERSE_MAP);
+        R = patches[i].calc_response(I);
 		gpu::minMaxLoc(R, 0, 0, 0, &maxLoc);
         pts[i] = Point2f(pts[i].x + maxLoc.x - 0.5*ssize.width, pts[i].y + maxLoc.y - 0.5*ssize.height);
     }
