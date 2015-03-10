@@ -405,7 +405,7 @@ gpu::GpuMat patch_models::inv_simil(const gpu::GpuMat &S) {
     //print_mat<<<1,1>>>(Ri, Ri.size().width, Ri.size().height);
     
 	//cerr << "Starting first multiply" << endl;
-    gpu::multiply(Ri, Scalar(-1.0), Ri);  // Originally Ri = -Ri*S.col(2);
+//    gpu::multiply(Ri, Scalar(-1.0), Ri);  // Originally Ri = -Ri*S.col(2);
     //cerr << "After first multiply:" << endl;
 	//cerr << "Exiting first multiply and starting second multiply" << endl;
     GpuMat T(2,1,CV_32F);
