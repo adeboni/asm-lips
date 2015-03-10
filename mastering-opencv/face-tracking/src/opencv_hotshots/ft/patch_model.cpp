@@ -194,8 +194,8 @@ vector<Point2f> patch_models::calc_peaks(const Mat &im, const vector<Point2f> &p
     Mat pt = Mat(points).reshape(1,2*n);
     Mat S = this->calc_simil(pt);
 //    vector<Point2f> pts = Mat(this->apply_simil(GpuMat(this->inv_simil(S)), points));
-//	vector<Point2f> pts = this->apply_simil(this->inv_simil(S), points);
-	vector<Point2f> pts = this->apply_simil(Mat(this->inv_simil(GpuMat(S))), points);
+	vector<Point2f> pts = this->apply_simil(this->inv_simil(S), points);
+//	vector<Point2f> pts = this->apply_simil(Mat(this->inv_simil(GpuMat(S))), points);
     for (int i = 0; i < n; i++) {
         Size wsize = ssize + patches[i].patch_size();
         Mat A(2, 3, CV_32F);
@@ -382,42 +382,18 @@ __global__ void print_mat(gpu::PtrStepSz<float> Ri, int width, int height)
 }
 
 gpu::GpuMat patch_models::inv_simil(const gpu::GpuMat &S) {
-    Mat matS(S);
-    Mat matSi(2,3,CV_32F);
-    float d = matS.fl(0,0)*matS.fl(1,1) - matS.fl(1,0)*matS.fl(0,1);
-    matSi.fl(0,0) = matS.fl(1,1)/d;
-    matSi.fl(0,1) = -matS.fl(0,1)/d;
-    matSi.fl(1,1) = matS.fl(0,0)/d;
-    matSi.fl(1,0) = -matS.fl(1,0)/d;
-    Mat matRi = matSi(Rect(0,0,2,2));
-    matRi = -matRi*matS.col(2);
-    Mat matSt = matSi.col(2);
-    matRi.copyTo(matSt);
-    print_mat<<<1,1>>>(GpuMat(matSi), matSi.size().width, matSi.size().height);
-    
     GpuMat Si(2,3,CV_32F);
-//    cerr << "Starting inv_simil_kernel" << endl;
 	inv_simil_kernel1<<<1,1>>>(S, Si);
-//    cerr << "Exiting inv_simil_kernel" << endl;
     GpuMat Ri = Si(Rect(0,0,2,2));
-    //cerr << "Initially:" << endl;
-	//cout << S.size().height << " " << S.size().width << endl;
-    //print_mat<<<1,1>>>(Ri, Ri.size().width, Ri.size().height);
     
-	//cerr << "Starting first multiply" << endl;
+    // Originally Ri = -Ri*S.col(2);
     GpuMat Ri2(2,2,CV_32F);
-    gpu::multiply(Ri, Scalar(-1.0), Ri2);  // Originally Ri = -Ri*S.col(2);
-    //cerr << "After first multiply:" << endl;
-	//cerr << "Exiting first multiply and starting second multiply" << endl;
+    gpu::multiply(Ri, Scalar(-1.0), Ri2);
     GpuMat T(2,1,CV_32F);
     inv_simil_kernel2<<<1,1>>>(Ri2, S.col(2), T);
-    //cerr << "After second multiply:" << endl;
-	//cerr << "Exiting second multiply" << endl;
     
 	GpuMat St = Si.col(2);
 	T.copyTo(St);
-    //cerr << "About to return from inv_simil." << endl;
-    print_mat<<<1,1>>>(Si, Si.size().width, Si.size().height);
 	return Si;
 }
 #endif /* WITH_CUDA */
