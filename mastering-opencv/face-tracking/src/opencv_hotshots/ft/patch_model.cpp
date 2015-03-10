@@ -79,9 +79,9 @@ Mat patch_model::calc_response(const Mat &im) {
 #ifdef WITH_CUDA
 gpu::GpuMat patch_model::calc_response(const gpu::GpuMat &im) {
     GpuMat res;
-//    gpu::matchTemplate(this->convert_image(im), GpuMat(P), res, CV_TM_SQDIFF); //might want to change to CV_TM_CCORR
-    gpu::matchTemplate(gpu::GpuMat(this->convert_image(Mat(im))), GpuMat(P), res, CV_TM_SQDIFF); //might want to change to CV_TM_CCORR
-    gpu::normalize(res, res, 0, 1, NORM_MINMAX); 
+    gpu::matchTemplate(this->convert_image(im), GpuMat(P), res, CV_TM_SQDIFF); //might want to change to CV_TM_CCORR
+//    gpu::matchTemplate(gpu::GpuMat(this->convert_image(Mat(im))), GpuMat(P), res, CV_TM_SQDIFF); //might want to change to CV_TM_CCORR
+    gpu::normalize(res, res, 0, 1, NORM_MINMAX);
 	gpu::divide(res, gpu::sum(res)[0], res);
     return res;
 }
@@ -194,8 +194,8 @@ vector<Point2f> patch_models::calc_peaks(const Mat &im, const vector<Point2f> &p
     Mat pt = Mat(points).reshape(1,2*n);
     Mat S = this->calc_simil(pt);
 //    vector<Point2f> pts = Mat(this->apply_simil(GpuMat(this->inv_simil(S)), points));
-	vector<Point2f> pts = this->apply_simil(this->inv_simil(S), points);
-	//vector<Point2f> pts = this->apply_simil(Mat(this->inv_simil(GpuMat(S))), points);
+//	vector<Point2f> pts = this->apply_simil(this->inv_simil(S), points);
+	vector<Point2f> pts = this->apply_simil(Mat(this->inv_simil(GpuMat(S))), points);
     for (int i = 0; i < n; i++) {
         Size wsize = ssize + patches[i].patch_size();
         Mat A(2, 3, CV_32F);
@@ -208,7 +208,8 @@ vector<Point2f> patch_models::calc_peaks(const Mat &im, const vector<Point2f> &p
         Mat I; 
 		warpAffine(im, I, A, wsize, INTER_LINEAR+WARP_INVERSE_MAP);
         
-        Mat R = Mat(patches[i].calc_response(GpuMat(I)));
+        Mat R = patches[i].calc_response(I);
+//        Mat R = Mat(patches[i].calc_response(GpuMat(I)));
         
         Point maxLoc; 
 		minMaxLoc(R, 0, 0, 0, &maxLoc);
