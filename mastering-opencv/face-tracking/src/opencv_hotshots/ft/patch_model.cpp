@@ -274,8 +274,8 @@ __global__ void apply_simil_kernel(const gpu::PtrStepSz<float> S, int n, float *
         printf(" --> Point %d: (%f, %f)\n", i, points[i*2], points[i*2 + 1]);
 		printf("S(0,0): %f,  S(1,0): %f,  S(2,0): %f\n", S(0,0), S(1,0), S(2,0));
 		printf("S(0,1): %f,  S(1,1): %f,  S(2,1): %f\n", S(0,1), S(1,1), S(2,1));
-		//output[i*2] = S(0,0) * points[i*2] + S(1,0) * points[i*2 + 1] + S(2,0);
-		//output[i*2 + 1] = S(0,1) * points[i*2] + S(1,1) * points[i*2 + 1] + S(2,1);
+		output[i*2] = S(0,0) * points[i*2] + S(1,0) * points[i*2 + 1] + S(2,0);
+		output[i*2 + 1] = S(0,1) * points[i*2] + S(1,1) * points[i*2 + 1] + S(2,1);
 	}
 }
 
@@ -307,13 +307,7 @@ vector<Point2f> patch_models::apply_simil(const gpu::GpuMat &S, const vector<Poi
     gpuErrchk(cudaMalloc((void**)&dev_input, num_bytes));
     gpuErrchk(cudaMalloc((void**)&dev_output, num_bytes));
     
-    cout << "Input address pre-copy: " << (void *)dev_input << endl;
-    cout << "Output address pre-copy: " << (void *)dev_output << endl;
-    
     gpuErrchk(cudaMemcpy(dev_input, input, num_bytes, cudaMemcpyHostToDevice));
-    
-    cout << "Input address post-copy: " << (void *)dev_input << endl;
-    cout << "Output address post-copy: " << (void *)dev_output << endl;
 	
     cerr << "Starting apply_simil_kernel" << endl;
     apply_simil_kernel<<<1, n>>>(S, n, dev_input, dev_output);
