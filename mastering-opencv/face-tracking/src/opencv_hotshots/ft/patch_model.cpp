@@ -208,7 +208,7 @@ vector<Point2f> patch_models::calc_peaks(const Mat &im, const vector<Point2f> &p
         Mat I; 
 		warpAffine(im, I, A, wsize, INTER_LINEAR+WARP_INVERSE_MAP);
         
-        Mat R = patches[i].calc_response(I);
+        Mat R = Mat(patches[i].calc_response(GpuMat(I)));
         
         Point maxLoc; 
 		minMaxLoc(R, 0, 0, 0, &maxLoc);
