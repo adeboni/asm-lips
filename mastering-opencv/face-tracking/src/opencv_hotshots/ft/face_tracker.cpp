@@ -39,7 +39,6 @@ face_tracker_params::face_tracker_params() {
     ssize[0] = Size(21,21);
     ssize[1] = Size(11,11);
     ssize[2] = Size(5,5);
-    robust = false;
     itol = 20;
     ftol = 1e-3;
     scaleFactor = 1.1;
@@ -54,8 +53,7 @@ void face_tracker_params::write(FileStorage &fs) const {
         sprintf(str,"w %d",i); ss = str; fs << ss << ssize[i].width;
         sprintf(str,"h %d",i); ss = str; fs << ss << ssize[i].height;
     }
-    fs << "robust" << robust
-        << "itol" << itol
+    fs  << "itol" << itol
         << "ftol" << ftol
         << "scaleFactor" << scaleFactor
         << "minNeighbours" << minNeighbours
@@ -75,7 +73,6 @@ void face_tracker_params::read(const FileNode& node) {
         sprintf(str,"w %d",i); ss = str; node[ss] >> ssize[i].width;
         sprintf(str,"h %d",i); ss = str; node[ss] >> ssize[i].height;
     }
-    node["robust"] >> robust;
     node["itol"] >> itol;
     node["ftol"] >> ftol;
     node["scaleFactor"] >> scaleFactor;
