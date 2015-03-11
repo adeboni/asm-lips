@@ -223,8 +223,8 @@ __global__ void calc_peaks_kernel(gpu::PtrStepSz<float> A, gpu::PtrStepSz<float>
 	A(0, 1) = S(0, 1);
 	A(1, 0) = S(1, 0);
 	A(1, 1) = S(1, 1);
-	A(2, 0) = pt(2 * i, 0) - A(0, 0) * w + A(1, 0) * h;
-	A(2, 1) = pt(2 * i + 1, 0) - A(0, 1) * w + A(1, 1) * h;
+	A(2, 0) = pt(0, 2 * i) - A(0, 0) * w + A(1, 0) * h;
+	A(2, 1) = pt(0, 2 * i + 1) - A(0, 1) * w + A(1, 1) * h;
 }
 
 vector<Point2f> patch_models::calc_peaks(const GpuMat &im, const vector<Point2f> &points, const Size ssize) {
@@ -233,19 +233,17 @@ vector<Point2f> patch_models::calc_peaks(const GpuMat &im, const vector<Point2f>
     GpuMat pt = GpuMat(Mat(points).reshape(1, 2*n));
     GpuMat S = this->calc_simil(pt);
     vector<Point2f> pts = this->apply_simil(this->inv_simil(S), points);
-	GpuMat I, R;
+	GpuMat I, A(2, 3, CV_32F);
 	Point maxLoc; 
-	GpuMat A(2, 3, CV_32F);
     for (int i = 0; i < n; i++) {
         Size wsize = ssize + patches[i].patch_size();
         
-        cerr << "Starting calc_peaks_kernel" << endl;
+        //cerr << "Starting calc_peaks_kernel" << endl;
 		calc_peaks_kernel<<<1, 1>>>(A, S, pt, i, (wsize.width - 1)/2.0, (wsize.height - 1)/2.0);
-        cerr << "Exiting calc_peaks_kernel" << endl;
+        //cerr << "Exiting calc_peaks_kernel" << endl;
         
 		gpu::warpAffine(im, I, Mat(A), wsize, INTER_LINEAR+WARP_INVERSE_MAP);
-        R = patches[i].calc_response(I);
-		gpu::minMaxLoc(R, 0, 0, 0, &maxLoc);
+		gpu::minMaxLoc(patches[i].calc_response(I), 0, 0, 0, &maxLoc);
         pts[i] = Point2f(pts[i].x + maxLoc.x - 0.5*ssize.width, pts[i].y + maxLoc.y - 0.5*ssize.height);
     }
     return this->apply_simil(S, pts);
