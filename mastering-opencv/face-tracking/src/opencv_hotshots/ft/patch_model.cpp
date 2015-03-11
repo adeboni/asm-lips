@@ -61,7 +61,7 @@ gpu::GpuMat patch_model::convert_image(const gpu::GpuMat &im)
         }
     }
     gpu::add(I, Scalar(1.0), I); // Used to be I += 1.0;
-    log(I, I);
+    gpu::log(I, I);
     return I;
 }
 #endif /* WITH_CUDA */
