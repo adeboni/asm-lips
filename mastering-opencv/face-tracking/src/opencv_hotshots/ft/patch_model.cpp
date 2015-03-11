@@ -217,7 +217,7 @@ vector<Point2f> patch_models::calc_peaks(const Mat &im, const vector<Point2f> &p
 }
 
 #ifdef WITH_CUDA
-__global__ void calc_peaks_kernel(gpu::PtrStepSz<float> A, gpu::PtrStepSz<float> S, gpu::PtrStepSz<float> pt, int i, float w, float h) {
+__global__ void calc_peaks_kernel(gpu::PtrStepSz<float> A, gpu::PtrStepSz<float> S, gpu::PtrStepSz<float> pt, int i, int w, int h) {
 	A(0, 0) = S(0, 0);
 	A(0, 1) = S(0, 1);
 	A(1, 0) = S(1, 0);
@@ -238,7 +238,7 @@ vector<Point2f> patch_models::calc_peaks(const GpuMat &im, const vector<Point2f>
         Size wsize = ssize + patches[i].patch_size();
         
         //cerr << "Starting calc_peaks_kernel" << endl;
-		calc_peaks_kernel<<<1, 1>>>(A, S, pt, i, (wsize.width - 1)/2.0, (wsize.height - 1)/2.0);
+		calc_peaks_kernel<<<1, 1>>>(A, S, pt, i, (wsize.width - 1)/2, (wsize.height - 1)/2);
         //cerr << "Exiting calc_peaks_kernel" << endl;
         
 		gpu::warpAffine(im, I, Mat(A), wsize, INTER_LINEAR+WARP_INVERSE_MAP);
