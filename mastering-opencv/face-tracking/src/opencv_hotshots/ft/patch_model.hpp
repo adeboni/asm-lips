@@ -17,6 +17,7 @@ class patch_model{                                  //correlation-based patch ex
     typedef gpu::GpuMat GpuMat;
 public:
     Mat P;                                          //normalised patch
+	GpuMat gpuP;
   
     Size                                            //size of patch model
     patch_size(){return P.size();}

@@ -79,7 +79,7 @@ Mat patch_model::calc_response(const Mat &im) {
 #ifdef WITH_CUDA
 gpu::GpuMat patch_model::calc_response(const gpu::GpuMat &im) {
     GpuMat res;
-    gpu::matchTemplate(this->convert_image(im), GpuMat(P), res, CV_TM_CCORR); //might want to change to CV_TM_SQDIFF
+    gpu::matchTemplate(this->convert_image(im), gpuP, res, CV_TM_CCORR); //might want to change to CV_TM_SQDIFF
 //    gpu::matchTemplate(gpu::GpuMat(this->convert_image(Mat(im))), GpuMat(P), res, CV_TM_SQDIFF); //might want to change to CV_TM_SQDIFF
     gpu::normalize(res, res, 0, 1, NORM_MINMAX);
 	gpu::divide(res, gpu::sum(res)[0], res);
@@ -142,6 +142,9 @@ void patch_model::write(FileStorage &fs) const {
 void patch_model::read(const FileNode& node) {
     assert(node.type() == FileNode::MAP);
     node["P"] >> P;
+#ifdef WITH_CUDA
+	gpuP = GpuMat(P);
+#endif
 }
 //==============================================================================
 void patch_models::train(ft_data &data, const vector<Point2f> &ref, const Size psize, const Size ssize, const bool mirror, const float var, const float lambda, const float mu_init, const int nsamples, const bool visi) {
