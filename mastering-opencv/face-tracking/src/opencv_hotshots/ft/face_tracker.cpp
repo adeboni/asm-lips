@@ -135,7 +135,7 @@ void face_tracker::draw(Mat &im, const Scalar pts_color, const Scalar con_color)
     //for (int i = 0; i < n; i++) circle(im, points[i], 1, pts_color, 2, CV_AA);
 }
 //==============================================================================
-vector<Point2f>face_tracker::fit(const Mat &image, const vector<Point2f> &init, const Size ssize, const bool robust, const int itol, const float ftol) {
+vector<Point2f>face_tracker::fit(const Mat &image, const vector<Point2f> &init, const Size ssize, const int itol, const float ftol) {
     int n = smodel.npts();
     assert((int(init.size())==n) && (pmodel.n_patches()==n));
     smodel.calc_params(init); 
