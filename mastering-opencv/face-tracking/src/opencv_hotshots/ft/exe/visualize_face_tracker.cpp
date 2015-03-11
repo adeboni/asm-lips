@@ -22,7 +22,6 @@ int main(int argc,char** argv) {
 
 	//create tracker parameters
 	face_tracker_params p; 
-	p.robust = false;
 	p.ssize.resize(3);
 	p.ssize[0] = Size(21,21);
 	p.ssize[1] = Size(11,11);

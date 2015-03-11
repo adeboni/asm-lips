@@ -119,7 +119,7 @@ int face_tracker::track(const Mat &im,const face_tracker_params &p) {
 
     //fit
     for(int level = 0; level < int(p.ssize.size()); level++)
-        points = this->fit(gray,points,p.ssize[level],p.robust,p.itol,p.ftol);
+        points = this->fit(gray,points,p.ssize[level],p.itol,p.ftol);
 
     //set tracking flag and increment timer
     tracking = true;

@@ -25,7 +25,6 @@ public:
 class face_tracker_params{                 //face tracking parameters
 public:
   vector<Size> ssize;                      //search region size/level
-  bool robust;                             //use robust fitting?
   int itol;                                //maximum number of iterations to try
   float ftol;                              //convergence tolerance
   float scaleFactor;                       //OpenCV Cascade detector parameters
