@@ -196,6 +196,9 @@ vector<Point2f> patch_models::calc_peaks(const Mat &im, const vector<Point2f> &p
 //    vector<Point2f> pts = Mat(this->apply_simil(GpuMat(this->inv_simil(S)), points));
 	vector<Point2f> pts = this->apply_simil(this->inv_simil(S), points);
 //	vector<Point2f> pts = this->apply_simil(Mat(this->inv_simil(GpuMat(S))), points);
+
+	Mat I, R;
+	Point maxLoc;
     for (int i = 0; i < n; i++) {
         Size wsize = ssize + patches[i].patch_size();
         Mat A(2, 3, CV_32F);
@@ -203,15 +206,13 @@ vector<Point2f> patch_models::calc_peaks(const Mat &im, const vector<Point2f> &p
 		A.fl(0, 1) = S.fl(0, 1);
         A.fl(1, 0) = S.fl(1, 0); 
 		A.fl(1, 1) = S.fl(1, 1);
-        A.fl(0, 2) = pt.fl(2*i  ) - (A.fl(0,0) * (wsize.width-1)/2 + A.fl(0,1)*(wsize.height-1)/2);
-        A.fl(1, 2) = pt.fl(2*i+1) - (A.fl(1,0) * (wsize.width-1)/2 + A.fl(1,1)*(wsize.height-1)/2);
-        Mat I; 
+        A.fl(0, 2) = pt.fl(2*i  , 0) - (A.fl(0,0) * (wsize.width-1)/2 + A.fl(0,1)*(wsize.height-1)/2);
+        A.fl(1, 2) = pt.fl(2*i+1, 0) - (A.fl(1,0) * (wsize.width-1)/2 + A.fl(1,1)*(wsize.height-1)/2);
 		warpAffine(im, I, A, wsize, INTER_LINEAR+WARP_INVERSE_MAP);
         
-        Mat R = patches[i].calc_response(I);
+        R = patches[i].calc_response(I);
 //        Mat R = Mat(patches[i].calc_response(GpuMat(I)));
         
-        Point maxLoc; 
 		minMaxLoc(R, 0, 0, 0, &maxLoc);
         pts[i] = Point2f(pts[i].x + maxLoc.x - 0.5*ssize.width, pts[i].y + maxLoc.y - 0.5*ssize.height);
     }
