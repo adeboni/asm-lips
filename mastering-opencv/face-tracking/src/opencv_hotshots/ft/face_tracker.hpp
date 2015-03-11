@@ -76,7 +76,6 @@ protected:
   fit(const Mat &image,                    //image containing face
       const vector<Point2f> &init,         //initial point estimates
       const Size ssize = Size(21,21),      //search region size
-      const bool robust = true,           //use robust fitting?
       const int itol = 10,                 //maximum number of iterations to try
       const float ftol = 1e-3);            //convergence tolerance
 };

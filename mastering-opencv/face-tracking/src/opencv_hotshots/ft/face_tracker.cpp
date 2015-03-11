@@ -145,41 +145,38 @@ vector<Point2f>face_tracker::fit(const Mat &image, const vector<Point2f> &init, 
 #ifndef WITH_CUDA
     vector<Point2f> peaks = pmodel.calc_peaks(image,pts,ssize);
 #else
-	vector<Point2f> peaks = pmodel.calc_peaks(image,pts,ssize);
-    // vector<Point2f> peaks = pmodel.calc_peaks(gpu::GpuMat(image),pts,ssize);
+	// vector<Point2f> peaks = pmodel.calc_peaks(image,pts,ssize);
+    vector<Point2f> peaks = pmodel.calc_peaks(gpu::GpuMat(image),pts,ssize);
 #endif
 
     //optimise
-    if(!robust){
-        smodel.calc_params(peaks); //compute shape model parameters
-        pts = smodel.calc_shape(); //update shape
-    }else{
-        Mat weight(n,1,CV_32F), weight_sort(n,1,CV_32F);
-        vector<Point2f> pts_old = pts;
-        for (int iter = 0; iter < itol; iter++) {
-            //compute robust weight
-            for (int i = 0; i < n; i++) weight.fl(i) = norm(pts[i] - peaks[i]);
-            cv::sort(weight,weight_sort,CV_SORT_EVERY_COLUMN|CV_SORT_ASCENDING);
-            double var = 1.4826*weight_sort.fl(n/2); 
-			if (var < 0.1) var = 0.1;
-            pow(weight,2,weight); 
-			weight *= -0.5/(var*var); 
-			cv::exp(weight,weight);
+	Mat weight(n,1,CV_32F), weight_sort(n,1,CV_32F);
+	vector<Point2f> pts_old = pts;
+	for (int iter = 0; iter < itol; iter++) {
+		//compute robust weight
+		for (int i = 0; i < n; i++) weight.fl(i) = norm(pts[i] - peaks[i]);
+		cv::sort(weight,weight_sort,CV_SORT_EVERY_COLUMN|CV_SORT_ASCENDING);
+		double var = 1.4826*weight_sort.fl(n/2); 
+		if (var < 0.1) var = 0.1;
+		pow(weight,2,weight); 
+		weight *= -0.5/(var*var); 
+		cv::exp(weight,weight);
 
-            //compute shape model parameters
-            smodel.calc_params(peaks,weight);
-      
-            //update shape
-            pts = smodel.calc_shape();
-      
-            //check for convergence
-            float v = 0; 
-			for(int i = 0; i < n; i++)
-				v += norm(pts[i]-pts_old[i]);
-            if (v < ftol) break; 
-			else pts_old = pts;
-        }
-    }return pts;
+		//compute shape model parameters
+		smodel.calc_params(peaks,weight);
+  
+		//update shape
+		pts = smodel.calc_shape();
+  
+		//check for convergence
+		float v = 0; 
+		for(int i = 0; i < n; i++)
+			v += norm(pts[i]-pts_old[i]);
+		if (v < ftol) break; 
+		else pts_old = pts;
+	}
+	
+    return pts;
 }
 //==============================================================================
 void face_tracker::write(FileStorage &fs) const {

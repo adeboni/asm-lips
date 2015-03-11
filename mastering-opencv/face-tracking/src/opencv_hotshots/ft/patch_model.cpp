@@ -223,8 +223,8 @@ __global__ void calc_peaks_kernel(gpu::PtrStepSz<float> A, gpu::PtrStepSz<float>
 	A(0, 1) = S(0, 1);
 	A(1, 0) = S(1, 0);
 	A(1, 1) = S(1, 1);
-	A(2, 0) = pt(2 * i, 1) - A(0, 0) * w + A(1, 0) * h;
-	A(2, 1) = pt(2 * i + 1, 1) - A(0, 1) * w + A(1, 1) * h;
+	A(2, 0) = pt(2 * i, 0) - A(0, 0) * w + A(1, 0) * h;
+	A(2, 1) = pt(2 * i + 1, 0) - A(0, 1) * w + A(1, 1) * h;
 }
 
 vector<Point2f> patch_models::calc_peaks(const GpuMat &im, const vector<Point2f> &points, const Size ssize) {
