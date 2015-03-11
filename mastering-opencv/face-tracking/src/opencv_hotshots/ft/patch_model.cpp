@@ -197,11 +197,11 @@ vector<Point2f> patch_models::calc_peaks(const Mat &im, const vector<Point2f> &p
 	vector<Point2f> pts = this->apply_simil(this->inv_simil(S), points);
 //	vector<Point2f> pts = this->apply_simil(Mat(this->inv_simil(GpuMat(S))), points);
 
-	Mat I, R;
+	Mat I, R, A(2, 3, CV_32F);
 	Point maxLoc;
     for (int i = 0; i < n; i++) {
         Size wsize = ssize + patches[i].patch_size();
-        Mat A(2, 3, CV_32F);
+
         A.fl(0, 0) = S.fl(0, 0); 
 		A.fl(0, 1) = S.fl(0, 1);
         A.fl(1, 0) = S.fl(1, 0); 
