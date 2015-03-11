@@ -202,7 +202,10 @@ vector<Point2f> patch_models::calc_peaks(const Mat &im, const vector<Point2f> &p
     for (int i = 0; i < n; i++) {
         Size wsize = ssize + patches[i].patch_size();
 
-        A = S;
+        A.fl(0, 0) = S.fl(0, 0); 
+		A.fl(0, 1) = S.fl(0, 1);
+        A.fl(1, 0) = S.fl(1, 0); 
+		A.fl(1, 1) = S.fl(1, 1);
         A.fl(0, 2) = pt.fl(2 * i, 0) - (A.fl(0,0) * (wsize.width-1)/2 + A.fl(0,1)*(wsize.height-1)/2);
         A.fl(1, 2) = pt.fl(2 * i + 1, 0) - (A.fl(1,0) * (wsize.width-1)/2 + A.fl(1,1)*(wsize.height-1)/2);
 		
