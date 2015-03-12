@@ -60,7 +60,7 @@ gpu::GpuMat patch_model::convert_image(const gpu::GpuMat &im)
             abort();
         }
     }
-    gpu::add(I, Scalar(1.0), I); // Used to be I += 1.0;
+    gpu::add(I, Scalar(1), I); // Used to be I += 1.0;
     gpu::log(I, I);
     return I;
 }
@@ -79,7 +79,9 @@ Mat patch_model::calc_response(const Mat &im) {
 #ifdef WITH_CUDA
 gpu::GpuMat patch_model::calc_response(const gpu::GpuMat &im) {
     GpuMat res;
-    gpu::matchTemplate(this->convert_image(im), gpuP, res, CV_TM_CCOEFF_NORMED); //might want to change to CV_TM_SQDIFF
+	GpuMat gpuP2;
+	gpuP.convertTo(gpuP2, CV_8U);
+    gpu::matchTemplate(this->convert_image(im), gpuP2, res, CV_TM_CCOEFF_NORMED); //might want to change to CV_TM_SQDIFF
 //    gpu::matchTemplate(gpu::GpuMat(this->convert_image(Mat(im))), GpuMat(P), res, CV_TM_SQDIFF); //might want to change to CV_TM_SQDIFF
     gpu::normalize(res, res, 0, 1, NORM_MINMAX);
 	gpu::divide(res, gpu::sum(res)[0], res);
