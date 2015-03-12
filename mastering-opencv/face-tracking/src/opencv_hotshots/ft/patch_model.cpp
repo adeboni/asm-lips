@@ -47,13 +47,13 @@ gpu::GpuMat patch_model::convert_image(const gpu::GpuMat &im)
 {
     GpuMat I;
     if (im.channels() == 1) {
-        if (im.type() != CV_32F) im.convertTo(I, CV_32F);
+        if (im.type() != CV_8U) im.convertTo(I, CV_8U);
         else I = im;
     } else {
         if (im.channels() == 3) {
             GpuMat img;
             gpu::cvtColor(im, img, CV_RGB2GRAY);
-            if (img.type() != CV_32F) img.convertTo(I, CV_32F);
+            if (img.type() != CV_8U) img.convertTo(I, CV_8U);
             else I = img;
         } else {
             cout << "Unsupported image type!" << endl;
@@ -79,7 +79,7 @@ Mat patch_model::calc_response(const Mat &im) {
 #ifdef WITH_CUDA
 gpu::GpuMat patch_model::calc_response(const gpu::GpuMat &im) {
     GpuMat res;
-    gpu::matchTemplate(this->convert_image(im), gpuP, res, CV_TM_CCORR); //might want to change to CV_TM_SQDIFF
+    gpu::matchTemplate(this->convert_image(im), gpuP, res, CV_TM_CCOEFF_NORMED); //might want to change to CV_TM_SQDIFF
 //    gpu::matchTemplate(gpu::GpuMat(this->convert_image(Mat(im))), GpuMat(P), res, CV_TM_SQDIFF); //might want to change to CV_TM_SQDIFF
     gpu::normalize(res, res, 0, 1, NORM_MINMAX);
 	gpu::divide(res, gpu::sum(res)[0], res);
