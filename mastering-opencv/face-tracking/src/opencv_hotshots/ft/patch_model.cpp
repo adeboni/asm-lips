@@ -47,13 +47,13 @@ gpu::GpuMat patch_model::convert_image(const gpu::GpuMat &im)
 {
     GpuMat I;
     if (im.channels() == 1) {
-        if (im.type() != CV_8U) im.convertTo(I, CV_8U);
+        if (im.type() != CV_8U) im.convertTo(I, CV_8U, 255);
         else I = im;
     } else {
         if (im.channels() == 3) {
             GpuMat img;
             gpu::cvtColor(im, img, CV_RGB2GRAY);
-            if (img.type() != CV_8U) img.convertTo(I, CV_8U);
+            if (img.type() != CV_8U) img.convertTo(I, CV_8U, 255);
             else I = img;
         } else {
             cout << "Unsupported image type!" << endl;
@@ -79,10 +79,9 @@ Mat patch_model::calc_response(const Mat &im) {
 #ifdef WITH_CUDA
 gpu::GpuMat patch_model::calc_response(const gpu::GpuMat &im) {
     GpuMat res;
-	GpuMat gpuP2;
-	gpuP.convertTo(gpuP2, CV_8U);
-    gpu::matchTemplate(this->convert_image(im), gpuP2, res, CV_TM_CCOEFF_NORMED); //might want to change to CV_TM_SQDIFF
-//    gpu::matchTemplate(gpu::GpuMat(this->convert_image(Mat(im))), GpuMat(P), res, CV_TM_SQDIFF); //might want to change to CV_TM_SQDIFF
+	//need to convert to 8U to use CV_TM_CCOEFF_NORMED
+    gpu::matchTemplate(this->convert_image(im), gpuP, res, CV_TM_CCOEFF_NORMED);
+//    gpu::matchTemplate(gpu::GpuMat(this->convert_image(Mat(im))), GpuMat(P), res, CV_TM_CCOEFF_NORMED);
     gpu::normalize(res, res, 0, 1, NORM_MINMAX);
 	gpu::divide(res, gpu::sum(res)[0], res);
     return res;
@@ -146,6 +145,7 @@ void patch_model::read(const FileNode& node) {
     node["P"] >> P;
 #ifdef WITH_CUDA
 	gpuP = GpuMat(P);
+	gpuP.convertTo(gpuP, CV_8U, 255);
 #endif
 }
 //==============================================================================
@@ -222,15 +222,6 @@ vector<Point2f> patch_models::calc_peaks(const Mat &im, const vector<Point2f> &p
 }
 
 #ifdef WITH_CUDA
-__global__ void calc_peaks_kernel(gpu::PtrStepSz<float> A, gpu::PtrStepSz<float> S, gpu::PtrStepSz<float> pt, int i, int w, int h) {
-	A(0, 0) = S(0, 0);
-	A(0, 1) = S(0, 1);
-	A(1, 0) = S(1, 0);
-	A(1, 1) = S(1, 1);
-	A(2, 0) = pt(0, 2 * i) - (A(0, 0) * w + A(1, 0) * h);
-	A(2, 1) = pt(0, 2 * i + 1) - (A(0, 1) * w + A(1, 1) * h);
-}
-
 vector<Point2f> patch_models::calc_peaks(const GpuMat &im, const vector<Point2f> &points, const Size ssize) {
     int n = points.size();
     assert(n == int(patches.size()));
@@ -243,18 +234,13 @@ vector<Point2f> patch_models::calc_peaks(const GpuMat &im, const vector<Point2f>
     for (int i = 0; i < n; i++) {
         Size wsize = ssize + patches[i].patch_size();
         
-		
 		A.fl(0, 0) = matS.fl(0, 0); 
 		A.fl(0, 1) = matS.fl(0, 1);
         A.fl(1, 0) = matS.fl(1, 0); 
 		A.fl(1, 1) = matS.fl(1, 1);
         A.fl(0, 2) = matpt.fl(2 * i, 0) - (A.fl(0,0) * (wsize.width-1)/2 + A.fl(0,1)*(wsize.height-1)/2);
         A.fl(1, 2) = matpt.fl(2 * i + 1, 0) - (A.fl(1,0) * (wsize.width-1)/2 + A.fl(1,1)*(wsize.height-1)/2);
-		
-        //cerr << "Starting calc_peaks_kernel" << endl;
-		//calc_peaks_kernel<<<1, 1>>>(A, S, pt, i, (wsize.width - 1)/2, (wsize.height - 1)/2);
-        //cerr << "Exiting calc_peaks_kernel" << endl;
-        
+		       
 		gpu::warpAffine(im, I, A, wsize, INTER_LINEAR+WARP_INVERSE_MAP);
 		gpu::minMaxLoc(patches[i].calc_response(I), 0, 0, 0, &maxLoc);
         pts[i] = Point2f(pts[i].x + maxLoc.x - 0.5*ssize.width, pts[i].y + maxLoc.y - 0.5*ssize.height);
