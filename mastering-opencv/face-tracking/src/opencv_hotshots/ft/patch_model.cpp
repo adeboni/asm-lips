@@ -69,7 +69,7 @@ gpu::GpuMat patch_model::convert_image(const gpu::GpuMat &im)
 //==============================================================================
 Mat patch_model::calc_response(const Mat &im) {
     Mat res;
-    matchTemplate(this->convert_image(im), P, res, CV_TM_SQDIFF);
+    matchTemplate(this->convert_image(im), P, res, CV_TM_CCOEFF_NORMED);
 //    matchTemplate(Mat(this->convert_image(GpuMat(im))), P, res, CV_TM_CCOEFF_NORMED);
     normalize(res, res, 0, 1, NORM_MINMAX);
 	res /= sum(res)[0];
