@@ -146,7 +146,11 @@ vector<Point2f>face_tracker::fit(const Mat &image, const vector<Point2f> &init, 
     vector<Point2f> peaks = pmodel.calc_peaks(gpu::GpuMat(image),pts,ssize);
 #endif
 
-    //optimise
+#ifdef NO_OPTIMIZE
+	smodel.calc_params(peaks); 
+	pts = smodel.calc_shape();
+#else	
+	//optimize
 	Mat weight(n,1,CV_32F), weight_sort(n,1,CV_32F);
 	vector<Point2f> pts_old = pts;
 	for (int iter = 0; iter < itol; iter++) {
@@ -172,6 +176,7 @@ vector<Point2f>face_tracker::fit(const Mat &image, const vector<Point2f> &init, 
 		if (v < ftol) break; 
 		else pts_old = pts;
 	}
+#endif
 	
     return pts;
 }
