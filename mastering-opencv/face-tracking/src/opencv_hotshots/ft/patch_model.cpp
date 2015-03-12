@@ -481,7 +481,7 @@ gpu::GpuMat patch_models::calc_simil(const gpu::GpuMat &pts) {
     int n = pts.rows/2;
     float mx = 0, my = 0;
     static float *dev_mx, *dev_my;
-    static haveCudaMalloced = false;
+    static bool haveCudaMalloced = false;
     
     if (!haveCudaMalloced) {
         cudaMalloc((void**)&dev_mx, sizeof(float));
