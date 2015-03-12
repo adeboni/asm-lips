@@ -497,6 +497,9 @@ gpu::GpuMat patch_models::calc_simil(const gpu::GpuMat &pts) {
     
     cudaMemcpy(&mx, dev_mx, sizeof(float), cudaMemcpyDeviceToHost);
     cudaMemcpy(&my, dev_my, sizeof(float), cudaMemcpyDeviceToHost);
+	
+	cudaFree(dev_mx);
+	cudaFree(dev_my);
     
     mx /= n;
     my /= n;
@@ -528,6 +531,11 @@ gpu::GpuMat patch_models::calc_simil(const gpu::GpuMat &pts) {
     //cerr << "Starting calc_simil_kernel3" << endl;
 	calc_simil_kernel3<<<1, 1>>>(ret, sc, ss, mx, my);
     //cerr << "Exiting calc_simil_kernel3" << endl;
+	
+	cudaFree(deviceFuncInput);
+	cudaFree(dev_a);
+	cudaFree(dev_b);
+	cudaFree(dev_c);
     
 	return ret;
 }
