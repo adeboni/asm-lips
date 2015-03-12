@@ -16,6 +16,8 @@ inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=t
 	}
 }
 
+
+
 #endif
 
 #define fl at<float>
@@ -303,8 +305,9 @@ vector<Point2f> patch_models::apply_simil2(const gpu::GpuMat &S, const vector<Po
     
     float *input = &(points[0].x);
     float *output = &(p[0].x);
-    float *dev_input;
-	float *dev_output;
+    static float *dev_input;
+	static float *dev_output;
+    static bool haveCudaMalloced = false;
     
     /*cout << "--- Printing Points ---" << endl;
     for (int i = 0; i < points.size(); i++) {
@@ -314,8 +317,12 @@ vector<Point2f> patch_models::apply_simil2(const gpu::GpuMat &S, const vector<Po
     }
     cout << "--- Done Printing Points ---" << endl;*/
     
-    gpuErrchk(cudaMalloc((void**)&dev_input, num_bytes));
-    gpuErrchk(cudaMalloc((void**)&dev_output, num_bytes));
+    if (!haveCudaMalloced)
+    {
+        gpuErrchk(cudaMalloc((void**)&dev_input, num_bytes));
+        gpuErrchk(cudaMalloc((void**)&dev_output, num_bytes));
+        haveCudaMalloced = true;
+    }
     
     gpuErrchk(cudaMemcpy(dev_input, input, num_bytes, cudaMemcpyHostToDevice));
 	
@@ -325,8 +332,8 @@ vector<Point2f> patch_models::apply_simil2(const gpu::GpuMat &S, const vector<Po
     gpuErrchk(cudaMemcpy(output, dev_output, num_bytes, cudaMemcpyDeviceToHost));
     cerr << "Exiting apply_simil_kernel" << endl;
     
-    gpuErrchk(cudaFree(dev_input));
-    gpuErrchk(cudaFree(dev_output));
+//    gpuErrchk(cudaFree(dev_input));
+//    gpuErrchk(cudaFree(dev_output));
     
     return p;
 }
@@ -474,10 +481,13 @@ gpu::GpuMat patch_models::calc_simil(const gpu::GpuMat &pts) {
     //compute translation
     int n = pts.rows/2;
     float mx = 0, my = 0;
-    float *dev_mx, *dev_my;
+    static float *dev_mx, *dev_my;
+    static haveCudaMalloced = false;
     
-    cudaMalloc((void**)&dev_mx, sizeof(float));
-    cudaMalloc((void**)&dev_my, sizeof(float));
+    if (!haveCudaMalloced) {
+        cudaMalloc((void**)&dev_mx, sizeof(float));
+        cudaMalloc((void**)&dev_my, sizeof(float));
+    }
     
     //cerr << "Starting calc_simil_kernel1" << endl;
 	calc_simil_kernel1<<<1, 1>>>(pts, dev_mx, dev_my, n);
@@ -486,8 +496,8 @@ gpu::GpuMat patch_models::calc_simil(const gpu::GpuMat &pts) {
     cudaMemcpy(&mx, dev_mx, sizeof(float), cudaMemcpyDeviceToHost);
     cudaMemcpy(&my, dev_my, sizeof(float), cudaMemcpyDeviceToHost);
 	
-	cudaFree(dev_mx);
-	cudaFree(dev_my);
+//	cudaFree(dev_mx);
+//	cudaFree(dev_my);
     
     mx /= n;
     my /= n;
@@ -495,14 +505,18 @@ gpu::GpuMat patch_models::calc_simil(const gpu::GpuMat &pts) {
     vector<float> p(2*n);
 	int num_bytes = 2*n*sizeof(float);
     float *funcInput = (float *) &(p[0]);
-    float *deviceFuncInput;
+    static float *deviceFuncInput;
 	float a=0, b=0, c=0;
-    float *dev_a, *dev_b, *dev_c;
+    static float *dev_a, *dev_b, *dev_c;
     
-    cudaMalloc((void**)&deviceFuncInput, num_bytes);
-    cudaMalloc((void**)&dev_a, sizeof(float));
-    cudaMalloc((void**)&dev_b, sizeof(float));
-    cudaMalloc((void**)&dev_c, sizeof(float));
+    if (!haveCudaMalloced) {
+        cudaMalloc((void**)&deviceFuncInput, num_bytes);
+        cudaMalloc((void**)&dev_a, sizeof(float));
+        cudaMalloc((void**)&dev_b, sizeof(float));
+        cudaMalloc((void**)&dev_c, sizeof(float));
+        
+        haveCudaMalloced = true;
+    }
     
     cudaMemcpy(deviceFuncInput, funcInput, num_bytes, cudaMemcpyHostToDevice);
     //cerr << "Starting calc_simil_kernel2" << endl;
@@ -520,10 +534,10 @@ gpu::GpuMat patch_models::calc_simil(const gpu::GpuMat &pts) {
 	calc_simil_kernel3<<<1, 1>>>(ret, sc, ss, mx, my);
     //cerr << "Exiting calc_simil_kernel3" << endl;
 	
-	cudaFree(deviceFuncInput);
-	cudaFree(dev_a);
-	cudaFree(dev_b);
-	cudaFree(dev_c);
+//	cudaFree(deviceFuncInput);
+//	cudaFree(dev_a);
+//	cudaFree(dev_b);
+//	cudaFree(dev_c);
     
 	return ret;
 }
