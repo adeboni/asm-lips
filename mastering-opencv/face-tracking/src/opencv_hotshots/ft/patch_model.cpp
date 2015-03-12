@@ -426,7 +426,15 @@ Mat patch_models::calc_simil(const Mat &pts) {
 	c /= a;
     float scale = sqrt(b*b+c*c), theta = atan2(c,b);
     float sc = scale*cos(theta), ss = scale*sin(theta);
-    return (Mat_<float>(2,3) << sc,-ss,mx,ss,sc,my);
+//    return (Mat_<float>(2,3) << sc,-ss,mx,ss,sc,my);
+    Mat myMat(2,3, CV_32F);
+    myMat.fl(0, 0) = sc;
+    myMat.fl(0, 1) = -ss;
+    myMat.fl(0, 2) = mx;
+    myMat.fl(1, 0) = ss;
+    myMat.fl(1, 1) = sc;
+    myMat.fl(1, 2) = my;
+    return myMat;
 }
 
 #ifdef WITH_CUDA
