@@ -142,8 +142,8 @@ vector<Point2f>face_tracker::fit(const Mat &image, const vector<Point2f> &init, 
 #ifndef WITH_CUDA
     vector<Point2f> peaks = pmodel.calc_peaks(image,pts,ssize);
 #else
-	// vector<Point2f> peaks = pmodel.calc_peaks(image,pts,ssize);
-    vector<Point2f> peaks = pmodel.calc_peaks(gpu::GpuMat(image),pts,ssize);
+	vector<Point2f> peaks = pmodel.calc_peaks(image,pts,ssize);
+    // vector<Point2f> peaks = pmodel.calc_peaks(gpu::GpuMat(image),pts,ssize);
 #endif
 
 #ifdef NO_OPTIMIZE
@@ -164,9 +164,7 @@ vector<Point2f>face_tracker::fit(const Mat &image, const vector<Point2f> &init, 
 		cv::exp(weight,weight);
 
 		//compute shape model parameters
-		smodel.calc_params(peaks,weight);
-  
-		//update shape
+		smodel.calc_params(peaks, weight);
 		pts = smodel.calc_shape();
   
 		//check for convergence
