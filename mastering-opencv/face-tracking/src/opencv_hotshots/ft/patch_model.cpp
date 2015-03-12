@@ -81,7 +81,6 @@ Mat patch_model::calc_response(const Mat &im) {
 #ifdef WITH_CUDA
 gpu::GpuMat patch_model::calc_response(const gpu::GpuMat &im) {
     GpuMat res;
-	//need to convert to 8U to use CV_TM_CCOEFF_NORMED
     gpu::matchTemplate(this->convert_image(im), gpuP, res, CV_TM_CCOEFF_NORMED);
 //    gpu::matchTemplate(gpu::GpuMat(this->convert_image(Mat(im))), GpuMat(P), res, CV_TM_CCOEFF_NORMED);
     gpu::normalize(res, res, 0, 1, NORM_MINMAX);
