@@ -195,19 +195,22 @@ void patch_models::train(ft_data &data, const vector<Point2f> &ref, const Size p
 }
 //==============================================================================
 vector<Point2f> patch_models::calc_peaks(const Mat &im, const vector<Point2f> &points, const Size ssize) {
-    int n = points.size();
+    // int n = points.size();
+    // assert(n == int(patches.size()));
+    // Mat pt = Mat(points).reshape(1,2*n);
+    // Mat S = this->calc_simil(pt);
+	// vector<Point2f> pts = this->apply_simil(this->inv_simil(S), points);
+	// Mat I, A(2, 3, CV_32F);
+	// Point maxLoc;
+	
+	int n = points.size();
     assert(n == int(patches.size()));
     Mat pt = Mat(points).reshape(1,2*n);
-    Mat S = this->calc_simil(pt);
-   // vector<Point2f> pts = Mat(this->apply_simil(GpuMat(this->inv_simil(S)), points));
-	vector<Point2f> pts = this->apply_simil(this->inv_simil(S), points);
-	// vector<Point2f> pts = this->apply_simil(Mat(this->inv_simil(GpuMat(S))), points);
-
-    //GpuMat S = this->calc_simil(GpuMat(pt));
-    //vector<Point2f> pts = this->apply_simil(this->inv_simil(S), points);
-
-	Mat I, A(2, 3, CV_32F);
-	Point maxLoc;
+    GpuMat gpuS = this->calc_simil(GpuMat(pt));
+    vector<Point2f> pts = this->apply_simil(this->inv_simil(gpuS), points);
+	Mat I, A(2, 3, CV_32F), S(gpuS);
+	Point maxLoc; 
+	
     for (int i = 0; i < n; i++) {
         Size wsize = ssize + patches[i].patch_size();
 
@@ -222,7 +225,8 @@ vector<Point2f> patch_models::calc_peaks(const Mat &im, const vector<Point2f> &p
 		minMaxLoc(patches[i].calc_response(I), 0, 0, 0, &maxLoc);
         pts[i] = Point2f(pts[i].x + maxLoc.x - 0.5*ssize.width, pts[i].y + maxLoc.y - 0.5*ssize.height);
     }
-    return this->apply_simil(S,pts);
+	
+    return this->apply_simil(gpuS, pts);
 }
 
 #ifdef WITH_CUDA
@@ -232,9 +236,9 @@ vector<Point2f> patch_models::calc_peaks(const GpuMat &im, const vector<Point2f>
     GpuMat pt = GpuMat(Mat(points).reshape(1, 2*n));
     GpuMat S = this->calc_simil(pt);
     vector<Point2f> pts = this->apply_simil(this->inv_simil(S), points);
-	GpuMat I;
-	Mat A(2, 3, CV_32F), matS(S), matpt(pt);
+	GpuMat I; Mat A(2, 3, CV_32F), matS(S), matpt(pt);
 	Point maxLoc; 
+	
     for (int i = 0; i < n; i++) {
         Size wsize = ssize + patches[i].patch_size();
         
@@ -249,6 +253,7 @@ vector<Point2f> patch_models::calc_peaks(const GpuMat &im, const vector<Point2f>
 		gpu::minMaxLoc(patches[i].calc_response(I), 0, 0, 0, &maxLoc);
         pts[i] = Point2f(pts[i].x + maxLoc.x - 0.5*ssize.width, pts[i].y + maxLoc.y - 0.5*ssize.height);
     }
+	
     return this->apply_simil(S, pts);
 }
 #endif /* WITH_CUDA */
