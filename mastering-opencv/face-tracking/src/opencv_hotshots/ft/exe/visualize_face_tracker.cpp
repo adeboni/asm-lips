@@ -30,7 +30,10 @@ int main(int argc,char** argv) {
 	p.ssize[2] = Size(5,5);
 	
 #ifdef WITH_CUDA
+	cout << gpu::getCudaEnabledDeviceCount() << endl;
+	cout << gpu::DeviceInfo::isCompatible() << endl;
 	gpu::printShortCudaDeviceInfo(cv::gpu::getDevice());
+	gpu::setDevice(0);
 #endif
 
 	//open video stream
