@@ -201,13 +201,13 @@ vector<Point2f> patch_models::calc_peaks(const Mat &im, const vector<Point2f> &p
     Mat pt = Mat(points).reshape(1,2*n);
 	
 #ifdef GPU_TEST
-    Mat S = this->calc_simil(pt);
-	vector<Point2f> pts = this->apply_simil(this->inv_simil(S), points);
-	Mat I, A(2, 3, CV_32F);
-#else
     GpuMat gpuS = this->calc_simil(GpuMat(pt));
     vector<Point2f> pts = this->apply_simil(this->inv_simil(gpuS), points);
 	Mat I, A(2, 3, CV_32F), S(gpuS);
+#else
+	Mat S = this->calc_simil(pt);
+	vector<Point2f> pts = this->apply_simil(this->inv_simil(S), points);
+	Mat I, A(2, 3, CV_32F);
 #endif
 	
     for (int i = 0; i < n; i++) {
