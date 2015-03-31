@@ -45,9 +45,10 @@ int main(int argc,char** argv) {
 	}
 	//detect until user quits
 	namedWindow("lip tracker");
+	Mat im;
 	while (cam.isOpened()) {
 		if (!paused) {
-			Mat im; cam >> im;
+			cam >> im;
 			if (tracker.track(im,p)) tracker.draw(im);
 			draw_string(im,"d - redetection");
 			draw_string(im,"p - pause", 20);

@@ -139,11 +139,11 @@ vector<Point2f>face_tracker::fit(const Mat &image, const vector<Point2f> &init, 
 	vector<Point2f> pts = smodel.calc_shape();
 
     //find facial features in image around current estimates
-#ifndef WITH_CUDA
+#ifdef WITH_CUDA
     vector<Point2f> peaks = pmodel.calc_peaks(image,pts,ssize);
+	// vector<Point2f> peaks = pmodel.calc_peaks(gpu::GpuMat(image),pts,ssize);
 #else
 	vector<Point2f> peaks = pmodel.calc_peaks(image,pts,ssize);
-    // vector<Point2f> peaks = pmodel.calc_peaks(gpu::GpuMat(image),pts,ssize);
 #endif
 
 #ifdef NO_OPTIMIZE
