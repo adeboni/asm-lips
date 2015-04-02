@@ -26,20 +26,19 @@ inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=t
 Mat patch_model::convert_image(const Mat &im) {
     Mat I;
     if (im.channels() == 1) {
-        if (im.type() != CV_32F) im.convertTo(I, CV_32F);
+        if (im.type() != CV_8U) im.convertTo(I, CV_8U, 255);
         else I = im;
     } else {
         if (im.channels() == 3) {
             cvtColor(im, I, CV_RGB2GRAY);
-            if (I.type() != CV_32F) I.convertTo(I, CV_32F);
+            if (I.type() != CV_8U) I.convertTo(I, CV_8U, 255);
         } else {
 			cout << "Unsupported image type!" << endl; 
 			abort();
 		}
     }
-    I += 1.0;
+    I += 255;
     log(I, I);
-	I.convertTo(I, CV_8U, 255);
     return I;
 }
 
@@ -47,7 +46,7 @@ Mat patch_model::convert_image(const Mat &im) {
 gpu::GpuMat patch_model::convert_image(const gpu::GpuMat &im) {
     GpuMat I;
     if (im.channels() == 1) {
-        if (im.type() != CV_8U) im.convertTo(I, CV_32F);
+        if (im.type() != CV_32F) im.convertTo(I, CV_32F);
         else I = im;
     } else {
         if (im.channels() == 3) {
@@ -72,7 +71,7 @@ Mat patch_model::calc_response(const Mat &im) {
     Mat res;
 	P.convertTo(P, CV_8U, 255);
     matchTemplate(this->convert_image(im), P, res, CV_TM_CCOEFF_NORMED);
-    normalize(res, res, 0, 1, NORM_MINMAX);
+    normalize(res, res, 0, 255, NORM_MINMAX);
 	res /= sum(res)[0];
     return res;
 }
