@@ -16,8 +16,6 @@ inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=t
 	}
 }
 
-
-
 #endif
 
 #define fl at<float>
@@ -37,7 +35,11 @@ Mat patch_model::convert_image(const Mat &im) {
 	}
     I += 1.0;
     log(I, I);
-	//I.convertTo(I, CV_8U);
+	
+	double minVal, maxVal;
+	minMaxLoc(I, &minVal, &maxVal);
+	I.convertTo(I, CV_8U, 255.0/(maxVal - minVal), -minVal * 255.0/(maxVal - minVal));
+	
     return I;
 }
 
@@ -64,7 +66,11 @@ gpu::GpuMat patch_model::convert_image(const gpu::GpuMat &im) {
 //==============================================================================
 Mat patch_model::calc_response(const Mat &im) {
     Mat res;
-	//if (P.type() != CV_8U) P.convertTo(P, CV_8U);
+	if (P.type() != CV_8U) {
+		double minVal, maxVal;
+		minMaxLoc(P, &minVal, &maxVal);
+		P.convertTo(P, CV_8U, 255.0/(maxVal - minVal), -minVal * 255.0/(maxVal - minVal));	
+	}	
     matchTemplate(this->convert_image(im), P, res, CV_TM_CCOEFF_NORMED);
     normalize(res, res, 0, 1, NORM_MINMAX);
 	res /= sum(res)[0];
