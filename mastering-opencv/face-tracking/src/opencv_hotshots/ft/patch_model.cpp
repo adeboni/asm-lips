@@ -81,6 +81,7 @@ Mat patch_model::calc_response(const Mat &im) {
 gpu::GpuMat patch_model::calc_response(const gpu::GpuMat &im) {
     GpuMat res;
     gpu::matchTemplate(this->convert_image(im), gpuP, res, CV_TM_CCOEFF_NORMED);
+	res.convertTo(res, CV_32U);
     gpu::normalize(res, res, 0, 1, NORM_MINMAX);
 	gpu::divide(res, gpu::sum(res)[0], res);
     return res;
@@ -197,7 +198,7 @@ vector<Point2f> patch_models::calc_peaks(const Mat &im, const vector<Point2f> &p
 	int n = points.size();
     assert(n == int(patches.size()));
     Mat pt = Mat(points).reshape(1,2*n);
-	
+
 #ifdef GPU_TEST
     GpuMat gpuS = this->calc_simil(GpuMat(pt));
     vector<Point2f> pts = this->apply_simil(this->inv_simil(gpuS), points);
