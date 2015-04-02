@@ -70,6 +70,7 @@ gpu::GpuMat patch_model::convert_image(const gpu::GpuMat &im) {
 //==============================================================================
 Mat patch_model::calc_response(const Mat &im) {
     Mat res;
+	P.convertTo(P, CV_8U, 255);
     matchTemplate(this->convert_image(im), P, res, CV_TM_CCOEFF_NORMED);
 	res.convertTo(res, CV_32F);
     normalize(res, res, 0, 1, NORM_MINMAX);
