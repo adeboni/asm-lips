@@ -36,9 +36,9 @@ Mat patch_model::convert_image(const Mat &im) {
     I += 1.0;
     log(I, I);
 	
-	double minVal, maxVal;
-	minMaxLoc(I, &minVal, &maxVal);
-	I.convertTo(I, CV_8U, 255.0/(maxVal - minVal), -minVal * 255.0/(maxVal - minVal));
+	// double minVal, maxVal;
+	// minMaxLoc(I, &minVal, &maxVal);
+	// I.convertTo(I, CV_8U, 255.0/(maxVal - minVal), -minVal * 255.0/(maxVal - minVal));
 	
     return I;
 }
@@ -58,7 +58,11 @@ gpu::GpuMat patch_model::convert_image(const gpu::GpuMat &im) {
     }
     gpu::add(I, Scalar(1.0), I);
     gpu::log(I, I);
-	I.convertTo(I, CV_8U, 255);
+	
+	double minVal, maxVal;
+	gpu::minMaxLoc(I, &minVal, &maxVal);
+	I.convertTo(I, CV_8U, 255.0/(maxVal - minVal), -minVal * 255.0/(maxVal - minVal));
+	
     return I;
 }
 #endif /* WITH_CUDA */
@@ -66,11 +70,11 @@ gpu::GpuMat patch_model::convert_image(const gpu::GpuMat &im) {
 //==============================================================================
 Mat patch_model::calc_response(const Mat &im) {
     Mat res;
-	if (P.type() != CV_8U) {
-		double minVal, maxVal;
-		minMaxLoc(P, &minVal, &maxVal);
-		P.convertTo(P, CV_8U, 255.0/(maxVal - minVal), -minVal * 255.0/(maxVal - minVal));	
-	}	
+	// if (P.type() != CV_8U) {
+		// double minVal, maxVal;
+		// minMaxLoc(P, &minVal, &maxVal);
+		// P.convertTo(P, CV_8U, 255.0/(maxVal - minVal), -minVal * 255.0/(maxVal - minVal));	
+	// }	
     matchTemplate(this->convert_image(im), P, res, CV_TM_CCOEFF_NORMED);
     normalize(res, res, 0, 1, NORM_MINMAX);
 	res /= sum(res)[0];
@@ -144,7 +148,9 @@ void patch_model::read(const FileNode& node) {
     node["P"] >> P;
 #ifdef WITH_CUDA
 	gpuP = GpuMat(P);
-	gpuP.convertTo(gpuP, CV_8U, 255);
+	double minVal, maxVal;
+	gpu::minMaxLoc(gpuP, &minVal, &maxVal);
+	gpuP.convertTo(gpuP, CV_8U, 255.0/(maxVal - minVal), -minVal * 255.0/(maxVal - minVal));
 #endif
 }
 //==============================================================================
