@@ -37,7 +37,7 @@ Mat patch_model::convert_image(const Mat &im) {
 	}
     I += 1.0;
     log(I, I);
-	I.convertTo(I, CV_8U, 255);
+	I.convertTo(I, CV_8U);
     return I;
 }
 
@@ -64,7 +64,7 @@ gpu::GpuMat patch_model::convert_image(const gpu::GpuMat &im) {
 //==============================================================================
 Mat patch_model::calc_response(const Mat &im) {
     Mat res;
-	if (P.type() != CV_8U) P.convertTo(P, CV_8U, 255);
+	if (P.type() != CV_8U) P.convertTo(P, CV_8U);
     matchTemplate(this->convert_image(im), P, res, CV_TM_CCOEFF_NORMED);
     normalize(res, res, 0, 1, NORM_MINMAX);
 	res /= sum(res)[0];
@@ -75,7 +75,6 @@ Mat patch_model::calc_response(const Mat &im) {
 gpu::GpuMat patch_model::calc_response(const gpu::GpuMat &im) {
     GpuMat res;
     gpu::matchTemplate(this->convert_image(im), gpuP, res, CV_TM_CCOEFF_NORMED);
-	res.convertTo(res, CV_32F);
     gpu::normalize(res, res, 0, 1, NORM_MINMAX);
 	gpu::divide(res, gpu::sum(res)[0], res);
     return res;
