@@ -30,7 +30,7 @@ int main(int argc,char** argv) {
 	p.ssize[2] = Size(5,5);
 	
 #ifdef WITH_CUDA
-	cout << gpu::getCudaEnabledDeviceCount() << " devices found" << endl;
+	cout << gpu::getCudaEnabledDeviceCount() << " device(s) found" << endl;
 	gpu::printShortCudaDeviceInfo(cv::gpu::getDevice());
 	gpu::setDevice(0);
 #endif
@@ -43,6 +43,7 @@ int main(int argc,char** argv) {
 		cout << "Failed opening video stream." << endl; 
 		return 0;
 	}
+	
 	//detect until user quits
 	namedWindow("lip tracker");
 	Mat im;
@@ -50,9 +51,9 @@ int main(int argc,char** argv) {
 		if (!paused) {
 			cam >> im;
 			if (tracker.track(im,p)) tracker.draw(im);
-			draw_string(im,"d - redetection");
-			draw_string(im,"p - pause", 20);
-			tracker.timer.display_fps(im, Point(1,im.rows-1));
+			draw_string(im, "d - redetection");
+			draw_string(im, "p - pause", 20);
+			tracker.timer.display_fps(im, Point(1, im.rows - 1));
 			imshow("lip tracker", im);
 		}
 		

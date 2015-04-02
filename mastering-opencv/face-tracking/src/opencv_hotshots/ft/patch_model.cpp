@@ -45,25 +45,25 @@ Mat patch_model::convert_image(const Mat &im) {
 }
 
 #ifdef WITH_CUDA
-gpu::GpuMat patch_model::convert_image(const gpu::GpuMat &im)
-{
+gpu::GpuMat patch_model::convert_image(const gpu::GpuMat &im) {
     GpuMat I;
     if (im.channels() == 1) {
-        if (im.type() != CV_8U) im.convertTo(I, CV_8U, 255);
+        if (im.type() != CV_8U) im.convertTo(I, CV_32F);
         else I = im;
     } else {
         if (im.channels() == 3) {
             GpuMat img;
             gpu::cvtColor(im, img, CV_RGB2GRAY);
-            if (img.type() != CV_8U) img.convertTo(I, CV_8U, 255);
+            if (img.type() != CV_8U) img.convertTo(I, CV_32F);
             else I = img;
         } else {
             cout << "Unsupported image type!" << endl;
             abort();
         }
     }
-    gpu::add(I, Scalar(1), I); // Used to be I += 1.0;
+    gpu::add(I, Scalar(1.0), I);
     gpu::log(I, I);
+	I.convertTo(I, CV_8U, 255);
     return I;
 }
 #endif /* WITH_CUDA */
@@ -72,7 +72,6 @@ gpu::GpuMat patch_model::convert_image(const gpu::GpuMat &im)
 Mat patch_model::calc_response(const Mat &im) {
     Mat res;
     matchTemplate(this->convert_image(im), P, res, CV_TM_CCOEFF_NORMED);
-//    matchTemplate(Mat(this->convert_image(GpuMat(im))), P, res, CV_TM_CCOEFF_NORMED);
     normalize(res, res, 0, 1, NORM_MINMAX);
 	res /= sum(res)[0];
     return res;
@@ -82,7 +81,6 @@ Mat patch_model::calc_response(const Mat &im) {
 gpu::GpuMat patch_model::calc_response(const gpu::GpuMat &im) {
     GpuMat res;
     gpu::matchTemplate(this->convert_image(im), gpuP, res, CV_TM_CCOEFF_NORMED);
-//    gpu::matchTemplate(gpu::GpuMat(this->convert_image(Mat(im))), GpuMat(P), res, CV_TM_CCOEFF_NORMED);
     gpu::normalize(res, res, 0, 1, NORM_MINMAX);
 	gpu::divide(res, gpu::sum(res)[0], res);
     return res;
