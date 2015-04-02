@@ -31,13 +31,13 @@ Mat patch_model::convert_image(const Mat &im) {
     } else if (im.channels() == 3) {
         cvtColor(im, I, CV_RGB2GRAY);
         if (I.type() != CV_32F) I.convertTo(I, CV_32F);
-    } else{
+    } else {
 		cout << "Unsupported image type!" << endl; 
 		abort();
 	}
     I += 1.0;
     log(I, I);
-	I.convertTo(I, CV_8U);
+	//I.convertTo(I, CV_8U);
     return I;
 }
 
@@ -64,7 +64,7 @@ gpu::GpuMat patch_model::convert_image(const gpu::GpuMat &im) {
 //==============================================================================
 Mat patch_model::calc_response(const Mat &im) {
     Mat res;
-	if (P.type() != CV_8U) P.convertTo(P, CV_8U);
+	//if (P.type() != CV_8U) P.convertTo(P, CV_8U);
     matchTemplate(this->convert_image(im), P, res, CV_TM_CCOEFF_NORMED);
     normalize(res, res, 0, 1, NORM_MINMAX);
 	res /= sum(res)[0];
