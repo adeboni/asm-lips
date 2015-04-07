@@ -25,7 +25,7 @@ public:
     Mat                                             //response map (CV_32F)
     calc_response(const Mat &im);                   //image to compute response from
 	
-	GpuMat calc_response(const GpuMat &im); //GPU version
+	Mat calc_response(const GpuMat &im); //GPU version
 
     void
     train(const vector<Mat> &images,                //feature centered training images
