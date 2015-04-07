@@ -31,8 +31,8 @@ int main(int argc,char** argv) {
 	
 #ifdef WITH_CUDA
 	cout << gpu::getCudaEnabledDeviceCount() << " device(s) found" << endl;
-	gpu::printShortCudaDeviceInfo(cv::gpu::getDevice());
 	gpu::setDevice(0);
+	gpu::printShortCudaDeviceInfo(cv::gpu::getDevice());
 #endif
 
 	//open video stream
