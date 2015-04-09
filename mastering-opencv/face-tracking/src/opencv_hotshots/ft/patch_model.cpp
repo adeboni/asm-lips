@@ -82,12 +82,13 @@ Mat patch_model::calc_response(const Mat &im) {
 }
 
 #ifdef WITH_CUDA
-gpu::GpuMat patch_model::calc_response(const gpu::GpuMat &im) {
+Mat patch_model::calc_response(const gpu::GpuMat &im) {
     GpuMat res;
     gpu::matchTemplate(this->convert_image(im), gpuP, res, CV_TM_CCORR);
-    gpu::normalize(res, res, 0, 1, NORM_MINMAX);
-	gpu::divide(res, gpu::sum(res)[0], res);
-    return res;
+	Mat cpuRes(res);
+    normalize(cpuRes, cpuRes, 0, 1, NORM_MINMAX);
+	cpuRes /= sum(cpuRes)[0];
+    return cpuRes;
 }
 #endif /* WITH_CUDA */
 //==============================================================================
@@ -258,7 +259,7 @@ vector<Point2f> patch_models::calc_peaks(const GpuMat &im, const vector<Point2f>
         A.fl(1, 2) = pt.fl(2 * i + 1, 0) - (A.fl(1,0) * (wsize.width-1)/2 + A.fl(1,1)*(wsize.height-1)/2);
 		       
 		gpu::warpAffine(im, I, A, wsize, INTER_LINEAR+WARP_INVERSE_MAP);
-		gpu::minMaxLoc(patches[i].calc_response(I), 0, 0, 0, &maxLoc);
+		minMaxLoc(patches[i].calc_response(I), 0, 0, 0, &maxLoc);
         pts[i] = Point2f(pts[i].x + maxLoc.x - 0.5*ssize.width, pts[i].y + maxLoc.y - 0.5*ssize.height);
     }
 	
