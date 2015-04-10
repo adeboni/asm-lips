@@ -1,0 +1,10 @@
+\chapter{Results}
+
+\section{Pre-processing Input Images}
+Our initial plan was to use a geometric-based and appearance-based approach to pre-process the input images before doing the shape-modeling step. The geometric-based approach involves doing edge detection on the image, which can highlight the contours of the lips better for easier detection. The appearance-based approach involves doing color segmentation on the image which can separate the lips from the rest of the face due to their different color. 
+
+After trying these approaches, we found that they are not viable methods of enhancement. The edge detection alone did not slow down the program noticeably (it only added 20 milliseconds of processing time per frame) but it made detection much worse. The shape-modeling algorithm could not find landmarks on the input image after an edge detection filter was applied to it. 
+
+
+
+<add images here>
