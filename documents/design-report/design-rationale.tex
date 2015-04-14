@@ -4,7 +4,7 @@ In this chapter we list and explain the reasoning for the design choices we have
 
 \section{Technologies}
 
-A description of the technologies we will be using can be found in \Cref{technologies}. We chose these technologies because they are very common and well supported, in addition to being available on every platform we are working with (Windows, Linux, OS X, Android).
+A description of the technologies we will be using can be found in \Cref{technologies}. We chose these technologies because they are very common and well supported, in addition to being available on every platform we are working with (Windows, Linux, OS X, Android). 
 
 \section{Application Programming Interface}
 
@@ -24,7 +24,7 @@ These approaches involve edge detection and then trying to match ratios of the e
 \subsection{Appearance-Based Approaches}
 
 These approaches involve color segmentation of the image and then trying to match a segment with a predefined set of colors. 
-This is the most common approach currently taken~\cite{Stillittano13}\cite{Yang09}, but does not always have good results.
+This is the most common approach currently taken~\cite{Stillittano13}\cite{Yang09}, but does not always have good results. Increasing the contrast beforehand can somewhat improve the results.
 
 \subsection{Model-Based Approaches}
 
@@ -38,4 +38,12 @@ Additionally, both ASM~\cite{Li09} and AAM~\cite{Wang14} have been shown to be p
 
 \subsection{Our Approach}
 
-We have chosen to take a hybrid approach that combines all three previous approaches. The geometric-based and appearance-based approaches alone do not produce results that are accurate enough for us. They run very quickly, however, and can produce a better input image for a model-based approach. The model-based approach we are using is the Active Shape Model. The model is a good balance between the Active Contour Model, which is too simple and not accurate enough, and the Active Appearance Model, which is complicated and relatively slow.
+We have chosen to take a hybrid approach that combines all three previous approaches. The geometric-based and appearance-based approaches alone do not produce results that are accurate enough for us. They run very quickly, however, and can produce a better input image for a model-based approach. The model-based approach we are using is the Active Shape Model. The model is a good balance between the Active Contour Model, which is too simple and not accurate enough, and the Active Appearance Model, which is complicated and relatively slow. We will also convert all of the input images to grayscale as this will speed up many of the processing operations. An example of all the operations we will perform can be found in \Cref{fig:lena}.
+
+\begin{figure}[p]
+    \centering
+    \includegraphics[width=0.8\textwidth]{diagrams/lena.png}
+    \caption{(a) Source image\\(b) Increased contrast\\(c) Grayscale\\(d) Heavy edge detection\\
+	(e) Light edge detection\\(f) Color segmentation\\(g) Medium edge detection\\Figure taken from Zhang\cite{filters}}
+    \label{fig:lena}
+\end{figure}
