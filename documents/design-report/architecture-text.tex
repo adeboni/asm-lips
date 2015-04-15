@@ -1,14 +1,21 @@
 \chapter{Architectual Diagram}
 
-We will be using a data-flow architecture for our system, also known as a pipe-and-filter architecture. 
-The system will have an array of pixel values for an image which gets modified by each filter it passes through.
-The entire data flow for our system can be seen in \Cref{fig:architecture}.
+We used a data-flow architecture for our system, also known as a pipe-and-filter architecture. 
+The system has an array of pixel values for an image which gets modified by each filter it passes through.Our original plan for the data flow for our system can be seen in \Cref{fig:architecture}. The current data flow of our system more closely resembles \Cref{fig:architecture-new}.
 \newline
 
 \begin{figure}[!h]
 \noindent\resizebox{\textwidth}{!}{
   \input{Diagrams/architecture}
 }
-\caption{System architecture}
+\caption{Planned system architecture}
 \label{fig:architecture}
+\end{figure}
+
+\begin{figure}[!h]
+	\noindent\resizebox{\textwidth}{!}{
+		\input{Diagrams/architecture-new}
+	}
+	\caption{Current system architecture}
+	\label{fig:architecture-new}
 \end{figure}
