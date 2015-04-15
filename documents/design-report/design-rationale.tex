@@ -4,7 +4,7 @@ In this chapter we list and explain the reasoning for the design choices we have
 
 \section{Technologies}
 
-A description of the technologies we will be using can be found in \Cref{technologies}. We chose these technologies because they are very common and well supported, in addition to being available on every platform we are working with (Windows, Linux, OS X, Android). 
+A description of the technologies we used can be found in \Cref{technologies}. We chose these technologies because they are very common and well supported, in addition to being available on every platform with which we are working (Windows, Linux, OS X, Android). 
 
 \section{Application Programming Interface}
 
@@ -48,7 +48,7 @@ Additionally, both ASM~\cite{Li09} and AAM~\cite{Wang14} have been shown to be p
 
 \subsection{Our Approach}
 
-We have chosen to take a hybrid approach that combines all three previous approaches. The geometric-based and appearance-based approaches alone do not produce results that are accurate enough for us. They run very quickly, however, and can produce a better input image for a model-based approach. The model-based approach we are using is the Active Shape Model. The model is a good balance between the Active Contour Model, which is too simple and not accurate enough, and the Active Appearance Model, which is complicated and relatively slow. We will also convert all of the input images to grayscale as this will speed up many of the processing operations. An example of all the operations we will perform can be found in \Cref{fig:lena}.
+We chose to attempt a hybrid approach that combines all three previous approaches. The geometric-based and appearance-based approaches alone do not produce results that are accurate enough for us. They run very quickly, however, and we believed that they could produce a better input image for a model-based approach. The model-based approach we are using is the Active Shape Model. The model is a good balance between the Active Contour Model, which is too simple and not accurate enough, and the Active Appearance Model, which is complicated and relatively slow. We also convert all of the input images to grayscale as this speeds up many of the processing operations. An example of all the operations we will perform can be found in \Cref{fig:lena}.
 
 \begin{figure}[p]
     \centering
