@@ -1,0 +1,38 @@
+\begin{tikzpicture}[auto, node distance=1cm and 4.5cm, >=latex]
+	\tikzset{
+		block/.style= {draw, rectangle, align=center, minimum width=2cm, minimum height=1cm},
+		rblock/.style={draw, shape=rectangle, rounded corners=0.8em, align=center, minimum width=2cm, minimum height=1cm},
+	}
+
+	\node [coordinate] (r1c1) {};
+	\node [coordinate, right= of r1c1] (r1c2) {};
+	\node [coordinate, right= of r1c2] (r1c3) {};
+	\node [coordinate, right= of r1c3] (r1c4) {};
+
+	\node [coordinate, below=3cm of r1c1] (r2c1) {};
+	\node [coordinate, right= of r2c1] (r2c2) {};
+	\node [coordinate, right= of r2c2] (r2c3) {};
+
+	\node [block, right of=r1c1] (rawImage) {Raw Image};
+	\node [rblock, right of=r1c2] (noiseFilter) {Noise Filter};
+	\node [block, right of=r1c3] (quietImage) {Denoised Image};
+	\node [rblock, right of=r1c4] (mouthDetection) {Mouth Detection};
+
+	\node [block, right of=r2c1] (mouthImage) {Mouth Image};
+	\node [rblock, right of=r2c2] (asmModel) {Active Shape Modelling};
+	\node [block, right of=r2c3] (lipArray) {Final Lip Contour};
+
+	\node [coordinate, below =1cm of mouthDetection] (r1end) {};
+	\node [coordinate, above =1cm of mouthImage] (r2start) {}; 
+
+	\path[draw,->] 
+				(rawImage) edge (noiseFilter)
+				(noiseFilter) edge (quietImage)
+				(quietImage) edge (mouthDetection)
+
+				(mouthImage) edge (asmModel)
+				(asmModel) edge (lipArray)
+
+				(mouthDetection.south) -- (r1end) -- (r2start) -- (mouthImage.north)
+				;
+\end{tikzpicture}
