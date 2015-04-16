@@ -13,6 +13,7 @@ face_tracker_params p;
 Mat im;
 
 EXPORT int getLipContour(char *filepath, float contour[]) {
+	if (tracker == NULL) return 2;
 	im = imread(filepath, CV_LOAD_IMAGE_GRAYSCALE); 
 	if (!tracker->track(im, p)) return 1;
 	for (int i = 0; i < tracker->points.size(); i++) {
