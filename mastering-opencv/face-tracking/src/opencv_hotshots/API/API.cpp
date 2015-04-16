@@ -14,11 +14,12 @@ Mat im;
 
 EXPORT int getLipContour(char *filepath, float contour[]) {
 	im = imread(filepath, CV_LOAD_IMAGE_GRAYSCALE); 
-	while (!tracker->track(im, p));
+	if (!tracker->track(im, p)) return 1;
 	for (int i = 0; i < tracker->points.size(); i++) {
 		contour[i*2] = tracker->points[i].x;
 		contour[i*2+1] = tracker->points[i].y;
 	}
+	return 0;
 }
 
 EXPORT int getNumberOfContourPoints() {
