@@ -1,13 +1,12 @@
 \chapter{Use Cases}
 Based on our conceptual model, our system has a number of actions that users might perform. Any action that a user might take can be considered a use case, which is defined as the steps needed to achieve a goal on the application. Presented below are the use cases for our library, which effectively correspond to the different functions in the library. Under each use case, the actor, goal, precondition, postcondition, sequence of steps, and exceptions are listed. All the use cases of our application are shown below in \Cref{fig:use-cases}. Following the diagram are detailed descriptions of each use case.
 
-
 \begin{figure}[!h]
-\noindent\centering\resizebox{0.8\textwidth}{!}{
-  \input{Diagrams/use-cases}
-}
-\caption{Use case diagram}
-\label{fig:use-cases}
+	\noindent\centering\resizebox{0.8\textwidth}{!}{
+		\input{Diagrams/use-cases}
+	}
+	\caption{Use case diagram}
+	\label{fig:use-cases}
 \end{figure}
 
 \section{Use Case 1: Get Lip Contour}
@@ -60,18 +59,18 @@ Based on our conceptual model, our system has a number of actions that users mig
 
 \begin{description}
 	\item[Actor:] User.
-	\item[Goal:] Change the value for the acceptance threshold for the lip tracking process.
-	\item[Preconditions:] User has imported our library.
-	\item[Postconditions:] Acceptance threshold value is changed to provided value.
-	\item[Sequence of Steps:] User calls the \texttt{setAcceptanceThreshold} function.
+	\item[Goal:] Initialize the tracking program with the shape data used for tracking.
+	\item[Preconditions:] User has imported our library (which includes shape data).
+	\item[Postconditions:] Tracker is ready to accept images.
+	\item[Sequence of Steps:] User calls the \texttt{initializeTracker} with shape data filepath.
 \end{description}
 
-\section{Use Case 4: Reset Tracker}
+\section{Use Case 6: Reset Tracker}
 
 \begin{description}
 	\item[Actor:] User.
-	\item[Goal:] Change the value for the acceptance threshold for the lip tracking process.
+	\item[Goal:] Re-establish accurate tracking of lips.
 	\item[Preconditions:] User has imported our library.
-	\item[Postconditions:] Acceptance threshold value is changed to provided value.
-	\item[Sequence of Steps:] User calls the \texttt{setAcceptanceThreshold} function.
+	\item[Postconditions:] Tracker is accurately tracking lips in provided images.
+	\item[Sequence of Steps:] User calls the \texttt{resetTracker} function.
 \end{description}
