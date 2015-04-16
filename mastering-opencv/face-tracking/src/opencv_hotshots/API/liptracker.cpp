@@ -23,21 +23,21 @@ EXPORT int getLipContour(char *filepath, float contour[]) {
 }
 
 EXPORT int getNumberOfContourPoints() {
+	if (tracker == NULL) return -1;
 	return tracker->pmodel.n_patches();
 }
 
 EXPORT void setAcceptanceThreshold(int threshold) {
-	p.itol = threshold;
+	if (tracker != NULL) p.itol = threshold;
 }
 
 EXPORT int getAcceptanceThreshold() {
+	if (tracker == NULL) return -1;
 	return p.itol;
 }
 
 EXPORT void resetTracker() {
-	if (tracker != NULL) {
-		tracker->reset;
-	}
+	if (tracker != NULL) tracker->reset;
 }
 
 EXPORT void initializeTracker(char *inifile) {
