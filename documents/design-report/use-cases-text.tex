@@ -17,7 +17,7 @@ Based on our conceptual model, our system has a number of actions that users mig
   \item[Goal:] Obtain lip contour data from a face image.
   \item[Preconditions:] User has imported our library, has an image to process, and has allocated an array of the proper size.
   \item[Postconditions:] User has a lip contour for the provided image.
-  \item[Sequence of Steps:] User calls one of the \texttt{getLipContour} functions on the facial image.
+  \item[Sequence of Steps:] User calls the \texttt{getLipContour} function on filepath to the facial image.
   \item[Exceptions:] The image provided is not of a face: the function will return an error code.
 \end{description}
 
@@ -54,5 +54,4 @@ Based on our conceptual model, our system has a number of actions that users mig
   \item[Preconditions:] User has imported our library.
   \item[Postconditions:] Acceptance threshold value is changed to provided value.
   \item[Sequence of Steps:] User calls the \texttt{setAcceptanceThreshold} function.
-  \item[Exceptions:] User provides an invalid value to the function: acceptance threshold value will remain unchanged. Function will return 1 to indicate failure.
 \end{description}
