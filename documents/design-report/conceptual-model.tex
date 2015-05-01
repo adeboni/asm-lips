@@ -1,13 +1,13 @@
 \chapter{Conceptual Model}
 
-The interface to our lip-tracking library consists of six functions. The first is used to obtain a lip contour model as an array of points. This function takes as parameters the file path to the image file to be processed and a reference to the array in which the lip contour information is to be stored. It also returns a status code indicating success or failure. The array that is passed in must have already been allocated by the user. To do this, the user will use the \texttt{getNumberOfContourPoints} function, which returns the size that the array should be. The next two functions allow the user to get and set a threshold value used in the first function. This threshold value determines the required confidence in the lip-tracking algorithm. The lower the threshold value, the less accurate the algorithm is. If the value is too high, however, the algorithm may fail to obtain a lip contour at the desired confidence level, in which case the functions return error codes. The \texttt{initializeTracker} function takes as a parameter the file containing the shape data that the tracker uses to perform its analysis. This will allow the tracking process to start. The user may also call the \texttt{resetTracker} function to tell the tracking process to re-evalute the entire image instead of just the region in which it believes the lips to be.
+The interface to our lip-tracking library consists of six functions. The first is the \texttt{initializeTracker} function, which takes as a parameter the file containing the shape data that the tracker uses to perform its analysis. This will allow the tracking process to start. The next two functions, \texttt{getAcceptanceThreshold} and \texttt{setAcceptanceThreshold}, allow the user to get and set a threshold value used in creating a lip contour. This threshold value determines the required confidence in the lip-tracking algorithm. The lower the threshold value, the less accurate the algorithm is. If the value is too high, however, the algorithm may fail to obtain a lip contour at the desired confidence level, resulting in an error being reported. The \texttt{getLipContour} function is used to obtain a lip contour model as an array of points. This function takes as parameters the file path to the image file to be processed and a reference to the array in which the lip contour information is to be stored. It also returns a status code indicating success or failure. The array that is passed in must have already been allocated by the user. To do this, the user will use the \texttt{getNumberOfContourPoints} function, which returns the size that the array should be. Finally, the user may also call the \texttt{resetTracker} function to tell the tracking process to re-evalute the entire image instead of just the region in which it believes the lips to be.
 
 \section{API Functions}
 \begin{itemize}
-\item \texttt{int getLipContourBMP(char *filePath, float contour[]);}
-\item \texttt{int getNumberOfContourPoints();}
-\item \texttt{void setAcceptanceThreshold(int threshold);}
-\item \texttt{int getAcceptanceThreshold();}
 \item \texttt{void initializeTracker(char *iniFile);}
+\item \texttt{int getAcceptanceThreshold();}
+\item \texttt{void setAcceptanceThreshold(int threshold);}
+\item \texttt{int getNumberOfContourPoints();}
+\item \texttt{int getLipContour(char *filePath, float contour[]);}
 \item \texttt{void resetTracker();}
 \end{itemize}
