@@ -75,7 +75,7 @@ Mat patch_model::calc_response(const Mat &im) {
 		// minMaxLoc(P, &minVal, &maxVal);
 		// P.convertTo(P, CV_8U, 255.0/(maxVal - minVal), -minVal * 255.0/(maxVal - minVal));	
 	// }	
-    matchTemplate(this->convert_image(im), P, res, CV_TM_CCORR);
+    matchTemplate(this->convert_image(im), P, res, CV_TM_CCOEFF_NORMED);
     normalize(res, res, 0, 1, NORM_MINMAX);
 	res /= sum(res)[0];
     return res;
