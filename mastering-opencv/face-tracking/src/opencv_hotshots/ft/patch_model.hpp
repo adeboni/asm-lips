@@ -13,11 +13,15 @@
 using namespace cv;
 using namespace std;
 
-class patch_model{                                  //correlation-based patch expert
+class patch_model{
+	#ifdef WITH_CUDA
     typedef gpu::GpuMat GpuMat;
+	#endif
 public:
     Mat P;                                          //normalised patch
+	#ifdef WITH_CUDA
 	GpuMat gpuP;
+	#endif
   
     Size                                            //size of patch model
     patch_size(){return P.size();}
@@ -25,7 +29,9 @@ public:
     Mat                                             //response map (CV_32F)
     calc_response(const Mat &im);                   //image to compute response from
 	
+	#ifdef WITH_CUDA
 	Mat calc_response(const GpuMat &im); //GPU version
+	#endif
 
     void
     train(const vector<Mat> &images,                //feature centered training images
@@ -46,12 +52,16 @@ protected:
     Mat                                             //single channel log-scale image
     convert_image(const Mat &im);                   //gray or rgb unsigned char image
     
+	#ifdef WITH_CUDA
     GpuMat                                     //GPU Version.
     convert_image(const GpuMat &im);
+	#endif
 };
 //==============================================================================
-class patch_models{                                 //collection of patch experts
+class patch_models{
+	#ifdef WITH_CUDA
     typedef gpu::GpuMat GpuMat;
+	#endif
 public:
     Mat reference;                                  //reference shape
     vector<patch_model> patches;                    //patch models
@@ -76,10 +86,12 @@ public:
                const vector<Point2f> &points,       //initial estimate of shape
                const Size ssize=Size(21,21));       //search window size
     
+	#ifdef WITH_CUDA
     vector<Point2f>                                 //GPU Version.
     calc_peaks(const GpuMat &im,
                const vector<Point2f> &points,
                const Size ssize=Size(21,21));
+	#endif
     
     void
     write(FileStorage &fs) const;                   //file storage object to write to
@@ -91,19 +103,24 @@ protected:
     Mat                                             //inverted similarity transform
     inv_simil(const Mat &S);                        //similarity transform
 	
+	#ifdef WITH_CUDA
 	GpuMat                                     //GPU version
-    inv_simil(const GpuMat &S);               
+    inv_simil(const GpuMat &S);   
+	#endif
 
     Mat                                             //similarity tranform referece->pts
     calc_simil(const Mat &pts);                     //destination shape
     
+	#ifdef WITH_CUDA
     GpuMat                                     //GPU Version.
     calc_simil(const GpuMat &pts);
+	#endif
 
     vector<Point2f>                                 //similarity transformed shape
     apply_simil(const Mat &S,                       //similarity transform
                 const vector<Point2f> &points);     //shape to transform
     
+	#ifdef WITH_CUDA
     vector<Point2f>                                 //GPU Version.
     apply_simil(const GpuMat &S,
                 const vector<Point2f> &pts);
@@ -111,6 +128,7 @@ protected:
     vector<Point2f>                                 //GPU Version 2.
     apply_simil2(const GpuMat &S,
                 const vector<Point2f> &pts);
+	#endif
 };
 //==============================================================================
 
