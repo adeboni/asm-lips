@@ -21,3 +21,5 @@ We encountered a number of complications when attempting to convert our CPU code
 We found that the reason the GPU implementation is slower than the CPU implementation is due to the matchTemplate function. We use this function for each patch to fit the model to the target image. Usually, this function would be faster on the GPU since it tries to match the patch in every location on the target image simultaneously. However, our CPU implementation is highly optimized and for each 11x11 pixel patch, matchTemplate only searches a 16x16 pixel area. Thus, it is much faster to run matchTemplate on the CPU since it is only searching a few locations.
 
 Lastly, the version of OpenCV with which we were working also did not support certain functions that we needed for and ideal implementation and we were forced to write our own. One example of this is the gemm function used for performing matrix multiplication on the GPU.
+
+\section{Conclusion}
