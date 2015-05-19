@@ -110,8 +110,7 @@ int face_tracker::track(const Mat &im,const face_tracker_params &p) {
     else cvtColor(im,gray,CV_RGB2GRAY);
 
     //initialise
-    if (!tracking)
-        points = detector.detect(gray,p.scaleFactor,p.minNeighbours,p.minSize);
+    if (!tracking) points = detector.detect(gray,p.scaleFactor,p.minNeighbours,p.minSize);
     if ((int)points.size() != smodel.npts()) return 0;
 
     //fit
