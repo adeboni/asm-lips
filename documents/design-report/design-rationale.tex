@@ -44,12 +44,12 @@ There are three common model-based approaches, the Active Contour Model (ACM), A
 These three models are closely related in that they all use the same fundamental algorithm. However, ASM is an improvement over ACM and AAM is an improvement over ASM. These improvements bring more accuracy to the algorithm, however, they also increase complexity and runtime.
 
 Additionally, both ASM~\cite{Li09} and AAM~\cite{Wang14} have been shown to be parallelizable with CUDA.
-	
 
 \subsection{Our Approach}
 
 We chose to attempt a hybrid approach that combines all three previous approaches. The geometric-based and appearance-based approaches alone do not produce results that are accurate enough for us. They run very quickly, however, and we believed that they could produce a better input image for a model-based approach. The results from our attempt at using the geometric-based and appearance-based approaches can be found in \Cref{results}. The model-based approach we are using is the Active Shape Model. We are using an Active Shape Model implementation that is detailed in the book \textit{Mastering OpenCV}~\cite{mastering-opencv}.
 The model is a good balance between the Active Contour Model, which is too simple and not accurate enough, and the Active Appearance Model, which is complicated and relatively slow. We also convert all of the input images to grayscale as this speeds up many of the processing operations. An example of all the operations we planned to perform can be found in \Cref{fig:lena}. 
+Finally, another optimization this algorithm has is that it uses a Haar Cascade (a data structure that generalizes the shape of the object we're looking for) on the first frame of the detection. The cascade narrows down the search area quickly and then in subsequent frames, we only search the area that the lips were last found in.
 
 \begin{figure}[p]
     \centering
