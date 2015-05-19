@@ -39,7 +39,7 @@ This is the most common approach currently taken~\cite{Stillittano13}\cite{Yang0
 \subsection{Model-Based Approaches}
 
 These approaches involve creating a statistical model of a feature shape by inputting a set of hand-landmarked images into a neural network.
-This model can then be used to very accurately find a similar shape in an image. 
+This model can then be used to very accurately find a similar shape in an image. It does this by creating a small image patch around each landmark point in the model and then iteratively fits the patches to the target image.
 There are three common model-based approaches, the Active Contour Model (ACM), Active Shape Model (ASM), and Active Appearance Model (AAM).
 These three models are closely related in that they all use the same fundamental algorithm. However, ASM is an improvement over ACM and AAM is an improvement over ASM. These improvements bring more accuracy to the algorithm, however, they also increase complexity and runtime.
 
