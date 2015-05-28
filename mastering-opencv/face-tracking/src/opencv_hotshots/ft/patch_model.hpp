@@ -32,7 +32,7 @@ public:
     calc_response(const Mat &im);                   //image to compute response from
 	
 	#ifdef WITH_CUDA
-	Mat calc_response(const GpuMat &im);
+	Mat calc_response();
 	void pre_calc_response(gpu::Stream &st);
 	#endif
 
