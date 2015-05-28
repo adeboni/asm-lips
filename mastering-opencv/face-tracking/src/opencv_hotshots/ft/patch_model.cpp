@@ -137,9 +137,6 @@ void patch_model::read(const FileNode& node) {
     node["P"] >> P;
 #ifdef WITH_CUDA
 	gpuP = GpuMat(P);
-	// double minVal, maxVal;
-	// gpu::minMaxLoc(gpuP, &minVal, &maxVal);
-	// gpuP.convertTo(gpuP, CV_8U, 255.0/(maxVal - minVal), -minVal * 255.0/(maxVal - minVal));
 #endif
 }
 //==============================================================================
@@ -276,7 +273,6 @@ vector<Point2f> patch_models::apply_simil(const Mat &S, const vector<Point2f> &p
 }
 
 #ifdef WITH_CUDA
-
 vector<Point2f> patch_models::apply_simil(const gpu::GpuMat &S, const vector<Point2f> &points) {
     Mat matS(S);
     int n = points.size();
