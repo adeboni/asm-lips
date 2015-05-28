@@ -48,6 +48,9 @@ public:
   face_detector detector;                  //detector for initialisation
   shape_model smodel;                      //shape model
   patch_models pmodel;                     //feature detectors
+  #ifdef WITH_CUDA
+  gpu::GpuMat cam_image;
+  #endif
   
   face_tracker(){tracking = false;}
 

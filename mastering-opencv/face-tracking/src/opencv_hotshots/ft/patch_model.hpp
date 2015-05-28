@@ -21,6 +21,8 @@ public:
     Mat P;                                          //normalised patch
 	#ifdef WITH_CUDA
 	GpuMat gpuP;
+	GpuMat conv;
+	GpuMat res;
 	#endif
   
     Size                                            //size of patch model
@@ -30,7 +32,8 @@ public:
     calc_response(const Mat &im);                   //image to compute response from
 	
 	#ifdef WITH_CUDA
-	Mat calc_response(const GpuMat &im); //GPU version
+	Mat calc_response(const GpuMat &im);
+	void pre_calc_response(gpu::Stream &st);
 	#endif
 
     void

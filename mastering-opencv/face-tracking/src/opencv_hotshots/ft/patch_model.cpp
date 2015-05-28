@@ -35,11 +35,7 @@ Mat patch_model::convert_image(const Mat &im) {
 	}
     I += 1.0;
     log(I, I);
-	
-	// double minVal, maxVal;
-	// minMaxLoc(I, &minVal, &maxVal);
-	// I.convertTo(I, CV_8U, 255.0/(maxVal - minVal), -minVal * 255.0/(maxVal - minVal));
-	
+
     return I;
 }
 
@@ -58,11 +54,7 @@ gpu::GpuMat patch_model::convert_image(const gpu::GpuMat &im) {
     }
     gpu::add(I, Scalar(1.0), I);
     gpu::log(I, I);
-	
-	// double minVal, maxVal;
-	// gpu::minMaxLoc(I, &minVal, &maxVal);
-	// I.convertTo(I, CV_8U, 255.0/(maxVal - minVal), -minVal * 255.0/(maxVal - minVal));
-	
+
     return I;
 }
 #endif /* WITH_CUDA */
@@ -70,11 +62,6 @@ gpu::GpuMat patch_model::convert_image(const gpu::GpuMat &im) {
 //==============================================================================
 Mat patch_model::calc_response(const Mat &im) {
     Mat res;
-	// if (P.type() != CV_8U) {
-		// double minVal, maxVal;
-		// minMaxLoc(P, &minVal, &maxVal);
-		// P.convertTo(P, CV_8U, 255.0/(maxVal - minVal), -minVal * 255.0/(maxVal - minVal));	
-	// }	
     matchTemplate(this->convert_image(im), P, res, CV_TM_CCOEFF_NORMED);
     normalize(res, res, 0, 1, NORM_MINMAX);
 	res /= sum(res)[0];
@@ -82,12 +69,13 @@ Mat patch_model::calc_response(const Mat &im) {
 }
 
 #ifdef WITH_CUDA
-Mat patch_model::calc_response(const gpu::GpuMat &im) {
-    GpuMat res;
-    gpu::matchTemplate(this->convert_image(im), gpuP, res, CV_TM_CCORR);
-	Mat cpuRes(res);
+void patch_model::pre_calc_response(gpu::Stream &st) {	
+	gpu::matchTemplate(conv, gpuP, res, CV_TM_CCORR, st);
+}
+Mat patch_model::calc_response() {	
+    Mat cpuRes(res);
     normalize(cpuRes, cpuRes, 0, 1, NORM_MINMAX);
-	cpuRes /= sum(cpuRes)[0];
+    cpuRes /= sum(cpuRes)[0];
     return cpuRes;
 }
 #endif /* WITH_CUDA */
@@ -205,16 +193,10 @@ vector<Point2f> patch_models::calc_peaks(const Mat &im, const vector<Point2f> &p
     assert(n == int(patches.size()));
     Mat pt = Mat(points).reshape(1,2*n);
 
-#ifdef GPU_TEST
-    GpuMat gpuS = this->calc_simil(GpuMat(pt));
-    vector<Point2f> pts = this->apply_simil(this->inv_simil(gpuS), points);
-	Mat I, A(2, 3, CV_32F), S(gpuS);
-#else
 	Mat S = this->calc_simil(pt);
 	vector<Point2f> pts = this->apply_simil(this->inv_simil(S), points);
 	Mat I, A(2, 3, CV_32F);
-#endif
-	
+
     for (int i = 0; i < n; i++) {
         Size wsize = ssize + patches[i].patch_size();
 
@@ -230,11 +212,7 @@ vector<Point2f> patch_models::calc_peaks(const Mat &im, const vector<Point2f> &p
         pts[i] = Point2f(pts[i].x + maxLoc.x - 0.5*ssize.width, pts[i].y + maxLoc.y - 0.5*ssize.height);
     }
 
-#ifdef GPU_TEST
-    return this->apply_simil(gpuS, pts);
-#else
 	return this->apply_simil(S, pts);
-#endif
 }
 
 #ifdef WITH_CUDA
@@ -244,25 +222,45 @@ vector<Point2f> patch_models::calc_peaks(const GpuMat &im, const vector<Point2f>
     assert(n == int(patches.size()));
     Mat pt = Mat(points).reshape(1,2*n);
 	
-    GpuMat S = this->calc_simil(GpuMat(pt));
+    Mat A[n];
+	Mat S = this->calc_simil(pt);
     vector<Point2f> pts = this->apply_simil(this->inv_simil(S), points);
-	GpuMat I; Mat A(2, 3, CV_32F), matS(S);
-	
-    for (int i = 0; i < n; i++) {
+  
+	gpu::Stream warp_stream, match_stream;
+	GpuMat d_im[n];
+  
+	for (int i = 0; i < n; i++) {
         Size wsize = ssize + patches[i].patch_size();
-        
-		A.fl(0, 0) = matS.fl(0, 0); 
-		A.fl(0, 1) = matS.fl(0, 1);
-        A.fl(1, 0) = matS.fl(1, 0); 
-		A.fl(1, 1) = matS.fl(1, 1);
-        A.fl(0, 2) = pt.fl(2 * i, 0) - (A.fl(0,0) * (wsize.width-1)/2 + A.fl(0,1)*(wsize.height-1)/2);
-        A.fl(1, 2) = pt.fl(2 * i + 1, 0) - (A.fl(1,0) * (wsize.width-1)/2 + A.fl(1,1)*(wsize.height-1)/2);
-		       
-		gpu::warpAffine(im, I, A, wsize, INTER_LINEAR+WARP_INVERSE_MAP);
-		minMaxLoc(patches[i].calc_response(I), 0, 0, 0, &maxLoc);
+        A[i] = Mat(2, 3, CV_32F);
+		A[i].fl(0, 0) = S.fl(0, 0); 
+		A[i].fl(0, 1) = S.fl(0, 1);
+		A[i].fl(1, 0) = S.fl(1, 0); 
+		A[i].fl(1, 1) = S.fl(1, 1);
+        A[i].fl(0, 2) = pt.fl(2 * i, 0) - (A[i].fl(0,0) * (wsize.width-1)/2 + A[i].fl(0,1)*(wsize.height-1)/2);
+        A[i].fl(1, 2) = pt.fl(2 * i + 1, 0) - (A[i].fl(1,0) * (wsize.width-1)/2 + A[i].fl(1,1)*(wsize.height-1)/2);
+		
+		d_im[i] = GpuMat();
+	}
+	
+	for (int i = 0; i < n; i++) {
+		gpu::warpAffine(im, d_im[i], A[i], ssize + patches[i].patch_size(), INTER_LINEAR+WARP_INVERSE_MAP, warp_stream);
+	}
+	warp_stream.waitForCompletion();
+	
+	for (int i = 0; i < n; i++) {
+		patches[i].convert_image(d_im[i]);
+	}
+	
+	for (int i = 0; i < n; i++) {
+		patches[i].pre_calc_response(match_stream);
+	}
+	match_stream.waitForCompletion();
+  
+    for (int i = 0; i < n; i++) {
+		minMaxLoc(patches[i].calc_response(), 0, 0, 0, &maxLoc);
         pts[i] = Point2f(pts[i].x + maxLoc.x - 0.5*ssize.width, pts[i].y + maxLoc.y - 0.5*ssize.height);
     }
-	
+
     return this->apply_simil(S, pts);
 }
 #endif /* WITH_CUDA */
