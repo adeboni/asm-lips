@@ -55,7 +55,7 @@ public:
     convert_image(const Mat &im);                   //gray or rgb unsigned char image
     
 	#ifdef WITH_CUDA
-    GpuMat                                     //GPU Version.
+    void                                     //GPU Version.
     convert_image(const GpuMat &im);
 	#endif
 };
