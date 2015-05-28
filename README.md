@@ -1,14 +1,12 @@
 # asm-lips
 GPU-Accelerated Lip-Tracking Library
-=======
-lip-tracking
 ============
-Todo:
-Make apply_simil use the gpu
-Fix Mat destructor
+Info:
+
+
 
 Prerequisites:
-
+CMake and OpenCV 2.4.9 or 2.4.10 is installed
 
 Installation:
 
