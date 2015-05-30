@@ -55,3 +55,16 @@ Installation:
 
 Usage:
 ---------------------
+### Creating a shape model and tracker from scratch:
+```
+./annotate -m <folder with images>/ -d <folder with images>
+./train_shape_model annotations.yaml shape.yaml
+./train_patch_model annotations.yaml shape.yaml patch.yaml
+./train_face_detector face.xml annotations.yaml shape.yaml detector.yaml
+./train_face_tracker shape.yaml patch.yaml detector.yaml tracker.yaml
+```
+
+### Visualizing the tracker:
+```
+./visualize_face_tracker tracker.yaml
+```
