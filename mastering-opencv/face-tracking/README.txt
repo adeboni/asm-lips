@@ -23,4 +23,4 @@ Windows (MS Visual Studio):
     start OPENCV_HOTSHOTS.sln 
     
 - A static library will be written to the "lib" directory.
-- The execuables can be found in the "bin" directory.
+- The executables can be found in the "bin" directory.
